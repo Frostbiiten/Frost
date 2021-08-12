@@ -1,5 +1,7 @@
 #pragma once
-#include <ApplicationManager.h>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/System/Vector2.hpp>
+#include <uuid.h>
 #include <algorithm>
 #include <chrono>
 #include <ctime>
@@ -7,12 +9,9 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/System/Vector2.hpp>
 #include <sstream>
-#include <time.h>
 #include <typeinfo>
-#include <uuid.h>
+#include <time.h>
 
 extern sf::RenderWindow* windowPtr;
 

@@ -1,8 +1,8 @@
 #pragma once
-#include <iostream>
-#include <json.hpp>
-#include <SFML/Graphics.hpp>
 #include <uuid.h>
+#include <SFML/Graphics.hpp>
+#include <json.hpp>
+#include <iostream>
 
 namespace FrostLib
 {

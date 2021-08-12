@@ -1,8 +1,9 @@
+#include <Scene.h>
+
 #include <ApplicationManager.h>
 #include <AssetMan.h>
 #include <UIElement.h>
 #include <Utils.h>
-#include <Scene.h>
 #include <vector>
 
 namespace FrostLib

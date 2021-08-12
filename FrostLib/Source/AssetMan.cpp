@@ -1,10 +1,10 @@
 #include <AssetMan.h>
-#include <ApplicationManager.h>
+
+#include <Debug.h>
+#include <physfs.h>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <physfs.h>
-#include <string>
 
 bool isInit; 
 

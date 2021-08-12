@@ -1,9 +1,8 @@
 #pragma once
+#include <SFML/Graphics.hpp>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <mutex>
-#include <SFML/Graphics.hpp>
 
 namespace FrostLib
 {

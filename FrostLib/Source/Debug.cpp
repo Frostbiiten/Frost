@@ -1,9 +1,10 @@
+#include <Debug.h>
+
 #include <algorithm>
 #include <filesystem>
 #include <iomanip>
 #include <sstream>
 #include <time.h>
-#include <Debug.h>
 
 namespace FrostLib
 {

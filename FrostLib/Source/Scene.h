@@ -1,7 +1,6 @@
 #pragma once
+#include <UIElement.h>
 #include <vector>
-#include "UIElement.h"
-#include <Utils.h>
 
 namespace FrostLib
 {

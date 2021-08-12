@@ -1,6 +1,6 @@
-#include <ApplicationManager.h>
-#include <memory>
 #include <UIElement.h>
+
+#include <Debug.h>
 #include <Utils.h>
 #include <uuid.h>
 

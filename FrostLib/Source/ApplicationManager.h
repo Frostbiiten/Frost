@@ -2,11 +2,16 @@
 #include <AssetMan.h>
 #include <Debug.h>
 #include <Utils.h>
-#include <SFML/Graphics.hpp>
 #include <Scene.h>
-#include <WindowWrapper.h>
+#include <SFML/Graphics.hpp>
 
 extern sf::RenderWindow* windowPtr;
+
+//Forward declaration of scene class
+namespace FrostLib
+{
+	class Scene;
+}
 
 namespace ApplicationManager
 {
