@@ -5,7 +5,7 @@
 namespace FrostLib
 {
 	//Unified* io class
-	class AssetMan
+	namespace AssetMan
 	{
 		//Initiates the basics 
 		bool init();
@@ -21,11 +21,6 @@ namespace FrostLib
 
 		//Unmounts an archive to the virtual filesystem. "dir" is the directory of the archive.
 		bool arc_unmountDir(std::string dir);
-
-	public:
-
-		AssetMan();
-		~AssetMan();
 
 		//UNIFIED
 

@@ -5,8 +5,6 @@
 #include <Scene.h>
 #include <vector>
 
-extern FrostLib::AssetMan assetManager;
-
 namespace FrostLib
 {
 	Scene::Scene()
@@ -42,7 +40,7 @@ namespace FrostLib
 
 		//Load string from scene file
 		std::string output;
-		assetManager.readFile("Scenes/" + sceneName + ".json", output);
+		FrostLib::AssetMan::readFile("Scenes/" + sceneName + ".json", output);
 		
 		//Parse json
 		try
@@ -72,8 +70,8 @@ namespace FrostLib
 		nlohmann::json finalJson;
 		
 		//Creates scene folder
-		assetManager.createDirectory("Scenes");
-		assetManager.createDirectory("Scenes/" + sceneName);
+		FrostLib::AssetMan::createDirectory("Scenes");
+		FrostLib::AssetMan::createDirectory("Scenes/" + sceneName);
 
 		//UI
 		for (size_t x = 0; x < ui.size(); x++)
@@ -84,7 +82,7 @@ namespace FrostLib
 		}
 
 		//Writes json
-		assetManager.writeFile(sceneName + ".json", finalJson.dump(), false, true, "./Scenes/" + sceneName);
+		FrostLib::AssetMan::writeFile(sceneName + ".json", finalJson.dump(), false, true, "./Scenes/" + sceneName);
 
 		return true;
 	}

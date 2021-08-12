@@ -3,9 +3,6 @@
 //Application's current scene
 FrostLib::Scene currentScene;
 
-//Application's asset manager
-FrostLib::AssetMan assetManager;
-
 sf::RenderWindow* windowPtr;
 
 void ApplicationManager::awake()

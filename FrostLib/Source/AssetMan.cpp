@@ -6,16 +6,7 @@
 #include <physfs.h>
 #include <string>
 
-FrostLib::AssetMan::AssetMan()
-{
-	init();
-}
-
-FrostLib::AssetMan::~AssetMan()
-{
-	if (!PHYSFS_isInit()) return;
-	if (!PHYSFS_deinit()) arc_logLatestError();
-}
+bool isInit; 
 
 bool FrostLib::AssetMan::init()
 {
@@ -36,11 +27,13 @@ bool FrostLib::AssetMan::init()
 		}
 	}
 
+	isInit = true;
 	return true;
 }
 
 void FrostLib::AssetMan::arc_logLatestError()
 {
+	if (!isInit) init();
 	PHYSFS_ErrorCode err = PHYSFS_getLastErrorCode();
 	std::string errText = PHYSFS_getErrorByCode(err);
 	std::string logText = "PHYSFS FILESYSTEM ERROR " + std::to_string(err) + ": " + errText;
@@ -50,6 +43,8 @@ void FrostLib::AssetMan::arc_logLatestError()
 
 void FrostLib::AssetMan::fs_logError(std::error_code err)
 {
+	if (!isInit) init();
+
 	std::string logText = "STANDARD FILESYSTEM ERROR " + std::to_string(err.value()) + ": " + err.message();
 	FrostLib::Debug::log(logText);
 	std::cout << logText << '\n';
@@ -57,6 +52,8 @@ void FrostLib::AssetMan::fs_logError(std::error_code err)
 
 bool FrostLib::AssetMan::arc_mountDir(std::string dir, std::string mountPoint)
 {
+	if (!isInit) init();
+
 	//runs and returns 0 on fail
 	if (!PHYSFS_mount(dir.c_str(), mountPoint.c_str(), 1))
 	{
@@ -68,6 +65,8 @@ bool FrostLib::AssetMan::arc_mountDir(std::string dir, std::string mountPoint)
 
 bool FrostLib::AssetMan::arc_unmountDir(std::string dir)
 {
+	if (!isInit) init();
+
 	//runs and returns 0 on fail
 	if (!PHYSFS_unmount(dir.c_str()))
 	{
@@ -79,6 +78,8 @@ bool FrostLib::AssetMan::arc_unmountDir(std::string dir)
 
 std::vector<std::string> FrostLib::AssetMan::list(std::string dir, bool relative)
 {
+	if (!isInit) init();
+
 	std::vector<std::string> list;
 
 	std::string dirPath;
@@ -118,6 +119,8 @@ std::vector<std::string> FrostLib::AssetMan::list(std::string dir, bool relative
 
 bool FrostLib::AssetMan::exists(std::string file)
 {
+	if (!isInit) init();
+
 	//mounts current directory and unmounts after checking for existence
 	arc_mountDir("./");
 	bool exists = PHYSFS_exists(file.c_str());
@@ -132,6 +135,8 @@ std::string FrostLib::AssetMan::getBaseDirectory()
 
 bool FrostLib::AssetMan::readFile(std::string fileName, std::string& output, bool relative, std::string path)
 {
+	if (!isInit) init();
+
 	std::string filePath;
 	if (relative)
 		filePath = "./" + fileName;
