@@ -47,7 +47,7 @@ namespace FrostLib
 			UIElement(UIElement* parentElement, const std::string elementName = "", ScalingType scaleType = ScalingType::Fractional, PositionType posType = PositionType::Fractional);
 
 			//Create UIElement from json
-			UIElement(nlohmann::json json, std::vector<UIElement> elementVector);
+			UIElement(nlohmann::json& json, std::vector<UIElement>& elementVector);
 
 			//Function that can be overriden to initiate custom properties for specific UIElement types
 			virtual void initCustomProperties();

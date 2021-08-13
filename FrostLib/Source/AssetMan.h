@@ -7,6 +7,8 @@ namespace FrostLib
 	//Unified* io class
 	namespace AssetMan
 	{
+		inline bool isInit;
+
 		//Initiates the basics 
 		bool init();
 
@@ -34,7 +36,7 @@ namespace FrostLib
 		std::string getBaseDirectory();
 
 		//Loads data from file into string - prefers std::filesystem over
-		bool readFile(std::string fileName, std::string& output, bool relative = false, std::string path = "./");
+		bool readFile(std::string fileName, std::string& output, bool relative = false, std::string path = "");
 
 		//STD::FILESYSTEM ONLY (No writing to archive support)
 
@@ -45,12 +47,12 @@ namespace FrostLib
 		bool removeDirectory(std::string path, bool relative = true);
 
 		//Creates a file
-		bool createFile(std::string fileName, bool relative = true, std::string path = "./");
+		bool createFile(std::string fileName, bool relative = true, std::string path = "");
 
 		//Removes a file
-		bool removeFile(std::string fileName, bool relative = true, std::string path = "./");
+		bool removeFile(std::string fileName, bool relative = true, std::string path = "");
 
 		//Writes data from string into a file
-		bool writeFile(std::string fileName, std::string data, bool append = false, bool relative = true, std::string path = "./");
+		bool writeFile(std::string fileName, std::string data, bool append = false, bool relative = true, std::string path = "");
 	};
 }

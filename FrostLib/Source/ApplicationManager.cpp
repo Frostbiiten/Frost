@@ -1,7 +1,7 @@
 #include <ApplicationManager.h>
 
 //Application's current scene
-FrostLib::Scene currentScene;
+FrostLib::Scene currentScene{ "currentScene" };
 
 sf::RenderWindow* windowPtr;
 
@@ -13,9 +13,11 @@ void ApplicationManager::awake()
 void ApplicationManager::start()
 {
 	FrostLib::Debug::log("Application running start");
-	auto element = FrostLib::UI::UIElement(nullptr, "test element", FrostLib::UI::ScalingType::Fractional, FrostLib::UI::PositionType::Fractional);
-	element.color = sf::Color::Blue;
-	currentScene.ui.push_back(std::move(element));
+	//currentScene.loadScene("currentScene");
+	currentScene.ui.push_back(FrostLib::UI::UIElement(nullptr, "test element", FrostLib::UI::ScalingType::Distanced, FrostLib::UI::PositionType::Fractional));
+	currentScene.ui[currentScene.ui.size() - 1].size = sf::Vector2f(20, 20);
+	currentScene.ui.push_back(FrostLib::UI::UIElement(&currentScene.ui.at(0), "test child", FrostLib::UI::ScalingType::Fractional, FrostLib::UI::PositionType::Fractional));
+	currentScene.saveScene(4);
 }
 
 void ApplicationManager::drawScene(FrostLib::Scene scene)
@@ -41,7 +43,6 @@ void ApplicationManager::init()
 	awake();
 	start();
 
-	//sf::RenderWindow window(sf::VideoMode(600, 600), applicationName, sf::Style::Titlebar);
 	windowPtr = new sf::RenderWindow(sf::VideoMode(600, 600), applicationName, sf::Style::Default);
 
 	while (windowPtr->isOpen())
@@ -73,6 +74,4 @@ void ApplicationManager::init()
 		// Update the window
 		windowPtr->display();
 	}
-
-	windowPtr->close();
 }

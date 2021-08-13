@@ -16,16 +16,13 @@ namespace FrostLib
 
 	namespace Debug
 	{
-		namespace
-		{
-			//Debug log file stream
-			std::fstream debugFile;
+		//Debug log file stream
+		inline std::fstream debugFile;
 
-			//Debug log file name
-			std::string logName;
+		//Debug log file name
+		inline std::string logName;
 
-			bool isInit;
-		}
+		inline bool isInit;
 
 		//Checks if log folder exists
 		void checkFolder();
@@ -47,6 +44,7 @@ namespace FrostLib
 			debugFile << '[' << std::put_time(&newtime, "%H:%M:%S") << "] ";
 			debugFile << obj << '\n';
 			debugFile.close();
+			std::cout << obj << '\n';
 		}
 
 		//Appends a message to log with specified flags
@@ -74,6 +72,8 @@ namespace FrostLib
 			if (flags & LogFlag::ContinueLine != flags) debugFile << '\n';
 
 			debugFile.close();
+
+			std::cout << obj << '\n';
 		}
 	};
 }

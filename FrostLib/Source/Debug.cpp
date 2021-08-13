@@ -16,6 +16,8 @@ namespace FrostLib
 		std::ostringstream dateStream;
 		dateStream << "./Logs/" << std::put_time(&newtime, "%d-%m-%Y %H-%M-%S") << ".log";
 		logName = dateStream.str();
+		std::cout << logName << '\n';
+		isInit = true;
 		checkFolder();
 	}
 

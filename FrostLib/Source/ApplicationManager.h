@@ -10,7 +10,7 @@ extern sf::RenderWindow* windowPtr;
 //Forward declaration of scene class
 namespace FrostLib
 {
-	class Scene;
+	struct Scene;
 }
 
 namespace ApplicationManager

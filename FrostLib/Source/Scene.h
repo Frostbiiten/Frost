@@ -14,6 +14,8 @@ namespace FrostLib
 		//Constructor
 		Scene();
 
+		Scene(std::string name);
+
 		//Render a scene to the display
 		void render(sf::RenderWindow& window);
 

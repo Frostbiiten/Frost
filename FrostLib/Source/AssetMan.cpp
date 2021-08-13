@@ -6,7 +6,6 @@
 #include <fstream>
 #include <iostream>
 
-bool isInit; 
 
 bool FrostLib::AssetMan::init()
 {
@@ -139,7 +138,7 @@ bool FrostLib::AssetMan::readFile(std::string fileName, std::string& output, boo
 
 	std::string filePath;
 	if (relative)
-		filePath = "./" + fileName;
+		filePath = "./" + path + fileName;
 	else
 		filePath = path + fileName;
 
@@ -157,7 +156,9 @@ bool FrostLib::AssetMan::readFile(std::string fileName, std::string& output, boo
 
 	//PHYSFS SECTION
 
-	PHYSFS_file* fileData = PHYSFS_openRead(filePath.c_str());
+	//Removes ./ for physfs
+	std::string PHYSFSPath = filePath.substr(2, filePath.size() - 2);
+	PHYSFS_file* fileData = PHYSFS_openRead(PHYSFSPath.c_str());
 
 	if (fileData != nullptr)
 	{
@@ -245,7 +246,7 @@ bool FrostLib::AssetMan::createFile(std::string fileName, bool relative, std::st
 {
 	std::string filePath;
 	if (relative)
-		filePath = "./" + fileName;
+		filePath = "./" + path + fileName;
 	else
 		filePath = path + fileName;
 
@@ -259,7 +260,7 @@ bool FrostLib::AssetMan::removeFile(std::string fileName, bool relative, std::st
 {
 	std::string filePath;
 	if (relative)
-		filePath = "./" + fileName;
+		filePath = "./" + path + fileName;
 	else
 		filePath = path + fileName;
 
@@ -281,13 +282,15 @@ bool FrostLib::AssetMan::writeFile(std::string fileName, std::string data, bool 
 {
 	std::string filePath;
 	if (relative)
-		filePath = "./" + fileName;
+		filePath = "./" + path + fileName;
 	else
 		filePath = path + fileName;
 
-	//Does not exist or not a regular file
+	/*
+	Files should be able to be written without creating the file firstly
 	if (!std::filesystem::exists(filePath) || !std::filesystem::is_regular_file(filePath))
 		return false;
+	*/
 
 	std::fstream fileStream;
 	if (append)

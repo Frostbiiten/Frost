@@ -163,7 +163,6 @@
     <ClCompile Include="Source\Scene.cpp" />
     <ClCompile Include="Source\UIElement.cpp" />
     <ClCompile Include="Source\UIPanel.cpp" />
-    <ClCompile Include="Source\WindowWrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\ApplicationManager.h" />
@@ -173,7 +172,6 @@
     <ClInclude Include="Source\UIElement.h" />
     <ClInclude Include="Source\UIPanel.h" />
     <ClInclude Include="Source\Utils.h" />
-    <ClInclude Include="Source\WindowWrapper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

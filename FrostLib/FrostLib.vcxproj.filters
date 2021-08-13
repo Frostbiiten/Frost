@@ -39,9 +39,6 @@
     <ClCompile Include="Source\ApplicationManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\WindowWrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\ApplicationManager.h">
@@ -63,9 +60,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\AssetMan.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\WindowWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
