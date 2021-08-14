@@ -6,7 +6,7 @@
 #include <sstream>
 #include <time.h>
 
-namespace FrostLib
+namespace fl
 {
 	void Debug::init()
 	{

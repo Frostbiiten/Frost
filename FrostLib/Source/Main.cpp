@@ -2,6 +2,6 @@
 
 int main()
 {
-	ApplicationManager::init();
+	fl::ApplicationManager::init();
 	return EXIT_SUCCESS;
 }

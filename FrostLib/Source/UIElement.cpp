@@ -4,7 +4,7 @@
 #include <Utils.h>
 #include <uuid.h>
 
-namespace FrostLib
+namespace fl
 {
 	namespace UI
 	{
@@ -94,7 +94,7 @@ namespace FrostLib
 
 		void UIElement::initCustomProperties()
 		{
-			FrostLib::Debug::log("Init custom properties has not been overriden");
+			fl::Debug::log("Init custom properties has not been overriden");
 		}
 
 		UIElement::~UIElement()
@@ -223,7 +223,7 @@ namespace FrostLib
 			}
 			catch (nlohmann::json::type_error& err)
 			{
-				FrostLib::Debug::log("JSON TYPE ERROR " + err.id + std::string(": ") + err.what());
+				fl::Debug::log("JSON TYPE ERROR " + err.id + std::string(": ") + err.what());
 			}
 
 			return j;

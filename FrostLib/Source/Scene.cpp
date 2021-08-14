@@ -6,7 +6,7 @@
 #include <Utils.h>
 #include <vector>
 
-namespace FrostLib
+namespace fl
 {
 	Scene::Scene()
 	{
@@ -46,7 +46,7 @@ namespace FrostLib
 
 		//Load string from scene file
 		std::string output;
-		FrostLib::AssetMan::readFile(sceneName + ".json", output, true, "Scenes/" + sceneName + '/');
+		fl::AssetMan::readFile(sceneName + ".json", output, true, "Scenes/" + sceneName + '/');
 
 		//Parse json
 		try
@@ -55,7 +55,7 @@ namespace FrostLib
 		}
 		catch (nlohmann::json::exception err)
 		{
-			FrostLib::Debug::log("JSON ERROR " + err.id + std::string(": ") + err.what());
+			fl::Debug::log("JSON ERROR " + err.id + std::string(": ") + err.what());
 			return false;
 		}
 
@@ -68,7 +68,7 @@ namespace FrostLib
 			}
 			catch (nlohmann::json::type_error& err)
 			{	
-				FrostLib::Debug::log("JSON TYPE ERROR " + err.id + std::string(": ") + err.what());
+				fl::Debug::log("JSON TYPE ERROR " + err.id + std::string(": ") + err.what());
 			}
 		}
 
@@ -81,11 +81,11 @@ namespace FrostLib
 		nlohmann::json finalJson;
 		
 		//Creates scene folder
-		if(!FrostLib::AssetMan::exists("Scenes"))
-			FrostLib::AssetMan::createDirectory("Scenes");
+		if(!fl::AssetMan::exists("Scenes"))
+			fl::AssetMan::createDirectory("Scenes");
 		std::string folderName = "Scenes/" + sceneName;
-		if(!FrostLib::AssetMan::exists(folderName))
-			FrostLib::AssetMan::createDirectory(folderName);
+		if(!fl::AssetMan::exists(folderName))
+			fl::AssetMan::createDirectory(folderName);
 
 		//UI
 		{
@@ -101,7 +101,7 @@ namespace FrostLib
 		}
 
 		//Writes json
-		FrostLib::AssetMan::writeFile(sceneName + ".json", finalJson.dump(jsonIndent), false, true, "Scenes/" + sceneName + '/');
+		fl::AssetMan::writeFile(sceneName + ".json", finalJson.dump(jsonIndent), false, true, "Scenes/" + sceneName + '/');
 
 		return true;
 	}

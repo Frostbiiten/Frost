@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <iostream>
 
-namespace FrostLib
+namespace fl
 {
 	//Options for logging data
 	enum LogFlag

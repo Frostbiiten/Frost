@@ -4,7 +4,7 @@
 #include <json.hpp>
 #include <iostream>
 
-namespace FrostLib
+namespace fl
 {
 	namespace UI
 	{

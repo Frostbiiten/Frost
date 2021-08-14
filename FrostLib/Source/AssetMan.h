@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-namespace FrostLib
+namespace fl
 {
 	//Unified* io class
 	namespace AssetMan

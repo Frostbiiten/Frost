@@ -1,77 +1,80 @@
 #include <ApplicationManager.h>
 
 //Application's current scene
-FrostLib::Scene currentScene{ "currentScene" };
+fl::Scene currentScene{ "currentScene" };
 
 sf::RenderWindow* windowPtr;
 
-void ApplicationManager::awake()
+namespace fl
 {
-	FrostLib::Debug::log("Application running awake");
-}
-
-void ApplicationManager::start()
-{
-	FrostLib::Debug::log("Application running start");
-	//currentScene.loadScene("currentScene");
-	currentScene.ui.push_back(FrostLib::UI::UIElement(nullptr, "test element", FrostLib::UI::ScalingType::Distanced, FrostLib::UI::PositionType::Fractional));
-	currentScene.ui[currentScene.ui.size() - 1].size = sf::Vector2f(20, 20);
-	currentScene.ui.push_back(FrostLib::UI::UIElement(&currentScene.ui.at(0), "test child", FrostLib::UI::ScalingType::Fractional, FrostLib::UI::PositionType::Fractional));
-	currentScene.saveScene(4);
-}
-
-void ApplicationManager::drawScene(FrostLib::Scene scene)
-{
-	for (auto& element : scene.ui)
+	void ApplicationManager::awake()
 	{
-		if (!element.parent)
+		fl::Debug::log("Application running awake");
+	}
+
+	void ApplicationManager::start()
+	{
+		fl::Debug::log("Application running start");
+		//currentScene.loadScene("currentScene");
+		currentScene.ui.push_back(fl::UI::UIElement(nullptr, "test element", fl::UI::ScalingType::Distanced, fl::UI::PositionType::Fractional));
+		currentScene.ui[currentScene.ui.size() - 1].size = sf::Vector2f(20, 20);
+		currentScene.ui.push_back(fl::UI::UIElement(&currentScene.ui.at(0), "test child", fl::UI::ScalingType::Fractional, fl::UI::PositionType::Fractional));
+		currentScene.saveScene(4);
+	}
+
+	void ApplicationManager::drawScene(fl::Scene scene)
+	{
+		for (auto& element : scene.ui)
 		{
-			element.renderElement(*windowPtr);
+			if (!element.parent)
+			{
+				element.renderElement(*windowPtr);
+			}
 		}
 	}
-}
 
-void ApplicationManager::update()
-{
-	drawScene(currentScene);
-	//currentScene.render(*windowPtr);
-	//do frame stuff
-}
-
-void ApplicationManager::init()
-{
-	awake();
-	start();
-
-	windowPtr = new sf::RenderWindow(sf::VideoMode(600, 600), applicationName, sf::Style::Default);
-
-	while (windowPtr->isOpen())
+	void ApplicationManager::update()
 	{
-		// Process events
-		sf::Event event;
-		while (windowPtr->pollEvent(event))
+		drawScene(currentScene);
+		//currentScene.render(*windowPtr);
+		//do frame stuff
+	}
+
+	void ApplicationManager::init()
+	{
+		awake();
+		start();
+
+		windowPtr = new sf::RenderWindow(sf::VideoMode(600, 600), applicationName, sf::Style::Default);
+
+		while (windowPtr->isOpen())
 		{
-			// Close window: exit
-			if (event.type == sf::Event::Closed)
+			// Process events
+			sf::Event event;
+			while (windowPtr->pollEvent(event))
 			{
-				FrostLib::Debug::log("Closing window");
-				windowPtr->close();
+				// Close window: exit
+				if (event.type == sf::Event::Closed)
+				{
+					fl::Debug::log("Closing window");
+					windowPtr->close();
+				}
+				if (event.type == sf::Event::Resized)
+				{
+					sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+					windowPtr->setView(sf::View(visibleArea));
+					currentScene.invalidateUIDimensions();
+				}
 			}
-			if (event.type == sf::Event::Resized)
-			{
-				sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
-				windowPtr->setView(sf::View(visibleArea));
-				currentScene.invalidateUIDimensions();
-			}
+
+			// Clear screen
+			windowPtr->clear(backgroundColor);
+
+			// Run frame code 
+			update();
+
+			// Update the window
+			windowPtr->display();
 		}
-
-		// Clear screen
-		windowPtr->clear(backgroundColor);
-
-		// Run frame code 
-		update();
-
-		// Update the window
-		windowPtr->display();
 	}
 }

@@ -15,7 +15,7 @@
 
 extern sf::RenderWindow* windowPtr;
 
-namespace FrostLib
+namespace fl
 {
 #define STRINGIFY(X) #X
 	

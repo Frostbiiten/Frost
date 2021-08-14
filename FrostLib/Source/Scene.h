@@ -2,7 +2,7 @@
 #include <UIElement.h>
 #include <vector>
 
-namespace FrostLib
+namespace fl
 {
 	//Scenes are "worlds" that can be loaded and unloaded 
 	//They are stored in directories with different files/folders for data

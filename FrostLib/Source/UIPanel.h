@@ -2,9 +2,9 @@
 #include <SFML/Graphics/RoundedRectangleShape.hpp>
 #include <UIElement.h>
 
-namespace FrostLib
+namespace fl
 {
-	class UIPanel : public FrostLib::UI::UIElement
+	class UIPanel : public fl::UI::UIElement
 	{
 		sf::RoundedRectangleShape shape;
 

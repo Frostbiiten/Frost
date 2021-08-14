@@ -1,8 +1,8 @@
 #include "UIPanel.h"
 
-namespace FrostLib
+namespace fl
 {
-	void FrostLib::UIPanel::renderElement(sf::RenderWindow& output)
+	void fl::UIPanel::renderElement(sf::RenderWindow& output)
 	{
 		output.draw(shape);
 	}

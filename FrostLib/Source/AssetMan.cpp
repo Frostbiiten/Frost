@@ -7,7 +7,7 @@
 #include <iostream>
 
 
-bool FrostLib::AssetMan::init()
+bool fl::AssetMan::init()
 {
 	if (PHYSFS_isInit()) return false;
 	if (!PHYSFS_init(NULL)) arc_logLatestError();
@@ -30,26 +30,26 @@ bool FrostLib::AssetMan::init()
 	return true;
 }
 
-void FrostLib::AssetMan::arc_logLatestError()
+void fl::AssetMan::arc_logLatestError()
 {
 	if (!isInit) init();
 	PHYSFS_ErrorCode err = PHYSFS_getLastErrorCode();
 	std::string errText = PHYSFS_getErrorByCode(err);
 	std::string logText = "PHYSFS FILESYSTEM ERROR " + std::to_string(err) + ": " + errText;
-	FrostLib::Debug::log(logText);
+	fl::Debug::log(logText);
 	std::cout << logText << '\n';
 }
 
-void FrostLib::AssetMan::fs_logError(std::error_code err)
+void fl::AssetMan::fs_logError(std::error_code err)
 {
 	if (!isInit) init();
 
 	std::string logText = "STANDARD FILESYSTEM ERROR " + std::to_string(err.value()) + ": " + err.message();
-	FrostLib::Debug::log(logText);
+	fl::Debug::log(logText);
 	std::cout << logText << '\n';
 }
 
-bool FrostLib::AssetMan::arc_mountDir(std::string dir, std::string mountPoint)
+bool fl::AssetMan::arc_mountDir(std::string dir, std::string mountPoint)
 {
 	if (!isInit) init();
 
@@ -62,7 +62,7 @@ bool FrostLib::AssetMan::arc_mountDir(std::string dir, std::string mountPoint)
 	else return true;
 }
 
-bool FrostLib::AssetMan::arc_unmountDir(std::string dir)
+bool fl::AssetMan::arc_unmountDir(std::string dir)
 {
 	if (!isInit) init();
 
@@ -75,7 +75,7 @@ bool FrostLib::AssetMan::arc_unmountDir(std::string dir)
 	else return true;
 }
 
-std::vector<std::string> FrostLib::AssetMan::list(std::string dir, bool relative)
+std::vector<std::string> fl::AssetMan::list(std::string dir, bool relative)
 {
 	if (!isInit) init();
 
@@ -116,7 +116,7 @@ std::vector<std::string> FrostLib::AssetMan::list(std::string dir, bool relative
 	return list;
 }
 
-bool FrostLib::AssetMan::exists(std::string file)
+bool fl::AssetMan::exists(std::string file)
 {
 	if (!isInit) init();
 
@@ -127,12 +127,12 @@ bool FrostLib::AssetMan::exists(std::string file)
 	return exists;
 }
 
-std::string FrostLib::AssetMan::getBaseDirectory()
+std::string fl::AssetMan::getBaseDirectory()
 {
 	return std::filesystem::current_path().string();
 }
 
-bool FrostLib::AssetMan::readFile(std::string fileName, std::string& output, bool relative, std::string path)
+bool fl::AssetMan::readFile(std::string fileName, std::string& output, bool relative, std::string path)
 {
 	if (!isInit) init();
 
@@ -202,7 +202,7 @@ bool FrostLib::AssetMan::readFile(std::string fileName, std::string& output, boo
 	return false;
 }
 
-bool FrostLib::AssetMan::createDirectory(std::string path, bool relative)
+bool fl::AssetMan::createDirectory(std::string path, bool relative)
 {
 	std::string dirPath;
 	if (relative)
@@ -220,7 +220,7 @@ bool FrostLib::AssetMan::createDirectory(std::string path, bool relative)
 	return false;
 }
 
-bool FrostLib::AssetMan::removeDirectory(std::string path, bool relative)
+bool fl::AssetMan::removeDirectory(std::string path, bool relative)
 {
 	std::string dirPath;
 	if (relative)
@@ -242,7 +242,7 @@ bool FrostLib::AssetMan::removeDirectory(std::string path, bool relative)
 	return false;
 }
 
-bool FrostLib::AssetMan::createFile(std::string fileName, bool relative, std::string path)
+bool fl::AssetMan::createFile(std::string fileName, bool relative, std::string path)
 {
 	std::string filePath;
 	if (relative)
@@ -256,7 +256,7 @@ bool FrostLib::AssetMan::createFile(std::string fileName, bool relative, std::st
 	return false;
 }
 
-bool FrostLib::AssetMan::removeFile(std::string fileName, bool relative, std::string path)
+bool fl::AssetMan::removeFile(std::string fileName, bool relative, std::string path)
 {
 	std::string filePath;
 	if (relative)
@@ -278,7 +278,7 @@ bool FrostLib::AssetMan::removeFile(std::string fileName, bool relative, std::st
 	return false;
 }
 
-bool FrostLib::AssetMan::writeFile(std::string fileName, std::string data, bool append, bool relative, std::string path)
+bool fl::AssetMan::writeFile(std::string fileName, std::string data, bool append, bool relative, std::string path)
 {
 	std::string filePath;
 	if (relative)
