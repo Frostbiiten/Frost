@@ -1,4 +1,6 @@
 #include <ApplicationManager.h>
+#include <imgui.h>
+#include <imgui-SFML.h>
 
 //Application's current scene
 fl::Scene currentScene{ "currentScene" };
@@ -7,74 +9,120 @@ sf::RenderWindow* windowPtr;
 
 namespace fl
 {
-	void ApplicationManager::awake()
+	namespace ApplicationManager
 	{
-		fl::Debug::log("Application running awake");
-	}
+		//20 milliseconds = 0.02 seconds ~ 50 times per frame
+		constexpr int fixedTimestep = 20;
+		sf::Time deltaTime;
+		sf::Clock imguiClock;
+		sf::Clock deltaTimeClock;
 
-	void ApplicationManager::start()
-	{
-		fl::Debug::log("Application running start");
-		//currentScene.loadScene("currentScene");
-		currentScene.ui.push_back(fl::UI::UIElement(nullptr, "test element", fl::UI::ScalingType::Distanced, fl::UI::PositionType::Fractional));
-		currentScene.ui[currentScene.ui.size() - 1].size = sf::Vector2f(20, 20);
-		currentScene.ui.push_back(fl::UI::UIElement(&currentScene.ui.at(0), "test child", fl::UI::ScalingType::Fractional, fl::UI::PositionType::Fractional));
-		currentScene.saveScene(4);
-	}
-
-	void ApplicationManager::drawScene(fl::Scene scene)
-	{
-		for (auto& element : scene.ui)
+		void awake()
 		{
-			if (!element.parent)
+			fl::Debug::log("Application running awake");
+		}
+
+		void start()
+		{
+			fl::Debug::log("Application running start");
+		}
+
+		void drawScene(fl::Scene scene)
+		{
+			for (auto& element : scene.ui)
 			{
-				element.renderElement(*windowPtr);
+				if (!element.parent)
+				{
+					element.renderElement(*windowPtr);
+				}
 			}
 		}
-	}
 
-	void ApplicationManager::update()
-	{
-		drawScene(currentScene);
-		//currentScene.render(*windowPtr);
-		//do frame stuff
-	}
-
-	void ApplicationManager::init()
-	{
-		awake();
-		start();
-
-		windowPtr = new sf::RenderWindow(sf::VideoMode(600, 600), applicationName, sf::Style::Default);
-
-		while (windowPtr->isOpen())
+		void update()
 		{
-			// Process events
-			sf::Event event;
-			while (windowPtr->pollEvent(event))
+			//Do frame stuff
+		}
+
+		void fixedUpdate()
+		{
+			//Runs on a fixed step
+		}
+
+		void init()
+		{
+			awake();
+			start();
+
+			windowPtr = new sf::RenderWindow(sf::VideoMode(900, 600), applicationName, sf::Style::Default);
+
+			//IMGUI
+			ImGui::SFML::Init(*windowPtr);
+			windowPtr->resetGLStates();
+
+			float fixedTimer = 0;
+			while (windowPtr->isOpen())
 			{
-				// Close window: exit
-				if (event.type == sf::Event::Closed)
+				// Process events
+				sf::Event event;
+				while (windowPtr->pollEvent(event))
 				{
-					fl::Debug::log("Closing window");
-					windowPtr->close();
+					// Close window: exit
+					if (event.type == sf::Event::Closed)
+					{
+						fl::Debug::log("Closing window");
+						windowPtr->close();
+					}
+					if (event.type == sf::Event::Resized)
+					{
+						sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+						windowPtr->setView(sf::View(visibleArea));
+						currentScene.invalidateUIDimensions();
+					}
 				}
-				if (event.type == sf::Event::Resized)
+
+				// Handle Deltatime
+				deltaTime = deltaTimeClock.restart();
+
+				// Clear screen
+				windowPtr->clear(backgroundColor);
+
+				// Handle fixedUpdate
+				while (fixedTimer > fixedTimestep)
 				{
-					sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
-					windowPtr->setView(sf::View(visibleArea));
-					currentScene.invalidateUIDimensions();
+					fixedTimer -= fixedTimestep;
+					fixedUpdate();
 				}
+				fixedTimer += deltaTime.asMilliseconds();
+
+				// Run frame code 
+				update();
+
+				// Render after the scene's code has been run
+				drawScene(currentScene);
+
+				//IMGUI
+				ImGui::SFML::Update(*windowPtr, imguiClock.restart());
+				{
+					ImGui::Begin("Testing ui");
+
+					// Window title text edit
+					//ImGui::InputText("Window title", "hello", 255);
+
+					if (ImGui::Button("Button"))
+					{
+
+					}
+
+					ImGui::SetWindowSize("Testing ui", sf::Vector2f(500, 200));
+
+					ImGui::End(); // end window
+				}
+
+				ImGui::SFML::Render(*windowPtr);
+
+				// Update the window
+				windowPtr->display();
 			}
-
-			// Clear screen
-			windowPtr->clear(backgroundColor);
-
-			// Run frame code 
-			update();
-
-			// Update the window
-			windowPtr->display();
 		}
 	}
 }

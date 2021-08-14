@@ -36,5 +36,8 @@ namespace fl
 
 		//Runs every frame while the application is open
 		void update();
+
+		//Runs on frames based on a fixed step for scaling across different performances. Should mostly only be used for physics
+		void fixedUpdate();
 	}
 }
