@@ -39,5 +39,7 @@ namespace fl
 
 		//Runs on frames based on a fixed step for scaling across different performances. Should mostly only be used for physics
 		void fixedUpdate();
+
+		sf::RenderWindow* getWindow();
 	}
 }

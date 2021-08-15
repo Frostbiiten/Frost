@@ -1,6 +1,7 @@
 #include <ApplicationManager.h>
 #include <imgui.h>
 #include <imgui-SFML.h>
+#include <InputMan.h>
 
 //Application's current scene
 fl::Scene currentScene{ "currentScene" };
@@ -16,6 +17,9 @@ namespace fl
 		sf::Time deltaTime;
 		sf::Clock imguiClock;
 		sf::Clock deltaTimeClock;
+
+		inline fl::InputMan::inputMap mainPlayer{ fl::InputMan::keyboardMap{} };
+		//std::vector<inputMap> otherPlayers;
 
 		void awake()
 		{
@@ -48,12 +52,38 @@ namespace fl
 			//Runs on a fixed step
 		}
 
+		void debugInput()
+		{
+			ImGui::Begin("Input Debugger");
+
+			ImGui::Text("Player Input Manager");
+			ImGui::Text("Directional Input:\n (%f, %f)", mainPlayer.directionalInput.x, mainPlayer.directionalInput.y);
+			ImGui::Text("Mouse Position:\n (%d, %d)", mainPlayer.pointerPos.x, mainPlayer.pointerPos.y);
+
+			ImGui::Text("");
+			ImGui::Separator();
+			ImGui::Text("");
+
+			ImGui::Checkbox("Clicking", &mainPlayer.isClicking);
+			ImGui::Checkbox("Button A", &mainPlayer.button1);
+			ImGui::Checkbox("Button B", &mainPlayer.button2);
+			ImGui::Checkbox("Button C", &mainPlayer.button3);
+			ImGui::Checkbox("Button D", &mainPlayer.button4);
+			ImGui::Checkbox("Special Button A", &mainPlayer.plus);
+			ImGui::Checkbox("Special Button B", &mainPlayer.minus);
+
+			ImGui::SetWindowSize(sf::Vector2f(200, 320));
+			ImGui::SetWindowPos(sf::Vector2i(windowPtr->getSize().x - 230, windowPtr->getSize().y / 2 - 160));
+
+			ImGui::End(); // end window
+		}
+
 		void init()
 		{
 			awake();
 			start();
 
-			windowPtr = new sf::RenderWindow(sf::VideoMode(900, 600), applicationName, sf::Style::Default);
+			windowPtr = new sf::RenderWindow(sf::VideoMode(1024, 576), applicationName, sf::Style::Default);
 
 			//IMGUI
 			ImGui::SFML::Init(*windowPtr);
@@ -83,6 +113,9 @@ namespace fl
 				// Handle Deltatime
 				deltaTime = deltaTimeClock.restart();
 
+				// Handle Input
+				mainPlayer.processInput();
+
 				// Clear screen
 				windowPtr->clear(backgroundColor);
 
@@ -103,19 +136,7 @@ namespace fl
 				//IMGUI
 				ImGui::SFML::Update(*windowPtr, imguiClock.restart());
 				{
-					ImGui::Begin("Testing ui");
-
-					// Window title text edit
-					//ImGui::InputText("Window title", "hello", 255);
-
-					if (ImGui::Button("Button"))
-					{
-
-					}
-
-					ImGui::SetWindowSize("Testing ui", sf::Vector2f(500, 200));
-
-					ImGui::End(); // end window
+					debugInput();
 				}
 
 				ImGui::SFML::Render(*windowPtr);
@@ -123,6 +144,11 @@ namespace fl
 				// Update the window
 				windowPtr->display();
 			}
+		}
+
+		sf::RenderWindow* getWindow()
+		{
+			return windowPtr;
 		}
 	}
 }
