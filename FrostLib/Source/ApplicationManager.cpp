@@ -1,4 +1,5 @@
-#include <ApplicationManager.h>
+﻿#include <ApplicationManager.h>
+#include <Graph.h>
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include <InputMan.h>
@@ -26,13 +27,38 @@ namespace fl
 			fl::Debug::log("Application running awake");
 		}
 
+		sf::Image graph;
+		float sz = 50;
 		void start()
 		{
 			fl::Debug::log("Application running start");
+			Graph g;
+			g.addNode(sf::Vector2f(0.f, 0.f), sf::Vector2f(5.f, 0.f), sf::Vector2f(20.f, 0.f), 0);
+			g.addNode(sf::Vector2f(5.f, 5.f), sf::Vector2f(-20.f, -0.f), sf::Vector2f(-5.f, -0.f), 1);
+
+			sf::Vector2u size(500, 500);
+			graph.create(size.x, size.y, sf::Color::Black);
+
+			float t = 0;
+			while (t < g.length)
+			{
+				sf::Vector2f test = g.evaluateDistance(t);
+				int px = test.x * sz;
+				int py = test.y * sz;
+				graph.setPixel(px, graph.getSize().y - 1 - py, sf::Color::White);
+				t += 0.1f;
+			}
+			
+			std::cout << "..";
 		}
 
 		void drawScene(fl::Scene scene)
 		{
+			sf::Texture gr;
+			gr.loadFromImage(graph);
+			sf::Sprite sprite;
+			sprite.setTexture(gr, true);
+			windowPtr->draw(sprite);
 			for (auto& element : scene.ui)
 			{
 				if (!element.parent)
@@ -138,7 +164,6 @@ namespace fl
 				{
 					debugInput();
 				}
-
 				ImGui::SFML::Render(*windowPtr);
 
 				// Update the window
