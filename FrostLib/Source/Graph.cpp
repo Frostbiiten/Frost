@@ -45,7 +45,8 @@ namespace fl
 	}
 	sf::Vector2f BezierNode::getLerpPos(bool side, float t)
 	{
-		return lerp(point, getHandle(side), t);
+		if (side) return lerp(point, getHandle(side), t);
+		else return lerp(getHandle(side), point, t);
 	}
 	void BezierNode::setPosition(sf::Vector2f pos)
 	{
@@ -69,10 +70,8 @@ namespace fl
 	}
 	sf::Vector2f UnevenBezierNode::getLerpPos(bool side, float t)
 	{
-		if (side)
-			return lerp(point, getHandle(side), t);
-		else
-			return lerp(getHandle(side), point, t);
+		if (side) return lerp(point, getHandle(side), t);
+		else return lerp(getHandle(side), point, t);
 	}
 	void UnevenBezierNode::setPosition(sf::Vector2f pos)
 	{

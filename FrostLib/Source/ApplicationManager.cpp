@@ -22,43 +22,22 @@ namespace fl
 		inline fl::InputMan::inputMap mainPlayer{ fl::InputMan::keyboardMap{} };
 		//std::vector<inputMap> otherPlayers;
 
+		//Pixel rendering
+		sf::Vector2f pixelSize{ 424, 240 };
+		sf::RenderTexture* buffer;
+
 		void awake()
 		{
 			fl::Debug::log("Application running awake");
 		}
 
-		sf::Image graph;
-		float sz = 50;
 		void start()
 		{
 			fl::Debug::log("Application running start");
-			Graph g;
-			g.addNode(sf::Vector2f(0.f, 0.f), sf::Vector2f(5.f, 0.f), sf::Vector2f(20.f, 0.f), 0);
-			g.addNode(sf::Vector2f(5.f, 5.f), sf::Vector2f(-20.f, -0.f), sf::Vector2f(-5.f, -0.f), 1);
-
-			sf::Vector2u size(500, 500);
-			graph.create(size.x, size.y, sf::Color::Black);
-
-			float t = 0;
-			while (t < g.length)
-			{
-				sf::Vector2f test = g.evaluateDistance(t);
-				int px = test.x * sz;
-				int py = test.y * sz;
-				graph.setPixel(px, graph.getSize().y - 1 - py, sf::Color::White);
-				t += 0.1f;
-			}
-			
-			std::cout << "..";
 		}
 
 		void drawScene(fl::Scene scene)
 		{
-			sf::Texture gr;
-			gr.loadFromImage(graph);
-			sf::Sprite sprite;
-			sprite.setTexture(gr, true);
-			windowPtr->draw(sprite);
 			for (auto& element : scene.ui)
 			{
 				if (!element.parent)
@@ -104,25 +83,37 @@ namespace fl
 			ImGui::End(); // end window
 		}
 
+		bool resizeFlag = false;
 		void init()
 		{
 			awake();
+
+			//Initiating window and set viewsize
+			windowPtr = new sf::RenderWindow(sf::VideoMode(1060, 600), applicationName, sf::Style::Default);
+			sf::View view(sf::Vector2f(pixelSize.x / 2.f, pixelSize.y / 2.f), pixelSize);
+			windowPtr->setView(view);
+			
+			//Create view buffer and sprite
+			sf::RenderTexture buf;
+			buf.create(pixelSize.x, pixelSize.y);
+			buffer = &buf;
+			sf::Sprite bufferSprite = sf::Sprite(buf.getTexture());
+			
 			start();
 
-			windowPtr = new sf::RenderWindow(sf::VideoMode(1024, 576), applicationName, sf::Style::Default);
+			//Fixed timestep timer
+			float fixedTimer = 0;
 
 			//IMGUI
 			ImGui::SFML::Init(*windowPtr);
 			windowPtr->resetGLStates();
 
-			float fixedTimer = 0;
 			while (windowPtr->isOpen())
 			{
 				// Process events
 				sf::Event event;
 				while (windowPtr->pollEvent(event))
 				{
-					// Close window: exit
 					if (event.type == sf::Event::Closed)
 					{
 						fl::Debug::log("Closing window");
@@ -130,8 +121,14 @@ namespace fl
 					}
 					if (event.type == sf::Event::Resized)
 					{
-						sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
-						windowPtr->setView(sf::View(visibleArea));
+						sf::Vector2u size = windowPtr->getSize();
+						float heightRatio = 30.f / 53.f;
+						float widthRatio = 53.f / 30.f;
+						if (size.y * widthRatio <= size.x)
+							size.x = size.y * widthRatio;
+						else if (size.x * heightRatio <= size.y)
+							size.y = size.x * heightRatio;
+						windowPtr->setSize(size);
 						currentScene.invalidateUIDimensions();
 					}
 				}
@@ -158,6 +155,8 @@ namespace fl
 
 				// Render after the scene's code has been run
 				drawScene(currentScene);
+				buffer->display();
+				windowPtr->draw(bufferSprite);
 
 				//IMGUI
 				ImGui::SFML::Update(*windowPtr, imguiClock.restart());
