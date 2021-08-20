@@ -1,5 +1,5 @@
 ﻿#include <ApplicationManager.h>
-#include <Graph.h>
+#include <AnimationCurve.h>
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include <InputMan.h>
@@ -83,7 +83,6 @@ namespace fl
 			ImGui::End(); // end window
 		}
 
-		bool resizeFlag = false;
 		void init()
 		{
 			awake();

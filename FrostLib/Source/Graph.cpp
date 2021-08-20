@@ -42,6 +42,7 @@ namespace fl
 		nlohmann::json json;
 		std::array<float, 2> pointArr = { point.x, point.y };
 		json["point"] = pointArr;
+		return json;
 	}
 
 	//Beziernode
@@ -81,6 +82,7 @@ namespace fl
 		std::array<float, 2> handleArr = { handle.x, handle.y };
 		json["point"] = pointArr;
 		json["handle"] = handleArr;
+		return json;
 	}
 
 	//Uneven bezier
@@ -125,6 +127,7 @@ namespace fl
 		json["point"] = pointArr;
 		json["handleR"] = handleRArr;
 		json["handleL"] = handleLArr;
+		return json;
 	}
 
 	//Graph
@@ -135,6 +138,7 @@ namespace fl
 	}
 	Graph::Graph(nlohmann::json json)
 	{
+		length = 0.f;
 		loop = json["loop"].get<bool>();
 
 		for (nlohmann::json& node : json["nodes"])
@@ -337,10 +341,18 @@ namespace fl
 	void Graph::moveNode(sf::Vector2f newPosition, int index)
 	{
 		graph[index]->setPosition(newPosition);
+		if (index > 0)
+			nodeLengths[index - 1] = getLength(*graph[index - 1], *graph[index]);
+		if (index < graph.size() - 1)
+			nodeLengths[index] = getLength(*graph[index], *graph[index + 1]);
 	}
 	void Graph::moveHandle(sf::Vector2f newPosition, int index, bool side)
 	{
 		graph[index]->setHandle(newPosition, side);
+		if (index > 0)
+			nodeLengths[index - 1] = getLength(*graph[index - 1], *graph[index]);
+		if (index < graph.size() - 1)
+			nodeLengths[index] = getLength(*graph[index], *graph[index + 1]);
 	}
 	sf::Vector2f Graph::evaluateDistance(float distance)
 	{
@@ -383,6 +395,10 @@ namespace fl
 
 		float t = inverseLerp(nodeADist, nodeBDist, distance);
 		return evaluate(*graph[prevIndex], *graph[index], t);
+	}
+	sf::Vector2f Graph::evaluateT(float t)
+	{
+		return evaluateDistance(t * length);
 	}
 	void Graph::updateLength()
 	{

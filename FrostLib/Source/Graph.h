@@ -51,6 +51,7 @@ namespace fl
 
 	class Graph
 	{
+	protected:
 		//Must use pointers for polymorphism
 		std::vector<std::unique_ptr<GraphNode>> graph;
 
@@ -68,6 +69,7 @@ namespace fl
 		bool loop;
 
 		Graph(bool loop = false);
+		Graph(nlohmann::json json);
 		void addNode(nlohmann::json json, int index);
 		void addNode(sf::Vector2f position, int index);
 		void addNode(sf::Vector2f position, sf::Vector2f handle, int index);
@@ -76,6 +78,8 @@ namespace fl
 		void moveHandle(sf::Vector2f newPosition, int index, bool side);
 		sf::Vector2f evaluateDistance(float distance);
 		sf::Vector2f evaluateT(float t);
+
+		virtual nlohmann::json serialize();
 	};
 
 	inline sf::Vector2f lerp(const sf::Vector2f& a, const sf::Vector2f& b, float t);
