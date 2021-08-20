@@ -1,4 +1,5 @@
 #pragma once
+#include <json.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <memory>
 #include <vector>
@@ -11,11 +12,13 @@ namespace fl
 		GraphNode();
 		GraphNode(sf::Vector2f point);
 		GraphNode(float x, float y);
+		GraphNode(nlohmann::json json);
 
 		virtual sf::Vector2f getHandle(bool side);
 		virtual sf::Vector2f getLerpPos(bool side, float t);
 		virtual void setPosition(sf::Vector2f pos);
 		virtual void setHandle(sf::Vector2f pos, bool side = true);
+		virtual nlohmann::json serialize();
 	};
 
 	//Default BezierNode is symmetric
@@ -24,10 +27,12 @@ namespace fl
 		//Handle is relative to the main point and considered as the right side
 		sf::Vector2f handle;
 		BezierNode(sf::Vector2f point, sf::Vector2f handle);
+		BezierNode(nlohmann::json json);
 		sf::Vector2f getHandle(bool side);
 		sf::Vector2f getLerpPos(bool side, float t);
 		void setPosition(sf::Vector2f pos);
 		void setHandle(sf::Vector2f pos, bool side = true);
+		nlohmann::json serialize();
 	};
 
 	struct UnevenBezierNode : public GraphNode
@@ -36,10 +41,12 @@ namespace fl
 		sf::Vector2f handleL;
 		sf::Vector2f handleR;
 		UnevenBezierNode(sf::Vector2f point, sf::Vector2f handleL, sf::Vector2f handleR);
+		UnevenBezierNode(nlohmann::json json);
 		sf::Vector2f getHandle(bool side);
 		sf::Vector2f getLerpPos(bool side, float t);
 		void setPosition(sf::Vector2f pos);
 		void setHandle(sf::Vector2f pos, bool side = true);
+		nlohmann::json serialize();
 	};
 
 	class Graph
@@ -61,6 +68,7 @@ namespace fl
 		bool loop;
 
 		Graph(bool loop = false);
+		void addNode(nlohmann::json json, int index);
 		void addNode(sf::Vector2f position, int index);
 		void addNode(sf::Vector2f position, sf::Vector2f handle, int index);
 		void addNode(sf::Vector2f position, sf::Vector2f handleL, sf::Vector2f handleR, int index);

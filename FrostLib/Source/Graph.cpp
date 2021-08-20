@@ -19,6 +19,11 @@ namespace fl
 	{
 		this->point = point;
 	}
+	GraphNode::GraphNode(nlohmann::json json)
+	{
+		std::array<float, 2> pointArr = json["point"];
+		this->point = sf::Vector2f(pointArr[0], pointArr[1]);
+	}
 	sf::Vector2f GraphNode::getHandle(bool side)
 	{
 		return point;
@@ -32,12 +37,25 @@ namespace fl
 		point = pos;
 	}
 	void GraphNode::setHandle(sf::Vector2f pos, bool side) { return; }
+	nlohmann::json GraphNode::serialize()
+	{
+		nlohmann::json json;
+		std::array<float, 2> pointArr = { point.x, point.y };
+		json["point"] = pointArr;
+	}
 
 	//Beziernode
 	BezierNode::BezierNode(sf::Vector2f point, sf::Vector2f handle)
 	{
 		this->point = point;
 		this->handle = handle;
+	}
+	BezierNode::BezierNode(nlohmann::json json)
+	{
+		std::array<float, 2> pointArr = json["point"];
+		std::array<float, 2> handleArr = json["handle"];
+		this->point = sf::Vector2f(pointArr[0], pointArr[1]);
+		this->handle = sf::Vector2f(handleArr[0], handleArr[1]);
 	}
 	sf::Vector2f BezierNode::getHandle(bool side)
 	{
@@ -56,6 +74,14 @@ namespace fl
 	{
 		side ? handle = pos : handle = -pos;
 	}
+	nlohmann::json BezierNode::serialize()
+	{
+		nlohmann::json json;
+		std::array<float, 2> pointArr = { point.x, point.y };
+		std::array<float, 2> handleArr = { handle.x, handle.y };
+		json["point"] = pointArr;
+		json["handle"] = handleArr;
+	}
 
 	//Uneven bezier
 	UnevenBezierNode::UnevenBezierNode(sf::Vector2f point, sf::Vector2f handleL, sf::Vector2f handleR)
@@ -63,6 +89,15 @@ namespace fl
 		this->point = point;
 		this->handleL = handleL;
 		this->handleR = handleR;
+	}
+	UnevenBezierNode::UnevenBezierNode(nlohmann::json json)
+	{
+		std::array<float, 2> pointArr = json["point"];
+		std::array<float, 2> handleLArr = json["handleR"];
+		std::array<float, 2> handleRArr = json["handleL"];
+		this->point = sf::Vector2f(pointArr[0], pointArr[1]);
+		this->handleR = sf::Vector2f(handleRArr[0], handleRArr[1]);
+		this->handleL = sf::Vector2f(handleLArr[0], handleLArr[1]);
 	}
 	sf::Vector2f UnevenBezierNode::getHandle(bool side)
 	{
@@ -81,12 +116,91 @@ namespace fl
 	{
 		side ? handleR = pos : handleL = pos;
 	}
+	nlohmann::json UnevenBezierNode::serialize()
+	{
+		nlohmann::json json;
+		std::array<float, 2> pointArr = { point.x, point.y };
+		std::array<float, 2> handleRArr = { handleR.x, handleR.y };
+		std::array<float, 2> handleLArr = { handleL.x, handleL.y };
+		json["point"] = pointArr;
+		json["handleR"] = handleRArr;
+		json["handleL"] = handleLArr;
+	}
 
 	//Graph
 	Graph::Graph(bool loop)
 	{
 		this->loop = loop;
 		length = 0;
+	}
+	Graph::Graph(nlohmann::json json)
+	{
+		loop = json["loop"].get<bool>();
+
+		for (nlohmann::json& node : json["nodes"])
+		{
+			addNode(node, graph.size() - 1);
+		}
+	}
+	void Graph::addNode(nlohmann::json json, int index)
+	{
+		if (graph.size() < 1)
+		{
+			if (json.contains("handleL"))
+				graph.push_back(std::make_unique<UnevenBezierNode>(json));
+			else if (json.contains("handle"))
+				graph.push_back(std::make_unique<BezierNode>(json));
+			else
+				graph.push_back(std::make_unique<GraphNode>(json));
+			length = 0;
+			return;
+		}
+
+		//Clamp to range of vector
+		index = std::max(std::min(index, (int)graph.size()), 0);
+
+		if (graph.size() < 2)
+		{
+			if (json.contains("handleL"))
+				graph.insert(graph.begin() + index, std::make_unique<UnevenBezierNode>(json));
+			else if (json.contains("handle"))
+				graph.insert(graph.begin() + index, std::make_unique<BezierNode>(json));
+			else
+				graph.insert(graph.begin() + index, std::make_unique<GraphNode>(json));
+
+			nodeLengths.push_back(getLength(*graph[0], *graph[1]));
+			length = nodeLengths[0];
+			return;
+		}
+
+		int prevIndex = index - 1;
+		int nextIndex = index + 1;
+
+		if (json.contains("handleL"))
+			graph.insert(graph.begin() + index, std::make_unique<UnevenBezierNode>(json));
+		else if (json.contains("handle"))
+			graph.insert(graph.begin() + index, std::make_unique<BezierNode>(json));
+		else
+			graph.insert(graph.begin() + index, std::make_unique<GraphNode>(json));
+
+		//If at end or beginning of vector
+		if (index == 0)
+		{
+			nodeLengths.insert(nodeLengths.begin(), getLength(*graph[nextIndex], *graph[index]));
+			updateLength();
+			return;
+		}
+		if (index == graph.size() - 1)
+		{
+			nodeLengths.insert(nodeLengths.end(), getLength(*graph[prevIndex], *graph[index]));
+			updateLength();
+			return;
+		}
+
+		//If not at beginning nor end
+		nodeLengths[prevIndex] = getLength(*graph[prevIndex], *graph[index]);
+		nodeLengths.insert(nodeLengths.begin() + index, getLength(*graph[nextIndex], *graph[index]));
+		updateLength();
 	}
 	void Graph::addNode(sf::Vector2f position, int index)
 	{
@@ -254,7 +368,7 @@ namespace fl
 		}
 
 		int prevIndex = index - 1;
-		
+
 		//For looping
 		if (prevIndex < 0)
 			prevIndex = graph.size() - 1;
@@ -274,6 +388,16 @@ namespace fl
 	{
 		length = loop ? std::reduce(std::execution::par, nodeLengths.begin(), nodeLengths.end()) + getLength(*graph[0], *graph[graph.size() - 1])
 			: std::reduce(std::execution::par, nodeLengths.begin(), nodeLengths.end());
+	}
+	nlohmann::json Graph::serialize()
+	{
+		nlohmann::json json;
+		json["loop"] = loop;
+		for (size_t x = 0; x < graph.size(); x++)
+		{
+			json["nodes"].push_back(graph[x]->serialize());
+		}
+		return json;
 	}
 
 	sf::Vector2f lerp(const sf::Vector2f& a, const sf::Vector2f& b, float t)
