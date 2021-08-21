@@ -2,6 +2,7 @@
 
 #include <ApplicationManager.h>
 #include <AssetMan.h>
+#include <Physics.h>
 #include <UIElement.h>
 #include <Utils.h>
 #include <vector>
@@ -16,6 +17,36 @@ namespace fl
 	Scene::Scene(std::string name)
 	{
 		sceneName = name;
+	}
+	
+	void Scene::awake()
+	{
+		for (auto& element : gameObjects)
+			if (element->active) element->awake();
+	}
+	
+	void Scene::start()
+	{
+		for (auto& element : gameObjects)
+			if (element->active) element->start();
+	}
+
+	void Scene::update()
+	{
+		for (auto& element : gameObjects)
+			if (element->active) element->update();
+	}
+
+	void Scene::fixedUpdate()
+	{
+		for (auto& element : gameObjects)
+			if (element->active) element->preFixedUpdate();
+
+		//Timestep is time since current and last fixedUpdate
+		fl::Physics::step();
+
+		for (auto& element : gameObjects)
+			if (element->active) element->fixedUpdate();
 	}
 
 	void Scene::render(sf::RenderWindow& window)

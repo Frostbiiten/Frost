@@ -1,5 +1,6 @@
 #pragma once
 #include <UIElement.h>
+#include <gameObject.h>
 #include <vector>
 
 namespace fl
@@ -9,14 +10,21 @@ namespace fl
 	struct Scene
 	{
 		std::string sceneName;
+		//TODO: Deprecate this
 		std::vector<UI::UIElement> ui;
+		std::vector<std::shared_ptr<gameObject>> gameObjects;
 
 		//Constructor
 		Scene();
 
 		Scene(std::string name);
 
-		//Render a scene to the display
+		void awake();
+		void start();
+		void update();
+		void fixedUpdate();
+
+		//Render a scene to the display : Deprecated
 		void render(sf::RenderWindow& window);
 
 		//Invalidates the dimensions of ui for screen scaling

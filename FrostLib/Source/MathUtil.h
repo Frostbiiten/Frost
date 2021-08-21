@@ -30,6 +30,12 @@ namespace fl
 
 		//Clamps value between min and max using specified mode
 		float clamp(float min, float max, float value, ClampMode mode = ClampMode::Clamp);
+
+		//Converts radians to degrees
+		float radToDeg(float radians);
+
+		//Converts radians to degrees
+		float degToRad(float degrees);
 	};
 }
 

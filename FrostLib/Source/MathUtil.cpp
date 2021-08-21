@@ -1,5 +1,9 @@
 #include <MathUtil.h>
 #include <algorithm>
+#include <cmath>
+
+constexpr double pi = 3.1415926535897932384626433832795028841971693993751058209749445923078164062;
+constexpr float pi_f = 3.1415926535897932384626433832795028841971693993751058209749445923078164062;
 
 float fl::Math::lerp(float a, float b, float t)
 {
@@ -49,4 +53,14 @@ float fl::Math::clamp(float min, float max, float value, ClampMode mode)
 		return loop(min, max, value);
 		break;
 	}
+}
+
+float fl::Math::radToDeg(float radians)
+{
+	return (radians * 180.f) / pi_f;
+}
+
+float fl::Math::degToRad(float degrees)
+{
+	return (degrees * pi_f) / 180.f;
 }
