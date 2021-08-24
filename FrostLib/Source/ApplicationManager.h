@@ -18,11 +18,13 @@ namespace fl
 		static const std::string applicationName{ "FL Prototype" };
 		static const std::string developer{ "Default Developer" };
 
-		//Timestep in milliseconds
-		extern constexpr int fixedTimestep = 20;
-
 		//The desired background color for the application
 		static sf::Color backgroundColor{ 20, 20, 20 };
+
+		//20 ms
+		inline constexpr int fixedTimestep = 20;
+		
+		inline float fps;
 
 		//Base functions
 		//Runs to start the application

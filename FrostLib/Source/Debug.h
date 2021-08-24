@@ -75,5 +75,12 @@ namespace fl
 
 			std::cout << obj << '\n';
 		}
+
+		void drawCircle(sf::Vector2f position, float radius, float thickness, sf::Color color = sf::Color::White);
+		void drawRectangle(sf::Vector2f position, sf::Vector2f size, float rotation, float thickness, sf::Color color = sf::Color::White);
+		void drawLine(sf::Vector2f begin, sf::Vector2f end, sf::Color color = sf::Color::White);
+		void drawLineThick(sf::Vector2f begin, sf::Vector2f end, float thickness, sf::Color color = sf::Color::White);
+		void drawRay(sf::Vector2f begin, sf::Vector2f direction, sf::Color color = sf::Color::White);
+		void drawRayThick(sf::Vector2f begin, sf::Vector2f direction, float thickness, sf::Color color = sf::Color::White);
 	};
 }

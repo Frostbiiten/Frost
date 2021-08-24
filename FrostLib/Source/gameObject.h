@@ -13,6 +13,8 @@ namespace fl
 		Default = 1 << 0,
 		Player = 1 << 1,
 		Enemy = 1 << 2,
+		Collectible = 1 << 3,
+		Land = 1 << 4,
 	};
 
 	//Forward declaration

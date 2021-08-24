@@ -3,6 +3,7 @@
 #include <ApplicationManager.h>
 #include <AssetMan.h>
 #include <Physics.h>
+#include "Player.h"
 #include <UIElement.h>
 #include <Utils.h>
 #include <vector>
@@ -21,6 +22,10 @@ namespace fl
 	
 	void Scene::awake()
 	{
+		//Create player
+		fl::Debug::log("Created player at next line from " + __LINE__ + std::string(" in") + __FILE__);
+		gameObjects.push_back(std::make_unique<Player>());
+
 		for (auto& element : gameObjects)
 			if (element->active) element->awake();
 	}

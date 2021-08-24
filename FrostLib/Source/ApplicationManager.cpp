@@ -14,7 +14,6 @@ namespace fl
 	namespace ApplicationManager
 	{
 		//20 milliseconds = 0.02 seconds ~ 50 times per frame
-		constexpr int fixedTimestep = 20;
 		sf::Time deltaTime;
 		sf::Clock imguiClock;
 		sf::Clock deltaTimeClock;
@@ -29,11 +28,13 @@ namespace fl
 		void awake()
 		{
 			fl::Debug::log("Application running awake");
+			currentScene.awake();
 		}
 
 		void start()
 		{
 			fl::Debug::log("Application running start");
+			currentScene.start();
 		}
 
 		void drawScene(fl::Scene scene)
@@ -49,17 +50,27 @@ namespace fl
 
 		void update()
 		{
+			currentScene.update();
 			//Do frame stuff
 		}
 
 		void fixedUpdate()
 		{
+			currentScene.fixedUpdate();
 			//Runs on a fixed step
 		}
 
 		void debugInput()
 		{
-			ImGui::Begin("Input Debugger");
+			ImGui::Begin("Debugger");
+
+			std::stringstream fpsStream;
+			fpsStream << std::fixed << std::setprecision(2) << fps;
+			ImGui::Text("FPS: %s", fpsStream.str().c_str());
+
+			ImGui::Text("");
+			ImGui::Separator();
+			ImGui::Text("");
 
 			ImGui::Text("Player Input Manager");
 			ImGui::Text("Directional Input:\n (%f, %f)", mainPlayer.directionalInput.x, mainPlayer.directionalInput.y);
@@ -77,7 +88,7 @@ namespace fl
 			ImGui::Checkbox("Special Button A", &mainPlayer.plus);
 			ImGui::Checkbox("Special Button B", &mainPlayer.minus);
 
-			ImGui::SetWindowSize(sf::Vector2f(200, 320));
+			ImGui::SetWindowSize(sf::Vector2f(200, 400));
 			ImGui::SetWindowPos(sf::Vector2i(windowPtr->getSize().x - 230, windowPtr->getSize().y / 2 - 160));
 
 			ImGui::End(); // end window
@@ -132,8 +143,9 @@ namespace fl
 					}
 				}
 
-				// Handle Deltatime
+				// Handle Deltatime + fps
 				deltaTime = deltaTimeClock.restart();
+				fps = 1000000.f / deltaTime.asMicroseconds();
 
 				// Handle Input
 				mainPlayer.processInput();
