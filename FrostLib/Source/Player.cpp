@@ -1,19 +1,24 @@
-#include "Player.h"
+#include <Player.h>
 #include <Debug.h>
 #include <Physics.h>
 #include <Utils.h>
+#include <Camera.h>
 
 namespace fl
 {
-	//rayMid -> EF, rayLeft = AB, rayRight -> CD
-	Physics::ray rayMid;
-	Physics::ray rayLeft;
-	Physics::ray rayRight;
+	Physics::ray rayA;
+	Physics::ray rayB;
+	Physics::ray rayC;
+	Physics::ray rayD;
+	Physics::ray rayE;
+	Physics::ray rayF;
 
-	Physics::maskedRayCallback rayMidResults;
-	Physics::maskedRayCallback rayLeftResults;
-	Physics::maskedRayCallback rayRightResults;
-	Physics::ray testRay;
+	Physics::maskedRayCallback rayAResults;
+	Physics::maskedRayCallback rayBResults;
+	Physics::maskedRayCallback rayCResults;
+	Physics::maskedRayCallback rayDResults;
+	Physics::maskedRayCallback rayEResults;
+	Physics::maskedRayCallback rayFResults;
 
 	//Default player hitbox/bounds
 	sf::Vector2f playerRect{ 19, 39 };
@@ -23,7 +28,6 @@ namespace fl
 		//Add rigidbody
 		components.push_back(std::make_unique<Physics::rigidBody>(this, Physics::pixelToBox2dUnits(playerRect)));
 		//Physics::rigidBody* rb = dynamic_cast<Physics::rigidBody*>(components[0].get());
-		std::cout << static_cast<int>(layer) << std::endl;
 	}
 	
 	void Player::update()
@@ -34,33 +38,50 @@ namespace fl
 
 	void Player::fixedUpdate()
 	{
+		//Update rays
 		updateRays();
+
+		switch (currentState)
+		{
+		case PlayerState::Grounded:
+			break;
+		case PlayerState::Airborne:
+			break;
+		case PlayerState::Attacking:
+			break;
+		}
+		
+		//Update player camera position
+		fl::Camera::updatePlayerCam(transform.getPosition() + playerRect / 2.f);
 	}
 
 	void Player::updateRays()
 	{
 		sf::Vector2f position = transform.getPosition();
 
-		//EF
-		rayMid.p1 = Physics::pixelToBox2dUnits(position + sf::Vector2f(0.1f, playerRect.y / 2));
-		rayMid.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, playerRect.y / 2));
-		rayMidResults = raycast(rayMid, Layer::All);
+		rayA.p1 = Physics::pixelToBox2dUnits(position + sf::Vector2f(0.f, playerRect.y));
+		rayA.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(0.f, playerRect.y / 2.f));
+		rayAResults = raycast(rayA, Layer::All);
 
-		//AB
-		rayLeft.p1 = Physics::pixelToBox2dUnits(position);
-		rayLeft.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(0.f, playerRect.y));
-		rayLeftResults = raycast(rayLeft, Layer::All);
+		rayB.p1 = Physics::pixelToBox2dUnits(position + playerRect);
+		rayB.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, playerRect.y / 2.f));
+		rayBResults = raycast(rayB, Layer::All);
 
-		//CD
-		rayRight.p1 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, 0.f));
-		rayRight.p2 = Physics::pixelToBox2dUnits(position + playerRect);
-		rayRightResults = raycast(rayRight, Layer::All);
+		rayC.p1 = Physics::pixelToBox2dUnits(position);
+		rayC.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(0.f , playerRect.y / 2.f));
+		rayCResults = raycast(rayC, Layer::All);
 
-		//Testray
-		testRay.p1 = Physics::pixelToBox2dUnits(position - sf::Vector2f(100.f, 100.f));
-		testRay.p2 = Physics::pixelToBox2dUnits(position + playerRect + sf::Vector2f(100.f, 100.f));
-		auto results = raycast(testRay, Layer::Player);
-		std::cout << " ";
+		rayD.p1 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, 0.f));
+		rayD.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, playerRect.y / 2.f));
+		rayDResults = raycast(rayD, Layer::All);
+
+		rayE.p1 = Physics::pixelToBox2dUnits(position + sf::Vector2f(0.f, playerRect.y / 2.f));
+		rayE.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, playerRect.y) / 2.f);
+		rayEResults = raycast(rayE, Layer::All);
+
+		rayF.p1 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, playerRect.y / 2.f));
+		rayF.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, playerRect.y) / 2.f);
+		rayFResults = raycast(rayF, Layer::All);
 	}
 
 	Physics::maskedRayCallback Player::raycast(Physics::ray& input, Layer layerMask)
@@ -70,19 +91,23 @@ namespace fl
 		return ray;
 	}
 
+	void Player::drawRay(Physics::ray& ray, sf::Color color)
+	{
+		Debug::drawLine(Physics::Box2dToPixelUnits(ray.p1), Physics::Box2dToPixelUnits(ray.p2), color);
+		Debug::drawRectangle(Physics::Box2dToPixelUnits(ray.p1), sf::Vector2f(0.01f, 0.01f), 0.f, 1.f, sf::Color::White);
+	}
+
 	void Player::drawDebug()
 	{
 		//Draw player hitbox
-		Debug::drawRectangle(transform.getPosition(), playerRect, transform.getRotation(), 0.5f, sf::Color::Blue);
-
-		Debug::drawLine(Physics::Box2dToPixelUnits(testRay.p1), Physics::Box2dToPixelUnits(testRay.p2), sf::Color::Green);
+		//Debug::drawRectangle(transform.getPosition(), playerRect, transform.getRotation(), 0.5f, sf::Color::Blue);
 
 		//Draw player rays
-		Debug::drawLine(Physics::Box2dToPixelUnits(rayMid.p1), Physics::Box2dToPixelUnits(rayMid.p2));
-		Debug::drawLine(Physics::Box2dToPixelUnits(rayLeft.p1), Physics::Box2dToPixelUnits(rayLeft.p2));
-		Debug::drawLine(Physics::Box2dToPixelUnits(rayRight.p1), Physics::Box2dToPixelUnits(rayRight.p2));
-		//Debug::drawLineThick(Physics::Box2dToPixelUnits(rayUL.p1), Physics::Box2dToPixelUnits(rayUL.p2), 1.f);
-		//Debug::drawLineThick(Physics::Box2dToPixelUnits(rayDR.p1), Physics::Box2dToPixelUnits(rayDR.p2), 1.f);
-		//Debug::drawLineThick(Physics::Box2dToPixelUnits(rayDL.p1), Physics::Box2dToPixelUnits(rayDL.p2), 1.f);
+		drawRay(rayA, sf::Color::Green);
+		drawRay(rayB, sf::Color(0, 255, 255));
+		drawRay(rayC, sf::Color::Blue);
+		drawRay(rayD, sf::Color::Yellow);
+		drawRay(rayE, sf::Color(255, 16, 240));
+		drawRay(rayF, sf::Color::Red);
 	}
 }

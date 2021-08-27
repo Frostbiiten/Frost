@@ -1,4 +1,5 @@
 #pragma once
+#include <SFML/System/Vector2.hpp>
 namespace fl
 {
 	namespace Math
@@ -36,6 +37,10 @@ namespace fl
 
 		//Converts radians to degrees
 		float degToRad(float degrees);
+
+		//Vector math
+		//Linearly interpolates from a to b respectively
+		sf::Vector2f lerpVec(sf::Vector2f a, sf::Vector2f b, float t);
 	};
 }
 

@@ -64,3 +64,8 @@ float fl::Math::degToRad(float degrees)
 {
 	return (degrees * pi_f) / 180.f;
 }
+
+sf::Vector2f fl::Math::lerpVec(sf::Vector2f a, sf::Vector2f b, float t)
+{
+	return sf::Vector2f( a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
+}

@@ -1,6 +1,7 @@
 #pragma once
 #include <AssetMan.h>
 #include <Debug.h>
+#include <InputMan.h>
 #include <Utils.h>
 #include <Scene.h>
 #include <SFML/Graphics.hpp>
@@ -21,10 +22,16 @@ namespace fl
 		//The desired background color for the application
 		static sf::Color backgroundColor{ 20, 20, 20 };
 
-		//20 ms
+		//Pixel resolution
+		inline sf::Vector2f pixelSize{ 424, 240 };
+
+		//Time: the timestep is in milliseconds
 		inline constexpr int fixedTimestep = 20;
-		
 		inline float fps;
+
+		//Input
+		inline fl::InputMan::inputMap mainPlayer{ fl::InputMan::keyboardMap{} };
+		//std::vector<inputMap> otherPlayers;
 
 		//Base functions
 		//Runs to start the application

@@ -18,11 +18,7 @@ namespace fl
 		sf::Clock imguiClock;
 		sf::Clock deltaTimeClock;
 
-		inline fl::InputMan::inputMap mainPlayer{ fl::InputMan::keyboardMap{} };
-		//std::vector<inputMap> otherPlayers;
-
 		//Pixel rendering
-		sf::Vector2f pixelSize{ 424, 240 };
 		sf::RenderTexture* buffer;
 
 		void awake()
@@ -100,7 +96,7 @@ namespace fl
 
 			//Initiating window and set viewsize
 			windowPtr = new sf::RenderWindow(sf::VideoMode(1060, 600), applicationName, sf::Style::Default);
-			sf::View view(sf::Vector2f(pixelSize.x / 2.f, pixelSize.y / 2.f), pixelSize);
+			sf::View view(sf::Vector2f(), pixelSize);
 			windowPtr->setView(view);
 			
 			//Create view buffer and sprite

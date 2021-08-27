@@ -1,5 +1,4 @@
 #pragma once
-#include <ApplicationManager.h>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Mouse.hpp>
