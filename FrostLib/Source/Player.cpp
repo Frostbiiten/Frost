@@ -5,71 +5,31 @@
 
 namespace fl
 {
-	//Respectively right, left, up-right, up-left, down-right, and down-left
-	b2RayCastInput rayR;
-	b2RayCastInput rayL;
-	b2RayCastInput rayUR;
-	b2RayCastInput rayUL;
-	b2RayCastInput rayDR;
-	b2RayCastInput rayDL;
+	//rayMid -> EF, rayLeft = AB, rayRight -> CD
+	Physics::ray rayMid;
+	Physics::ray rayLeft;
+	Physics::ray rayRight;
 
-	b2RayCastOutput rayROut;
-	b2RayCastOutput rayLOut;
-	b2RayCastOutput rayUROut;
-	b2RayCastOutput rayULOut;
-	b2RayCastOutput rayDROut;
+	Physics::maskedRayCallback rayMidResults;
+	Physics::maskedRayCallback rayLeftResults;
+	Physics::maskedRayCallback rayRightResults;
+	Physics::ray testRay;
 
+	//Default player hitbox/bounds
 	sf::Vector2f playerRect{ 19, 39 };
-
-	void Player::updateRays()
+	
+	void Player::awake()
 	{
-		sf::Vector2f pos = transform.getPosition();
-		sf::Vector2f rightRayPos = sf::Vector2f(pos.x + playerRect.x / 2, pos.y);
-		sf::Vector2f leftRayPos = sf::Vector2f(pos.x - playerRect.x / 2, pos.y);
-
-		//Mid rays
-		rayR.p1 = fl::Physics::pixelToBox2dUnits(pos);
-		rayR.p2 = fl::Physics::pixelToBox2dUnits(rightRayPos);
-		rayL.p1 = fl::Physics::pixelToBox2dUnits(pos);
-		rayL.p2 = fl::Physics::pixelToBox2dUnits(leftRayPos);
-
-		//Up rays
-		rayUR.p1 = fl::Physics::pixelToBox2dUnits(rightRayPos);
-		rayUR.p2 = fl::Physics::pixelToBox2dUnits(sf::Vector2f(rightRayPos.x, pos.y + playerRect.y / 2));
-		rayUL.p1 = fl::Physics::pixelToBox2dUnits(leftRayPos);
-		rayUL.p2 = fl::Physics::pixelToBox2dUnits(sf::Vector2f(leftRayPos.x, pos.y + playerRect.y / 2));
-
-		//Down rays
-		rayDR.p1 = fl::Physics::pixelToBox2dUnits(rightRayPos);
-		rayDR.p2 = fl::Physics::pixelToBox2dUnits(sf::Vector2f(rightRayPos.x, pos.y - playerRect.y / 2));
-		rayDL.p1 = fl::Physics::pixelToBox2dUnits(leftRayPos);
-		rayDL.p2 = fl::Physics::pixelToBox2dUnits(sf::Vector2f(leftRayPos.x, pos.y - playerRect.y / 2));
-
-		//raycast(rayR, player);
+		//Add rigidbody
+		components.push_back(std::make_unique<Physics::rigidBody>(this, Physics::pixelToBox2dUnits(playerRect)));
+		//Physics::rigidBody* rb = dynamic_cast<Physics::rigidBody*>(components[0].get());
+		std::cout << static_cast<int>(layer) << std::endl;
 	}
-
-	Physics::rayCallback Player::raycast(b2RayCastInput& input, Layer layerMask)
-	{
-		return Physics::rayCallback();
-	}
-
-	/*
-	Physics::rayCallback Player::raycast(b2RayCastInput& input, Layer layerMask)
-	{
-		Physics::rayCallback finalRay;
-		if ((layerMask & Layer::Enemy) == Layer::Enemy)
-			Physics::enemyTree.RayCast(&finalRay, input);
-		if ((layerMask & Layer::Land) == Layer::Land)
-			Physics::landTree.RayCast(&finalRay, input);
-		if ((layerMask & Layer::Collectible) == Layer::Collectible)
-			Physics::collectibleTree.RayCast(&finalRay, input);
-		return finalRay;
-	}
-	*/
-
+	
 	void Player::update()
 	{
-		Debug::drawRectangle(transform.getPosition(), playerRect, transform.getRotation(), 0.1f);
+		Physics::rigidBody* derivedPointer = dynamic_cast<Physics::rigidBody*>(components[0].get());
+		drawDebug();
 	}
 
 	void Player::fixedUpdate()
@@ -77,4 +37,52 @@ namespace fl
 		updateRays();
 	}
 
+	void Player::updateRays()
+	{
+		sf::Vector2f position = transform.getPosition();
+
+		//EF
+		rayMid.p1 = Physics::pixelToBox2dUnits(position + sf::Vector2f(0.1f, playerRect.y / 2));
+		rayMid.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, playerRect.y / 2));
+		rayMidResults = raycast(rayMid, Layer::All);
+
+		//AB
+		rayLeft.p1 = Physics::pixelToBox2dUnits(position);
+		rayLeft.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(0.f, playerRect.y));
+		rayLeftResults = raycast(rayLeft, Layer::All);
+
+		//CD
+		rayRight.p1 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, 0.f));
+		rayRight.p2 = Physics::pixelToBox2dUnits(position + playerRect);
+		rayRightResults = raycast(rayRight, Layer::All);
+
+		//Testray
+		testRay.p1 = Physics::pixelToBox2dUnits(position - sf::Vector2f(100.f, 100.f));
+		testRay.p2 = Physics::pixelToBox2dUnits(position + playerRect + sf::Vector2f(100.f, 100.f));
+		auto results = raycast(testRay, Layer::Player);
+		std::cout << " ";
+	}
+
+	Physics::maskedRayCallback Player::raycast(Physics::ray& input, Layer layerMask)
+	{
+		Physics::maskedRayCallback ray = Physics::maskedRayCallback{layerMask};
+		Physics::physicsWorld.RayCast(&ray, input.p1, input.p2);
+		return ray;
+	}
+
+	void Player::drawDebug()
+	{
+		//Draw player hitbox
+		Debug::drawRectangle(transform.getPosition(), playerRect, transform.getRotation(), 0.5f, sf::Color::Blue);
+
+		Debug::drawLine(Physics::Box2dToPixelUnits(testRay.p1), Physics::Box2dToPixelUnits(testRay.p2), sf::Color::Green);
+
+		//Draw player rays
+		Debug::drawLine(Physics::Box2dToPixelUnits(rayMid.p1), Physics::Box2dToPixelUnits(rayMid.p2));
+		Debug::drawLine(Physics::Box2dToPixelUnits(rayLeft.p1), Physics::Box2dToPixelUnits(rayLeft.p2));
+		Debug::drawLine(Physics::Box2dToPixelUnits(rayRight.p1), Physics::Box2dToPixelUnits(rayRight.p2));
+		//Debug::drawLineThick(Physics::Box2dToPixelUnits(rayUL.p1), Physics::Box2dToPixelUnits(rayUL.p2), 1.f);
+		//Debug::drawLineThick(Physics::Box2dToPixelUnits(rayDR.p1), Physics::Box2dToPixelUnits(rayDR.p2), 1.f);
+		//Debug::drawLineThick(Physics::Box2dToPixelUnits(rayDL.p1), Physics::Box2dToPixelUnits(rayDL.p2), 1.f);
+	}
 }

@@ -9,10 +9,14 @@ namespace fl
 
 	class Player : public gameObject
 	{
-		void updateRays();
-		Physics::rayCallback raycast(b2RayCastInput& input, Layer layerMask);
-		void fixedUpdate();
+		void awake();
 		void update();
+		void fixedUpdate();
+
+		void updateRays();
+		Physics::maskedRayCallback raycast(Physics::ray& input, Layer layerMask);
+
+		void drawDebug();
 	};
 }
 

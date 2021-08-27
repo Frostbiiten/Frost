@@ -1,6 +1,7 @@
 #include <AssetMan.h>
 
 #include <Debug.h>
+#include <box2d/box2d.h>
 #include <physfs.h>
 #include <filesystem>
 #include <fstream>
@@ -25,6 +26,9 @@ bool fl::AssetMan::init()
 			arc_mountDir(entry.path().string());
 		}
 	}
+
+	//Open b2d dump
+	
 
 	isInit = true;
 	return true;

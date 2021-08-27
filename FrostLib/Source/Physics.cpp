@@ -1,34 +1,12 @@
 #include <Physics.h>
 #include <ApplicationManager.h>
+#include <Utils.h>
 #include <box2d/b2_body.h>
 
 namespace fl
 {
 	namespace Physics
 	{
-		//Main physics wolrd
-		inline b2World physicsWorld(b2Vec2(0.f, -9.8f));
-
-		//Trees for querying
-		inline b2DynamicTree enemyTree;
-		inline b2DynamicTree collectibleTree;
-		inline b2DynamicTree landTree;
-		inline b2DynamicTree defaultTree; //This tree is the default tree for bodies. If they are not assigned to any other, they will be placed here.
-
-		//Conversion rate for Box2d to SFML units
-		constexpr float pixelsPerUnit = 100;
-
-		//Box2d does not operate with pixels as units
-		inline b2Vec2 pixelToBox2dUnits(sf::Vector2f unit)
-		{
-			return b2Vec2(unit.x / pixelsPerUnit, unit.y / pixelsPerUnit);
-		}
-
-		inline sf::Vector2f Box2dToPixelUnits(b2Vec2 unit)
-		{
-			return sf::Vector2f(unit.x * pixelsPerUnit, unit.y * pixelsPerUnit);
-		}
-
 		//Goes 1 step in the physics simulation
 		void step()
 		{
@@ -46,8 +24,26 @@ namespace fl
 			return 1.f;
 		}
 
+		maskedRayCallback::maskedRayCallback(Layer layerMask)
+		{
+			this->layerMask = layerMask;
+		}
+
+		//Masked raycallback
+		float maskedRayCallback::ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float fraction)
+		{
+			bodies.push_back(fixture);
+			points.push_back(point);
+			normals.push_back(normal);
+			fractions.push_back(fraction);
+			auto comp = static_cast<component*>(fixture->GetBody()->GetUserData().data);
+			if ((comp->owner->layer & layerMask) == layerMask)
+				components.push_back(comp);
+			return 1.f;
+		}
+
 		//Rigidbody
-		rigidBody::rigidBody(b2BodyType bodyType)
+		rigidBody::rigidBody(gameObject* owner, b2Vec2 rectSize, b2BodyType bodyType)
 		{
 			//Define body
 			b2BodyDef bodyDef;
@@ -62,30 +58,24 @@ namespace fl
 
 			//Set "collider" using a polygon
 			b2PolygonShape collider;
-			auto scale = owner->transform.getScale();
-			collider.SetAsBox(scale.x, scale.y);
+			collider.SetAsBox(rectSize.x, rectSize.y);
 
 			//Finalize; user data is pointer to owner
 			body->CreateFixture(&collider, 0.f);
 			body->GetUserData().data = owner;
 
 			bool added = false;
-			if ((owner->layer & Layer::Enemy) == Layer::Enemy)
+		}
+
+		void rigidBody::destroyFixture(int index)
+		{
+			b2Fixture* x = body->GetFixtureList();
+			int i = 0;
+			while (i < index)
 			{
-				enemyTree.CreateProxy(aabb, this);
-				added = true;
+				x = x->GetNext();
 			}
-			if ((owner->layer & Layer::Land) == Layer::Land)
-			{
-				landTree.CreateProxy(aabb, this);
-				added = true;
-			}
-			if ((owner->layer & Layer::Collectible) == Layer::Collectible)
-			{
-				collectibleTree.CreateProxy(aabb, this);
-				added = true;
-			}
-			if (!added) defaultTree.CreateProxy(aabb, this);
+			body->DestroyFixture(x);
 		}
 
 		void rigidBody::updateAABB()
@@ -96,6 +86,11 @@ namespace fl
 		void rigidBody::updateOldPos()
 		{
 			oldPos = body->GetPosition();
+		}
+
+		b2Body* rigidBody::getBody()
+		{
+			return body;
 		}
 
 		void rigidBody::preFixedUpdate()

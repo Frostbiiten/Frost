@@ -55,7 +55,7 @@ namespace fl
 			debugFile.open(logName, std::ios::app);
 
 			//Time flag
-			if (flags & LogFlag::Time == flags)
+			if ((flags & LogFlag::Time) == flags)
 			{
 				struct tm newtime;
 				time_t now = time(0);
@@ -64,12 +64,12 @@ namespace fl
 			}
 
 			//Type flag
-			if (flags & LogFlag::Type == flags) debugFile << "[" << getType(typeid(obj)) << "] ";
+			if ((flags & LogFlag::Type) == flags) debugFile << "[" << getType(typeid(obj)) << "] ";
 
 			debugFile << obj;
 
 			//Newline flag
-			if (flags & LogFlag::ContinueLine != flags) debugFile << '\n';
+			if ((flags & LogFlag::ContinueLine) != flags) debugFile << '\n';
 
 			debugFile.close();
 

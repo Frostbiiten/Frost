@@ -15,6 +15,7 @@ namespace fl
 		Enemy = 1 << 2,
 		Collectible = 1 << 3,
 		Land = 1 << 4,
+		All = Default | Player | Enemy | Collectible | Land,
 	};
 
 	//Forward declaration
@@ -41,6 +42,9 @@ namespace fl
 		//Constructor/Destructor
 		gameObject(gameObject* parent = nullptr, std::string name = "", Layer layer = Layer::Default, sf::Vector2f position = sf::Vector2f(0.f, 0.f), float rotation = 0.f, sf::Vector2f scale = sf::Vector2f(1.f, 1.f));
 		~gameObject();
+
+		//Custom init for object specific data
+		virtual void customInit();
 
 		//Add + Remove* child
 		void addChild(gameObject* child);

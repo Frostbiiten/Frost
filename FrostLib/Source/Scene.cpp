@@ -23,7 +23,7 @@ namespace fl
 	void Scene::awake()
 	{
 		//Create player
-		fl::Debug::log("Created player at next line from " + __LINE__ + std::string(" in") + __FILE__);
+		fl::Debug::log("Created player in scene.cpp, line 27");
 		gameObjects.push_back(std::make_unique<Player>());
 
 		for (auto& element : gameObjects)

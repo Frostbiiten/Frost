@@ -60,7 +60,7 @@ namespace fl
 			//Runs on a fixed step
 		}
 
-		void debugInput()
+		void debugGui()
 		{
 			ImGui::Begin("Debugger");
 
@@ -89,7 +89,7 @@ namespace fl
 			ImGui::Checkbox("Special Button B", &mainPlayer.minus);
 
 			ImGui::SetWindowSize(sf::Vector2f(200, 400));
-			ImGui::SetWindowPos(sf::Vector2i(windowPtr->getSize().x - 230, windowPtr->getSize().y / 2 - 160));
+			ImGui::SetWindowPos(sf::Vector2i(windowPtr->getSize().x - 230, windowPtr->getSize().y / 2 - 200));
 
 			ImGui::End(); // end window
 		}
@@ -172,7 +172,7 @@ namespace fl
 				//IMGUI
 				ImGui::SFML::Update(*windowPtr, imguiClock.restart());
 				{
-					debugInput();
+					debugGui();
 				}
 				ImGui::SFML::Render(*windowPtr);
 

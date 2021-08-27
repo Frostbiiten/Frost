@@ -17,9 +17,13 @@ namespace fl
 			this->name != "" ? this->name = name : this->name = uuids::to_string(uuid);
 		}
 
+		this->layer = layer;
+
 		transform.setPosition(position);
 		transform.setRotation(rotation);
 		transform.setScale(scale);
+
+		customInit();
 
 		validLocalTransform = false;
 	}
@@ -30,6 +34,9 @@ namespace fl
 		fl::Debug::log("Destroying" + uuids::to_string(uuid));
 		//Smart pointers and vectors will automatically be deleted ?
 	}
+
+	void gameObject::customInit()
+	{}
 
 	void gameObject::addChild(gameObject* child)
 	{

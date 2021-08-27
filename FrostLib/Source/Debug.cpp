@@ -1,7 +1,8 @@
 #include <Debug.h>
 
-#include <algorithm>
 #include <ApplicationManager.h>
+#include <box2d/box2d.h>
+#include <algorithm>
 #include <filesystem>
 #include <iomanip>
 #include <sstream>
