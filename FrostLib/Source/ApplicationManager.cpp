@@ -5,7 +5,7 @@
 #include <InputMan.h>
 
 //Application's current scene
-fl::Scene currentScene{ "currentScene" };
+fl::scene currentScene{ "currentScene" };
 
 sf::RenderWindow* windowPtr;
 
@@ -31,17 +31,6 @@ namespace fl
 		{
 			fl::Debug::log("Application running start");
 			currentScene.start();
-		}
-
-		void drawScene(fl::Scene scene)
-		{
-			for (auto& element : scene.ui)
-			{
-				if (!element.parent)
-				{
-					element.renderElement(*windowPtr);
-				}
-			}
 		}
 
 		void update()
@@ -101,7 +90,7 @@ namespace fl
 			
 			//Create view buffer and sprite
 			sf::RenderTexture buf;
-			buf.create(pixelSize.x, pixelSize.y);
+			buf.create((int)pixelSize.x, (int)pixelSize.y);
 			buffer = &buf;
 			sf::Sprite bufferSprite = sf::Sprite(buf.getTexture());
 			
@@ -128,12 +117,15 @@ namespace fl
 					if (event.type == sf::Event::Resized)
 					{
 						sf::Vector2u size = windowPtr->getSize();
-						float heightRatio = 30.f / 53.f;
-						float widthRatio = 53.f / 30.f;
+						constexpr float heightRatio = 30.f / 53.f;
+						constexpr float widthRatio = 53.f / 30.f;
+						#pragma warning(push)
+						#pragma warning(disable: 4244)
 						if (size.y * widthRatio <= size.x)
 							size.x = size.y * widthRatio;
 						else if (size.x * heightRatio <= size.y)
 							size.y = size.x * heightRatio;
+						#pragma warning(pop)
 						windowPtr->setSize(size);
 						currentScene.invalidateUIDimensions();
 					}
@@ -161,7 +153,6 @@ namespace fl
 				update();
 
 				// Render after the scene's code has been run
-				drawScene(currentScene);
 				buffer->display();
 				windowPtr->draw(bufferSprite);
 
@@ -177,9 +168,14 @@ namespace fl
 			}
 		}
 
+		//DO NOT USE UNLESS YOU WANT NON-PIXEL RENDERING - USE "getBuffer()" instead
 		sf::RenderWindow* getWindow()
 		{
 			return windowPtr;
+		}
+		sf::RenderTexture* getBuffer()
+		{
+			return buffer;
 		}
 	}
 }

@@ -3,14 +3,15 @@
 
 namespace fl
 {
-	gameObject::gameObject(gameObject* parent, std::string name, Layer layer, sf::Vector2f position, float rotation, sf::Vector2f scale)
+	gameObject::gameObject(fl::scene* scene, gameObject* parent, std::string name, Layer layer, sf::Vector2f position, float rotation, sf::Vector2f scale)
 	{
 		active = true;
+		this->ownerScene = scene;
 		uuid = uuids::uuid_random_generator{}();
 		if (parent)
 		{
-			parent->addChild(this);
-			this->name != "" ? this->name = name : this->name = "gameObject " + std::to_string(this->parent.get()->children.size());
+			parent->moveChildFrom(this, scene);
+			this->name != "" ? this->name = name : this->name = "gameObject " + std::to_string(this->parent->children.size());
 		}
 		else
 		{
@@ -28,37 +29,116 @@ namespace fl
 		validLocalTransform = false;
 	}
 
+	gameObject::gameObject(nlohmann::json json, fl::scene* scene)
+	{
+		name = json["name"];
+		uuid = uuids::uuid::from_string(json["uuid"].get<std::string>());
+		layer = json["layer"];
+		active = json["active"];
+		transform = deserializeTransform(json["transform"]);
+
+		for (auto& child : json["children"])
+		{
+			scene->createGameObject(child, this);
+		}
+	}
+
 	gameObject::~gameObject()
 	{
 		if (parent) parent->unparentChild(this);
-		fl::Debug::log("Destroying" + uuids::to_string(uuid));
-		//Smart pointers and vectors will automatically be deleted ?
+		fl::Debug::log("Destroy gameobject " + uuids::to_string(uuid));
 	}
 
 	void gameObject::customInit()
 	{}
 
-	void gameObject::addChild(gameObject* child)
+	void gameObject::moveChildTo(gameObject* child, gameObject* newGameObject)
 	{
-		//Check this because child might not be fully constructed
-		child->parent = std::make_shared<gameObject>(this);
-		children.push_back(std::make_shared<gameObject>(child));
+		auto foundChild = std::find_if(std::begin(children), std::end(children),
+			[&](std::unique_ptr<gameObject> const& obj) { return (*obj).uuid == child->uuid; });
+
+		if (foundChild == children.end())
+		{
+			throw std::invalid_argument(Formatter() << "Child \"" << child->name <<
+				'(' << uuids::to_string(child->uuid) << ')' << " Was not found in " <<
+				name << '(' << uuids::to_string(uuid) << ')');
+			return;
+		}
+
+		child->parent = newGameObject;
+		newGameObject->children.push_back(std::move(*foundChild));
+		children.erase(foundChild);
+	}
+
+	void gameObject::moveChildTo(gameObject* child, scene* scene)
+	{
+		auto foundChild = std::find_if(std::begin(children), std::end(children),
+			[&](std::unique_ptr<gameObject> const& obj) { return (*obj).uuid == child->uuid; });
+
+		if (foundChild == children.end())
+		{
+			throw std::invalid_argument(Formatter() << "Child \"" << child->name <<
+				'(' << uuids::to_string(child->uuid) << ')' << " Was not found in " <<
+				name << '(' << uuids::to_string(uuid) << ')');
+			return;
+		}
+
+		child->parent = nullptr;
+		scene->gameObjects.push_back(std::move(*foundChild));
+		children.erase(foundChild);
+	}
+
+	void gameObject::moveChildFrom(gameObject* child, gameObject* oldGameObject)
+	{
+		auto foundChild = std::find_if(std::begin(oldGameObject->children), std::end(oldGameObject->children),
+			[&](std::unique_ptr<gameObject> const& obj) { return (*obj).uuid == child->uuid; });
+
+		if (foundChild == oldGameObject->children.end())
+		{
+			throw std::invalid_argument(Formatter() << "Child \"" << child->name <<
+				'(' << uuids::to_string(child->uuid) << ')' << " Was not found in " <<
+				oldGameObject->name << '(' << uuids::to_string(oldGameObject->uuid) << ')');
+			return;
+		}
+
+		child->parent = this;
+		children.push_back(std::move(*foundChild));
+		oldGameObject->children.erase(foundChild);
+	}
+
+	void gameObject::moveChildFrom(gameObject* child, scene* scene)
+	{
+		auto foundChild = std::find_if(std::begin(scene->gameObjects), std::end(scene->gameObjects),
+			[&](std::unique_ptr<gameObject> const& obj) { return (*obj).uuid == child->uuid; });
+
+		if (foundChild == scene->gameObjects.end())
+		{
+			throw std::invalid_argument(Formatter() << "Child \"" << child->name <<
+				'(' << uuids::to_string(child->uuid) << ')' << " Was not found in " <<
+				scene->sceneName);
+			return;
+		}
+
+		child->parent = this;
+		children.push_back(std::move(*foundChild));
+		scene->gameObjects.erase(foundChild);		
 	}
 
 	void gameObject::unparentChild(gameObject* child)
 	{
-		int index = -1;
-		for (int x = 0; x < children.size(); x++)
+		auto foundChild = std::find_if(std::begin(children), std::end(children),
+			[&](std::unique_ptr<gameObject> const& obj) { return (*obj).uuid == child->uuid; });
+
+		if (foundChild == children.end())
 		{
-			if (children[x].get() == child)
-			{
-				index = x;
-				break;
-			}
+			throw std::invalid_argument(Formatter() << "Child \"" << child->name <<
+				'(' << uuids::to_string(child->uuid) << ')' << " Was not found in " <<
+				name << '(' << uuids::to_string(uuid) << ')');
+			return;
 		}
-		if(index == -1) throw "Child not found in children vector";
+		
 		child->parent = nullptr;
-		children.erase(children.begin() + index);
+		children.erase(foundChild);
 	}
 
 	void gameObject::updateLocalTransform()
@@ -111,23 +191,45 @@ namespace fl
 		sf::Vector2f pos = transform.getPosition();
 		float rotation = transform.getRotation();
 		sf::Vector2f scale = transform.getPosition();
+		sf::Vector2f origin = transform.getOrigin();
 
 		json["position"].push_back(pos.x);
 		json["position"].push_back(pos.y);
 		json["rotation"] = rotation;
 		json["scale"].push_back(scale.x);
 		json["scale"].push_back(scale.y);
+		json["origin"].push_back(origin.x);
+		json["origin"].push_back(origin.y);
 
 		return json;
 	}
 
-	nlohmann::json gameObject::serialize()
+	sf::Transformable gameObject::deserializeTransform(nlohmann::json json)
+	{
+		sf::Transformable tempTransform;
+
+		tempTransform.setPosition(sf::Vector2f(json["position"][0], json["position"][0]));
+		tempTransform.setRotation(json["rotation"]);
+		tempTransform.setScale(sf::Vector2f(json["scale"][0], json["scale"][0]));
+		tempTransform.setOrigin(sf::Vector2f(json["origin"][0], json["origin"][0]));
+
+		return tempTransform;
+	}
+
+	nlohmann::json gameObject::serializeBasic(std::string type)
 	{
 		nlohmann::json json;
 		json["name"] = name;
 		json["uuid"] = uuids::to_string(uuid);
 		json["layer"] = layer;
 		json["active"] = active;
+		return json;
+	}
+
+	nlohmann::json gameObject::serialize()
+	{
+		//Start with serializing the most important parts of a gameObject
+		nlohmann::json json = serializeBasic();
 		json["transform"] = serializeTransform();
 
 		for (auto& child : children)
@@ -160,5 +262,4 @@ namespace fl
 	{
 		fl::Debug::log("Fixedupdate method on component \"" + name + "\" has not been overriden in gameobject \"" + owner->name);
 	}
-
 }

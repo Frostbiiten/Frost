@@ -1,6 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <fstream>
+#include <sstream>
+#include <stdexcept>
 #include <iomanip>
 #include <iostream>
 
@@ -82,5 +84,35 @@ namespace fl
 		void drawLineThick(sf::Vector2f begin, sf::Vector2f end, float thickness, sf::Color color = sf::Color::White);
 		void drawRay(sf::Vector2f begin, sf::Vector2f direction, sf::Color color = sf::Color::White);
 		void drawRayThick(sf::Vector2f begin, sf::Vector2f direction, float thickness, sf::Color color = sf::Color::White);
+	};
+
+	//https://stackoverflow.com/a/12262626
+	struct Formatter
+	{
+		Formatter() {}
+		~Formatter() {}
+
+		template <typename Type>
+		Formatter& operator << (const Type& value)
+		{
+			stream_ << value;
+			Debug::log(value);
+			return *this;
+		}
+
+		std::string str() const { return stream_.str(); }
+		operator std::string() const { return stream_.str(); }
+
+		enum ConvertToString
+		{
+			to_str
+		};
+		std::string operator >> (ConvertToString) { return stream_.str(); }
+
+	private:
+		std::stringstream stream_;
+
+		Formatter(const Formatter&);
+		Formatter& operator = (Formatter&);
 	};
 }

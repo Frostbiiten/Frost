@@ -1,9 +1,10 @@
+#pragma once
+#include <Scene.h>
 #include <json.hpp>
 #include <uuid.h>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Transformable.hpp>
 #include <string>
-#pragma once
 
 namespace fl
 {
@@ -18,11 +19,14 @@ namespace fl
 		All = Default | Player | Enemy | Collectible | Land,
 	};
 
-	//Forward declaration
+	//Forward declarations
+	struct scene;
 	struct component;
 
 	struct gameObject
 	{
+		fl::scene* ownerScene;
+
 		//Identifiers
 		std::string name;
 		uuids::uuid uuid;
@@ -36,18 +40,33 @@ namespace fl
 		bool validLocalTransform;
 
 		//Pointers to the parent and children
-		std::shared_ptr<gameObject> parent;
-		std::vector<std::shared_ptr<gameObject>> children;
+		//Parent is not a smart pointer because the child will never have to clean up the parent
+		//The children are unique pointers because they are owned by the parent
+		gameObject* parent;
+		std::vector<std::unique_ptr<gameObject>> children;
 
-		//Constructor/Destructor
-		gameObject(gameObject* parent = nullptr, std::string name = "", Layer layer = Layer::Default, sf::Vector2f position = sf::Vector2f(0.f, 0.f), float rotation = 0.f, sf::Vector2f scale = sf::Vector2f(1.f, 1.f));
-		~gameObject();
+		//Constructor/Destructor for non-serialized objects
+		gameObject(fl::scene* scene = nullptr, gameObject* parent = nullptr, std::string name = "", Layer layer = Layer::Default, sf::Vector2f position = sf::Vector2f(0.f, 0.f), float rotation = 0.f, sf::Vector2f scale = sf::Vector2f(1.f, 1.f));
+		
+		//Sample json constructor
+		gameObject(nlohmann::json json, fl::scene* scene = nullptr);
+
+		//Remove copy and assign
+		gameObject(const gameObject&) = delete;
+		void operator=(const gameObject&) = delete;
+
+		//Destructor
+		virtual ~gameObject();
 
 		//Custom init for object specific data
 		virtual void customInit();
 
-		//Add + Remove* child
-		void addChild(gameObject* child);
+		//Move child from gameObject to another
+		void moveChildTo(gameObject* child, gameObject* newGameObject);
+		void moveChildTo(gameObject* child, scene* scene);
+		void moveChildFrom(gameObject* child, gameObject* oldGameObject);
+		void moveChildFrom(gameObject* child, scene* scene);
+
 		void unparentChild(gameObject* child);
 		void updateLocalTransform();
 
@@ -60,8 +79,10 @@ namespace fl
 		virtual void fixedUpdate();
 
 		//Serialize
-		nlohmann::json serialize();
+		nlohmann::json serializeBasic(std::string type = "basic");
+		virtual nlohmann::json serialize();
 		nlohmann::json serializeTransform();
+		virtual sf::Transformable deserializeTransform(nlohmann::json json);
 	};
 
 	struct component

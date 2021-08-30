@@ -11,7 +11,7 @@ extern sf::RenderWindow* windowPtr;
 //Forward declaration of scene class
 namespace fl
 {
-	struct Scene;
+	struct scene;
 
 	namespace ApplicationManager
 	{
@@ -44,7 +44,7 @@ namespace fl
 		void start();
 
 		//Draws a scene to the window
-		void drawScene(fl::Scene scene);
+		void drawScene(fl::scene scene);
 
 		//Runs every frame while the application is open
 		void update();
@@ -53,5 +53,6 @@ namespace fl
 		void fixedUpdate();
 
 		sf::RenderWindow* getWindow();
+		sf::RenderTexture* getBuffer();
 	}
 }

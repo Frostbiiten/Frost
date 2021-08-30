@@ -1,5 +1,6 @@
 #include <Player.h>
 #include <Debug.h>
+#include <gameObject.h>
 #include <Physics.h>
 #include <Utils.h>
 #include <Camera.h>
@@ -22,7 +23,16 @@ namespace fl
 
 	//Default player hitbox/bounds
 	sf::Vector2f playerRect{ 19, 39 };
-	
+
+	Player::Player(nlohmann::json json, scene* scene)
+	{
+				name = json["name"];
+		uuid = uuids::uuid::from_string(json["uuid"].get<std::string>());
+		layer = json["layer"];
+		active = json["active"];
+		transform = deserializeTransform(json["transform"]);	
+	}
+
 	void Player::awake()
 	{
 		//Add rigidbody
@@ -44,6 +54,7 @@ namespace fl
 		switch (currentState)
 		{
 		case PlayerState::Grounded:
+
 			break;
 		case PlayerState::Airborne:
 			break;

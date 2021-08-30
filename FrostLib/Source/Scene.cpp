@@ -2,47 +2,46 @@
 
 #include <ApplicationManager.h>
 #include <AssetMan.h>
+#include <gameObject.h>
 #include <Physics.h>
-#include "Player.h"
 #include <UIElement.h>
 #include <Utils.h>
 #include <vector>
 
+//Custom object types
+#include <Player.h>
+
 namespace fl
 {
-	Scene::Scene()
+	scene::scene()
 	{
 		sceneName = uuids::to_string(uuids::uuid(uuids::uuid_system_generator{}()));
 	}
 
-	Scene::Scene(std::string name)
+	scene::scene(std::string name)
 	{
 		sceneName = name;
 	}
 	
-	void Scene::awake()
+	void scene::awake()
 	{
-		//Create player
-		fl::Debug::log("Created player in scene.cpp, line 27");
-		gameObjects.push_back(std::make_unique<Player>());
-
 		for (auto& element : gameObjects)
 			if (element->active) element->awake();
 	}
 	
-	void Scene::start()
+	void scene::start()
 	{
 		for (auto& element : gameObjects)
 			if (element->active) element->start();
 	}
 
-	void Scene::update()
+	void scene::update()
 	{
 		for (auto& element : gameObjects)
 			if (element->active) element->update();
 	}
 
-	void Scene::fixedUpdate()
+	void scene::fixedUpdate()
 	{
 		for (auto& element : gameObjects)
 			if (element->active) element->preFixedUpdate();
@@ -54,7 +53,7 @@ namespace fl
 			if (element->active) element->fixedUpdate();
 	}
 
-	void Scene::render(sf::RenderWindow& window)
+	void scene::render(sf::RenderWindow& window)
 	{
 		//Render UI Last
 		for (auto& element : ui)
@@ -64,7 +63,7 @@ namespace fl
 		}
 	}
 
-	void Scene::invalidateUIDimensions()
+	void scene::invalidateUIDimensions()
 	{
 		for (auto& element : ui)
 		{
@@ -75,7 +74,47 @@ namespace fl
 		}
 	}
 
-	bool Scene::loadScene(std::string sceneName)
+	gameObject* scene::createGameObject(nlohmann::json json, gameObject* parent)
+	{
+		std::string jsonType = json["type"];
+
+		//Custom types can be defined here, they should be ordered from most common to rarest. i.e. collectibles (hundreds) to player (one)
+
+		if (!parent)
+		{
+			if (jsonType == "player")
+			{
+				gameObjects.push_back(std::make_unique<Player>(json, this));
+			}
+			else if (jsonType == "basic")
+			{
+				gameObjects.push_back(std::make_unique<gameObject>(json, this));
+			}
+			else
+				throw std::invalid_argument(Formatter() << "No appropriate constructor for object type \"" << jsonType << "\"");
+
+			//Returns newly added object
+			return gameObjects[gameObjects.size() - 1].get();
+		}
+		else
+		{
+			if (jsonType == "player")
+			{
+				parent->children.push_back(std::make_unique<Player>(json, this));
+			}
+			else if (jsonType == "basic")
+			{
+				parent->children.push_back(std::make_unique<gameObject>(json, this));
+			}
+			else
+				throw std::invalid_argument(Formatter() << "No appropriate constructor for object type \"" << jsonType << "\"");
+
+			//Returns newly added object
+			return parent->children[gameObjects.size() - 1].get();
+		}
+	}
+
+	bool scene::loadScene(std::string sceneName)
 	{
 		//Json representation
 		nlohmann::json json;
@@ -108,10 +147,16 @@ namespace fl
 			}
 		}
 
+		//Construct all the scene elements : ADD OBJECT OVERRIDES
+		for (nlohmann::json& element : json["gameObjects"])
+		{
+			//gameObjects.push_back(std::make_unique<gameObject>(element));
+		}
+
 		return true;
 	}
 
-	bool Scene::saveScene(int jsonIndent)
+	bool scene::saveScene(int jsonIndent)
 	{
 		//Becuse writing to archives is currently not possible, it will be saved to a folder
 		nlohmann::json finalJson;

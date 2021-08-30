@@ -17,6 +17,9 @@ namespace fl
 
 	class Player : public gameObject
 	{
+	public:
+		Player(nlohmann::json json, scene* scene);
+	protected:
 		PlayerState currentState;
 
 		void awake();
