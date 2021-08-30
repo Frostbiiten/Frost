@@ -1,7 +1,10 @@
 #pragma once
-#include <UIElement.h>
 #include <gameObject.h>
+#include <json.hpp>
+#include <SFML/Graphics.hpp>
 #include <vector>
+#include <string>
+#include <memory>
 
 namespace fl
 {
@@ -13,11 +16,10 @@ namespace fl
 
 	struct scene
 	{
-		std::vector<std::unique_ptr<gameObject>> gameObjects;
-		//TODO: Deprecate this
-		std::vector<UI::UIElement> ui;
-
 		std::string sceneName;
+
+		//Top-layer objects
+		std::vector<std::unique_ptr<gameObject>> gameObjects;
 
 		//Constructor
 		scene();
@@ -31,12 +33,6 @@ namespace fl
 		void start();
 		void update();
 		void fixedUpdate();
-
-		//Render a scene to the display : Deprecated
-		void render(sf::RenderWindow& window);
-
-		//Invalidates the dimensions of ui for screen scaling
-		void invalidateUIDimensions();
 
 		/// Creates a gameObject using the specified json
 		/// Overrides are specified here

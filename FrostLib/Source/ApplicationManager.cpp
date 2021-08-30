@@ -4,15 +4,14 @@
 #include <imgui-SFML.h>
 #include <InputMan.h>
 
-//Application's current scene
-fl::scene currentScene{ "currentScene" };
-
-sf::RenderWindow* windowPtr;
-
 namespace fl
 {
 	namespace ApplicationManager
 	{
+		//Application's current scene
+		fl::scene currentScene{ "currentScene" };
+		sf::RenderWindow* windowPtr;
+
 		//20 milliseconds = 0.02 seconds ~ 50 times per frame
 		sf::Time deltaTime;
 		sf::Clock imguiClock;
@@ -127,7 +126,6 @@ namespace fl
 							size.y = size.x * heightRatio;
 						#pragma warning(pop)
 						windowPtr->setSize(size);
-						currentScene.invalidateUIDimensions();
 					}
 				}
 

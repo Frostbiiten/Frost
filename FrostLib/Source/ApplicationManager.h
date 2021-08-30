@@ -43,9 +43,6 @@ namespace fl
 		//Runs after the window is created. Object-specific code starts running
 		void start();
 
-		//Draws a scene to the window
-		void drawScene(fl::scene scene);
-
 		//Runs every frame while the application is open
 		void update();
 
