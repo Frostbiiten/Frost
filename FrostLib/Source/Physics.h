@@ -99,12 +99,10 @@ namespace fl
 		{
 			b2Body* body;
 			b2Vec2 oldPos;
-			b2AABB aabb;
-
-			void updateAABB();
 
 		public:
 			rigidBody(gameObject* owner, b2Vec2 rectSize = b2Vec2(1.f, 1.f), b2BodyType bodyType = b2BodyType::b2_kinematicBody);
+			~rigidBody();
 
 			void destroyFixture(int index);
 

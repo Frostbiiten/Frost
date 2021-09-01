@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include <InputMan.h>
+#include <thread>
 
 namespace fl
 {
@@ -23,6 +24,7 @@ namespace fl
 		void awake()
 		{
 			fl::Debug::log("Application running awake");
+
 			currentScene.awake();
 		}
 
@@ -34,6 +36,8 @@ namespace fl
 
 		void update()
 		{
+			currentScene.clearScene();
+			currentScene.loadScene("sandbox");
 			currentScene.update();
 			//Do frame stuff
 		}

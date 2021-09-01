@@ -26,17 +26,17 @@ namespace fl
 
 	Player::Player(nlohmann::json json, scene* scene)
 	{
-				name = json["name"];
+		name = json["name"];
 		uuid = uuids::uuid::from_string(json["uuid"].get<std::string>());
 		layer = json["layer"];
 		active = json["active"];
 		transform = deserializeTransform(json["transform"]);	
+		components.push_back(std::make_unique<Physics::rigidBody>(this, Physics::pixelToBox2dUnits(playerRect)));
 	}
 
 	void Player::awake()
 	{
 		//Add rigidbody
-		components.push_back(std::make_unique<Physics::rigidBody>(this, Physics::pixelToBox2dUnits(playerRect)));
 		//Physics::rigidBody* rb = dynamic_cast<Physics::rigidBody*>(components[0].get());
 	}
 	

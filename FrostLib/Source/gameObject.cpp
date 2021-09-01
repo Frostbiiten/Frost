@@ -45,7 +45,7 @@ namespace fl
 
 	gameObject::~gameObject()
 	{
-		if (parent) parent->unparentChild(this);
+		components.clear();
 		fl::Debug::log("Destroy gameobject " + uuids::to_string(uuid));
 	}
 
@@ -208,10 +208,10 @@ namespace fl
 	{
 		sf::Transformable tempTransform;
 
-		tempTransform.setPosition(sf::Vector2f(json["position"][0], json["position"][0]));
+		tempTransform.setPosition(sf::Vector2f(json["position"][0], json["position"][1]));
 		tempTransform.setRotation(json["rotation"]);
-		tempTransform.setScale(sf::Vector2f(json["scale"][0], json["scale"][0]));
-		tempTransform.setOrigin(sf::Vector2f(json["origin"][0], json["origin"][0]));
+		tempTransform.setScale(sf::Vector2f(json["scale"][0], json["scale"][1]));
+		tempTransform.setOrigin(sf::Vector2f(json["origin"][0], json["origin"][1]));
 
 		return tempTransform;
 	}
@@ -239,6 +239,8 @@ namespace fl
 
 		return json;
 	}
+
+	component::~component(){}
 
 	void component::awake()
 	{

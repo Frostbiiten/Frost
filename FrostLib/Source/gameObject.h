@@ -91,6 +91,7 @@ namespace fl
 		gameObject* owner;
 		std::string name;
 		bool enabled;
+		virtual ~component();
 		virtual void awake();
 		virtual void start();
 		virtual void update();

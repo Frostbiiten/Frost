@@ -43,6 +43,9 @@ namespace fl
 		//Load a scene from json representation
 		bool loadScene(std::string sceneName);
 
+		//Completely clears a scene
+		void clearScene();
+
 		//Saves a scene in json representation
 		bool saveScene(int jsonIndent = -1);
 	};

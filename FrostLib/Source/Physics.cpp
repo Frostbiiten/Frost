@@ -67,6 +67,11 @@ namespace fl
 			bool added = false;
 		}
 
+		rigidBody::~rigidBody()
+		{
+			physicsWorld.DestroyBody(body);
+		}
+
 		void rigidBody::destroyFixture(int index)
 		{
 			b2Fixture* x = body->GetFixtureList();
@@ -76,11 +81,6 @@ namespace fl
 				x = x->GetNext();
 			}
 			body->DestroyFixture(x);
-		}
-
-		void rigidBody::updateAABB()
-		{
-			body->GetFixtureList()->GetShape()->ComputeAABB(&aabb, body->GetTransform(), 0);
 		}
 
 		void rigidBody::updateOldPos()
@@ -109,8 +109,6 @@ namespace fl
 			{
 				owner->transform.move(Box2dToPixelUnits(body->GetPosition()));
 			}
-
-			updateAABB();
 		}
 	}
 }

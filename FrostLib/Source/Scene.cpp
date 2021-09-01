@@ -57,7 +57,6 @@ namespace fl
 		std::string jsonType = json["type"];
 
 		//Custom types can be defined here, they should be ordered from most common to rarest. i.e. collectibles (hundreds) to player (one)
-
 		if (!parent)
 		{
 			if (jsonType == "player")
@@ -115,10 +114,15 @@ namespace fl
 		//Construct all the scene elements : ADD OBJECT OVERRIDES
 		for (nlohmann::json& element : json["gameObjects"])
 		{
-			//gameObjects.push_back(std::make_unique<gameObject>(element));
+			createGameObject(element);
 		}
 
 		return true;
+	}
+
+	void scene::clearScene()
+	{
+		gameObjects.clear();
 	}
 
 	bool scene::saveScene(int jsonIndent)
