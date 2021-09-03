@@ -13,15 +13,15 @@ namespace fl
 		//Conversion rate for Box2d to SFML units
 		constexpr float pixelsPerUnit = 50;
 
-		//Box2d does not operate with pixels as units
+		//Box2d does not operate with pixels as units. Y is inverted because sfml y starts at the top of the screen whereas box2d starts at bottom
 		inline b2Vec2 pixelToBox2dUnits(sf::Vector2f unit)
 		{
-			return b2Vec2(unit.x / pixelsPerUnit, unit.y / pixelsPerUnit);
+			return b2Vec2(unit.x / pixelsPerUnit, -unit.y / pixelsPerUnit);
 		}
 
 		inline sf::Vector2f Box2dToPixelUnits(b2Vec2 unit)
 		{
-			return sf::Vector2f(unit.x * pixelsPerUnit, unit.y * pixelsPerUnit);
+			return sf::Vector2f(unit.x * pixelsPerUnit, -unit.y * pixelsPerUnit);
 		}
 
 		inline sf::Vector2f b2dToVec(b2Vec2& vector)

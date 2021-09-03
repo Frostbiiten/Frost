@@ -231,6 +231,7 @@ namespace fl
 		//Start with serializing the most important parts of a gameObject
 		nlohmann::json json = serializeBasic();
 		json["transform"] = serializeTransform();
+		json["type"] = "basic";
 
 		for (auto& child : children)
 		{
@@ -244,17 +245,17 @@ namespace fl
 
 	void component::awake()
 	{
-		fl::Debug::log("Awake method on component \"" + name + "\" has not been overriden in gameobject \"" + owner->name);
+		fl::Debug::log("Awake method on component \"" + name + "\" has not been overriden in gameobject \"" + owner->name + '\"');
 	}
 
 	void component::start()
 	{
-		fl::Debug::log("Start method on component \"" + name + "\" has not been overriden in gameobject \"" + owner->name);
+		fl::Debug::log("Start method on component \"" + name + "\" has not been overriden in gameobject \"" + owner->name + '\"');
 	}
 
 	void component::update()
 	{
-		fl::Debug::log("Update method on component \"" + name + "\" has not been overriden in gameobject \"" + owner->name);
+		fl::Debug::log("Update method on component \"" + name + "\" has not been overriden in gameobject \"" + owner->name + '\"');
 	}
 
 	void component::preFixedUpdate()
@@ -262,6 +263,6 @@ namespace fl
 
 	void component::fixedUpdate()
 	{
-		fl::Debug::log("Fixedupdate method on component \"" + name + "\" has not been overriden in gameobject \"" + owner->name);
+		fl::Debug::log("Fixedupdate method on component \"" + name + "\" has not been overriden in gameobject \"" + owner->name + '\"');
 	}
 }

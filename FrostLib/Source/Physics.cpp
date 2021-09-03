@@ -37,7 +37,7 @@ namespace fl
 			normals.push_back(normal);
 			fractions.push_back(fraction);
 			auto comp = static_cast<component*>(fixture->GetBody()->GetUserData().data);
-			if ((comp->owner->layer & layerMask) == layerMask)
+			if ((layerMask & comp->owner->layer) == comp->owner->layer)
 				components.push_back(comp);
 			return 1.f;
 		}
@@ -45,6 +45,10 @@ namespace fl
 		//Rigidbody
 		rigidBody::rigidBody(gameObject* owner, b2Vec2 rectSize, b2BodyType bodyType)
 		{
+			this->owner = owner;
+			enabled = true;
+			name = "rigidbody";
+
 			//Define body
 			b2BodyDef bodyDef;
 			bodyDef.type = bodyType;
@@ -60,11 +64,9 @@ namespace fl
 			b2PolygonShape collider;
 			collider.SetAsBox(rectSize.x, rectSize.y);
 
-			//Finalize; user data is pointer to owner
+			//Finalize; user data is pointer to the component
 			body->CreateFixture(&collider, 0.f);
-			body->GetUserData().data = owner;
-
-			bool added = false;
+			body->GetUserData().data = this;
 		}
 
 		rigidBody::~rigidBody()

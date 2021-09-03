@@ -121,4 +121,19 @@ namespace fl
 		drawRay(rayE, sf::Color(255, 16, 240));
 		drawRay(rayF, sf::Color::Red);
 	}
+
+	nlohmann::json Player::serialize()
+	{
+		//Start with serializing the most important parts of a gameObject
+		nlohmann::json json = serializeBasic();
+		json["transform"] = serializeTransform();
+		json["type"] = "player";
+
+		for (auto& child : children)
+		{
+			json["children"].push_back(child->serialize());
+		}
+
+		return json;
+	}
 }

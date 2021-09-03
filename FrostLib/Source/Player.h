@@ -32,6 +32,7 @@ namespace fl
 		void drawRay(Physics::ray& ray, sf::Color color);
 
 		void drawDebug();
+		nlohmann::json serialize();
 	};
 }
 

@@ -95,8 +95,8 @@ namespace fl
 	UnevenBezierNode::UnevenBezierNode(nlohmann::json json)
 	{
 		std::array<float, 2> pointArr = json["point"];
-		std::array<float, 2> handleLArr = json["handleR"];
-		std::array<float, 2> handleRArr = json["handleL"];
+		std::array<float, 2> handleLArr = json["handleL"];
+		std::array<float, 2> handleRArr = json["handleR"];
 		this->point = sf::Vector2f(pointArr[0], pointArr[1]);
 		this->handleR = sf::Vector2f(handleRArr[0], handleRArr[1]);
 		this->handleL = sf::Vector2f(handleLArr[0], handleLArr[1]);
@@ -143,8 +143,16 @@ namespace fl
 
 		for (nlohmann::json& node : json["nodes"])
 		{
-			addNode(node, graph.size() - 1);
+			addNode(node, graph.size());
 		}
+	}
+	int Graph::getNodeCount()
+	{
+		return graph.size();
+	}
+	sf::Vector2f Graph::getNodePos(int index)
+	{
+		return graph[index].get()->point;
 	}
 	void Graph::addNode(nlohmann::json json, int index)
 	{

@@ -69,3 +69,34 @@ sf::Vector2f fl::Math::lerpVec(sf::Vector2f a, sf::Vector2f b, float t)
 {
 	return sf::Vector2f( a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
 }
+
+// Returns the length of this vector (RO).
+float fl::Math::sqrMagnitude(sf::Vector2f vector)
+{
+    return vector.x * vector.x + vector.y * vector.y;
+}
+
+float fl::Math::magnitude(sf::Vector2f vector)
+{
+    return sqrtf(vector.x * vector.x + vector.y * vector.y);
+}
+
+float fl::Math::dot(sf::Vector2f a, sf::Vector2f b)
+{
+    return a.x * b.x + a.y * b.y; 
+}
+
+//https://stackoverflow.com/a/9557244 (not my code)
+sf::Vector2f fl::Math::closestPointOnSegment(sf::Vector2f a, sf::Vector2f b, sf::Vector2f point)
+{
+    sf::Vector2f AP = point - a;
+    sf::Vector2f AB = b - a;
+
+    float magnitudeAB = sqrMagnitude(AB);
+    float ABAPproduct = dot(AP, AB);
+    float distance = ABAPproduct / magnitudeAB;
+
+    if (distance < 0) return a;
+    else if (distance > 1) return b;
+    else return a + AB * distance;
+}

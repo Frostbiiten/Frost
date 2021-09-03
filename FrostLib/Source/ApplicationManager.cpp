@@ -24,7 +24,7 @@ namespace fl
 		void awake()
 		{
 			fl::Debug::log("Application running awake");
-
+			currentScene.loadScene("currentScene");
 			currentScene.awake();
 		}
 
@@ -36,8 +36,6 @@ namespace fl
 
 		void update()
 		{
-			currentScene.clearScene();
-			currentScene.loadScene("sandbox");
 			currentScene.update();
 			//Do frame stuff
 		}
@@ -90,13 +88,13 @@ namespace fl
 			windowPtr = new sf::RenderWindow(sf::VideoMode(1060, 600), applicationName, sf::Style::Default);
 			sf::View view(sf::Vector2f(), pixelSize);
 			windowPtr->setView(view);
-			
+
 			//Create view buffer and sprite
 			sf::RenderTexture buf;
 			buf.create((int)pixelSize.x, (int)pixelSize.y);
 			buffer = &buf;
 			sf::Sprite bufferSprite = sf::Sprite(buf.getTexture());
-			
+
 			start();
 
 			//Fixed timestep timer

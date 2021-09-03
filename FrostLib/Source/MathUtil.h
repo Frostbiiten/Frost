@@ -41,6 +41,18 @@ namespace fl
 		//Vector math
 		//Linearly interpolates from a to b respectively
 		sf::Vector2f lerpVec(sf::Vector2f a, sf::Vector2f b, float t);
+
+		// Returns the squared length of the vector
+		float sqrMagnitude(sf::Vector2f vector);
+
+		// Returns the length of the vector
+		float magnitude(sf::Vector2f vector);
+
+		// Returns Dot Product of two vectors.
+		float dot(sf::Vector2f a, sf::Vector2f b);
+
+		// Returns closest point on line segment
+		sf::Vector2f closestPointOnSegment(sf::Vector2f a, sf::Vector2f b, sf::Vector2f point);
 	};
 }
 

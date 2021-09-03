@@ -70,6 +70,8 @@ namespace fl
 
 		Graph(bool loop = false);
 		Graph(nlohmann::json json);
+		int getNodeCount();
+		sf::Vector2f getNodePos(int pos);
 		void addNode(nlohmann::json json, int index);
 		void addNode(sf::Vector2f position, int index);
 		void addNode(sf::Vector2f position, sf::Vector2f handle, int index);

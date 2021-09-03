@@ -8,9 +8,9 @@
 
 extern sf::RenderWindow* windowPtr;
 
-//Forward declaration of scene class
 namespace fl
 {
+	//Forward declaration of scene
 	struct scene;
 
 	namespace ApplicationManager

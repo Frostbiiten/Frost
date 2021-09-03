@@ -1,0 +1,96 @@
+{
+    "gameObjects": [
+        {
+            "active": true,
+            "layer": 1,
+            "name": "player",
+            "transform": {
+                "origin": [
+                    0.0,
+                    0.0
+                ],
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "type": "player",
+            "uuid": "cb3b3d4e-cdb6-48e4-bb2a-cebbd325a858"
+        },
+        {
+            "active": true,
+            "layer": 16,
+            "name": "aa3188b9-dd97-4875-abbd-a9e6e7c026b0",
+            "spline": {
+                "loop": false,
+                "nodes": [
+                    {
+                        "handleL": [
+                            0.0,
+                            0.0
+                        ],
+                        "handleR": [
+                            0.0,
+                            0.0
+                        ],
+                        "point": [
+                            0.0,
+                            100.0
+                        ]
+                    },
+                    {
+                        "handleL": [
+                            -50.0,
+                            0.0
+                        ],
+                        "handleR": [
+                            50.0,
+                            0.0
+                        ],
+                        "point": [
+                            50.0,
+                            0.0
+                        ]
+                    },
+                    {
+                        "handleL": [
+                            0.0,
+                            0.0
+                        ],
+                        "handleR": [
+                            0.0,
+                            0.0
+                        ],
+                        "point": [
+                            100.0,
+                            100.0
+                        ]
+                    }
+                ]
+            },
+            "threshold": 1.0,
+            "transform": {
+                "origin": [
+                    0.0,
+                    0.0
+                ],
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "type": "terrain",
+            "uuid": "aa3188b9-dd97-4875-abbd-a9e6e7c026b0"
+        }
+    ]
+}

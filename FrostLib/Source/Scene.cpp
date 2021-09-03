@@ -9,6 +9,7 @@
 
 //Custom object types
 #include <Player.h>
+#include <SplineTerrain.h>
 
 namespace fl
 {
@@ -24,6 +25,18 @@ namespace fl
 	
 	void scene::awake()
 	{
+		/*
+		gameObjects.push_back(std::make_unique<SplineTerrain>(this));
+		SplineTerrain* terrainPtr = dynamic_cast<SplineTerrain*>(gameObjects[gameObjects.size() - 1].get());
+		terrainPtr->spline.addNode(sf::Vector2f(0.f, 100.f), sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f), 0);
+		terrainPtr->spline.addNode(sf::Vector2f(50.f, 0.f), sf::Vector2f(-50.f, 0.f), sf::Vector2f(50.f, 0.f), 1);
+		terrainPtr->spline.addNode(sf::Vector2f(100.f, 100.f), sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f), 2);
+		terrainPtr->generateOutline();
+		terrainPtr->simplifyOutline();
+		terrainPtr->generateShape();
+		terrainPtr->generateCollider();
+		*/
+		//saveScene(4);
 		for (auto& element : gameObjects)
 			if (element->active) element->awake();
 	}
@@ -59,7 +72,11 @@ namespace fl
 		//Custom types can be defined here, they should be ordered from most common to rarest. i.e. collectibles (hundreds) to player (one)
 		if (!parent)
 		{
-			if (jsonType == "player")
+			if (jsonType == "terrain")
+			{
+				gameObjects.push_back(std::make_unique<SplineTerrain>(json, this));
+			}
+			else if (jsonType == "player")
 			{
 				gameObjects.push_back(std::make_unique<Player>(json, this));
 			}
@@ -71,11 +88,23 @@ namespace fl
 				throw std::invalid_argument(Formatter() << "No appropriate constructor for object type \"" << jsonType << "\"");
 
 			//Returns newly added object
-			return gameObjects[gameObjects.size() - 1].get();
+			gameObject* obj = gameObjects[gameObjects.size() - 1].get();
+
+			for (auto& child : json["children"])
+			{
+				createGameObject(child, obj);
+			}
+
+			//Returns newly added object
+			return obj;
 		}
 		else
 		{
-			if (jsonType == "player")
+			if (jsonType == "terrain")
+			{
+				gameObjects.push_back(std::make_unique<SplineTerrain>(json, this));
+			}
+			else if (jsonType == "player")
 			{
 				parent->children.push_back(std::make_unique<Player>(json, this));
 			}
@@ -86,8 +115,15 @@ namespace fl
 			else
 				throw std::invalid_argument(Formatter() << "No appropriate constructor for object type \"" << jsonType << "\"");
 
+			gameObject* obj = parent->children[gameObjects.size() - 1].get();
+
+			for (auto& child : json["children"])
+			{
+				createGameObject(child, obj);
+			}
+
 			//Returns newly added object
-			return parent->children[gameObjects.size() - 1].get();
+			return obj;
 		}
 	}
 
@@ -111,7 +147,8 @@ namespace fl
 			return false;
 		}
 
-		//Construct all the scene elements : ADD OBJECT OVERRIDES
+		//Construct all the scene elements
+		gameObjects.reserve(json["gameObjects"].size());
 		for (nlohmann::json& element : json["gameObjects"])
 		{
 			createGameObject(element);
@@ -138,6 +175,10 @@ namespace fl
 			fl::AssetMan::createDirectory(folderName);
 
 		//Gameobjects
+		for (auto& obj : gameObjects)
+		{
+			finalJson["gameObjects"].push_back(obj.get()->serialize());
+		}
 
 		//Writes json
 		fl::AssetMan::writeFile(sceneName + ".json", finalJson.dump(jsonIndent), false, true, "Scenes/" + sceneName + '/');
