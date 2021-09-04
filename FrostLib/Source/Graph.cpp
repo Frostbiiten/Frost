@@ -368,8 +368,12 @@ namespace fl
 		int index = 0;
 		for (size_t x = 1; x < graph.size(); x++)
 		{
+			//Add distance between current and last node. If x = 0, it must have looped around
 			if (x != 0)
 				accumulatedDist += nodeLengths[x - 1];
+			else
+				accumulatedDist += getLength(*graph[0], *graph[graph.size() - 1]);
+
 			if (accumulatedDist > distance)
 			{
 				index = x;
@@ -377,11 +381,9 @@ namespace fl
 			}
 			if (x == graph.size() - 1)
 			{
+				//If it loops, it should go to -1 which will turn into 0 because x++, else return the final point
 				if (loop)
-				{
-					x = 0;
-					accumulatedDist += getLength(*graph[x], *graph[0]);
-				}
+					x = -1;
 				else
 					return graph[x]->point;
 			}

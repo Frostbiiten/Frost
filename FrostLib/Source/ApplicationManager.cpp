@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include <InputMan.h>
+#include <Physics.h>
 #include <thread>
 
 namespace fl

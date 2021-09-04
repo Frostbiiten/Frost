@@ -12,6 +12,7 @@ namespace fl
 		layer = Layer::Land;
 		active = true;
 		transform = sf::Transformable();
+		spline.loop = true;
 		this->simplifyThreshold = simplifyThreshold;
 	}
 
@@ -25,9 +26,9 @@ namespace fl
 		spline = Graph(json["spline"]);
 		simplifyThreshold = json["threshold"];
 		generateOutline();
-		//simplifyOutline(simplifyThreshold);
+		simplifyOutline(simplifyThreshold);
 		generateShape();
-		generateCollider();
+		//generateCollider();
 		setColor();
 	}
 
@@ -54,6 +55,7 @@ namespace fl
 			if (sqrDist < threshold * threshold)
 			{
 				outline.erase(outline.begin() + i + 1);
+				i--;
 			}
 		}
 	}
@@ -122,7 +124,7 @@ namespace fl
 		{
 			float x = i / (float)shape.size();
 			tri.setFillColor(sf::Color(x * 255, 0, 0));
-			//ApplicationManager::getBuffer()->draw(tri);
+			ApplicationManager::getBuffer()->draw(tri);
 			++i;
 		}
 
