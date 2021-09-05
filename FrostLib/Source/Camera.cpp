@@ -21,8 +21,7 @@ namespace fl
 				cameraPosition.y += diff.y;
 
 			cameraView.setCenter(Math::lerpVec(cameraView.getCenter(), cameraPosition, 0.1f));
-			cameraView.setSize(cameraView.getSize() * 1.003f);
-			cameraView.setRotation(cameraView.getRotation() + 0.1f);
+			//cameraView.setSize(cameraView.getSize() * 1.005f);
 			fl::ApplicationManager::getWindow()->setView(cameraView);
 			fl::ApplicationManager::getBuffer()->setView(cameraView);
 		}

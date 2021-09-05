@@ -19,6 +19,7 @@ namespace fl
 		virtual void setPosition(sf::Vector2f pos);
 		virtual void setHandle(sf::Vector2f pos, bool side = true);
 		virtual nlohmann::json serialize();
+		virtual int GetType();
 	};
 
 	//Default BezierNode is symmetric
@@ -33,6 +34,7 @@ namespace fl
 		void setPosition(sf::Vector2f pos);
 		void setHandle(sf::Vector2f pos, bool side = true);
 		nlohmann::json serialize();
+		int GetType();
 	};
 
 	struct UnevenBezierNode : public GraphNode
@@ -47,6 +49,7 @@ namespace fl
 		void setPosition(sf::Vector2f pos);
 		void setHandle(sf::Vector2f pos, bool side = true);
 		nlohmann::json serialize();
+		int GetType();
 	};
 
 	class Graph
@@ -71,7 +74,10 @@ namespace fl
 		Graph(bool loop = false);
 		Graph(nlohmann::json json);
 		int getNodeCount();
+		GraphNode& getNode(int pos);
 		sf::Vector2f getNodePos(int pos);
+		float getNodeLength(int index);
+		int getNodeType(int index);
 		void addNode(nlohmann::json json, int index);
 		void addNode(sf::Vector2f position, int index);
 		void addNode(sf::Vector2f position, sf::Vector2f handle, int index);
@@ -86,5 +92,7 @@ namespace fl
 
 	inline sf::Vector2f lerp(const sf::Vector2f& a, const sf::Vector2f& b, float t);
 	inline float inverseLerp(const float& a, const float& b, const float& value);
+	float getLength(GraphNode& a, GraphNode& b, float step = 0.001f);
 	sf::Vector2f evaluate(GraphNode& a, GraphNode& b, float t);
+	sf::Vector2f evaluate(Graph& graph, int a, int b, float t);
 }

@@ -34,12 +34,52 @@ namespace fl
 
 	void SplineTerrain::generateOutline(float step)
 	{
-		float t = 0.f;
+		for (std::size_t x = 0; x < spline.getNodeCount(); x++)
+		{
+			//Create first point
+			outline.push_back(transform.getTransform().transformPoint(spline.getNodePos(x)));
+
+			//If the current and next node are not linear
+			if (spline.getNodeType(x) != 0 && spline.getNodeType(x + 1) != 0)
+			{
+				//Don't start at zero because that node will already there
+				float t = step;
+
+				if (x < spline.getNodeCount() - 1)
+				{
+					//Distance from current to next node
+					float distance = spline.getNodeLength(x);
+					while (t < distance)
+					{
+						outline.push_back(transform.getTransform().transformPoint(evaluate(spline, x, x + 1, t / distance)));
+						t += step;
+					}
+				}
+				else if (spline.loop)
+				{
+					//Don't start at zero because that node will already there
+					float t = step;
+
+					//Distance from current to next node
+					float distance = getLength(spline.getNode(x), spline.getNode(0));
+
+					while (t < distance)
+					{
+						outline.push_back(evaluate(spline, x, 0, t));
+						t += step;
+					}
+				}
+			}
+		}
+
+		/*
+		OLD
 		while (t < spline.length)
 		{
 			outline.push_back(spline.evaluateDistance(t));
 			t += step;
 		}
+		*/
 	}
 
 	void SplineTerrain::simplifyOutline(float threshold)
@@ -84,7 +124,7 @@ namespace fl
 
 	void SplineTerrain::generateCollider()
 	{
-		components.push_back(std::make_unique<Physics::rigidBody>(this, b2Vec2(10, 10)));
+		components.push_back(std::make_unique<Physics::rigidBody>(this, b2Vec2(10, 10), b2BodyType::b2_staticBody));
 		Physics::rigidBody* rb = dynamic_cast<Physics::rigidBody*>(components[0].get());
 		//Removes default fixture
 		rb->destroyFixture(0);
@@ -118,14 +158,14 @@ namespace fl
 		{
 			float x = i / (float)shape.size();
 			tri.setFillColor(sf::Color(x * 255, 0, 0));
-			ApplicationManager::bufferDrawElement(tri);
-			//Debug::drawLine(tri.getPoint(0), tri.getPoint(1), sf::Color(10 + x * 255, 0, 0));
-			//Debug::drawLine(tri.getPoint(1), tri.getPoint(2), sf::Color(0, 10 + x * 255, 0));
-			//Debug::drawLine(tri.getPoint(2), tri.getPoint(0), sf::Color(0, 0, 10 + x * 255));
+			//ApplicationManager::bufferDrawElement(tri);
+			Debug::drawLine(tri.getPoint(0), tri.getPoint(1), sf::Color(10 + x * 255, 0, 0));
+			Debug::drawLine(tri.getPoint(1), tri.getPoint(2), sf::Color(0, 10 + x * 255, 0));
+			Debug::drawLine(tri.getPoint(2), tri.getPoint(0), sf::Color(0, 0, 10 + x * 255));
 			++i;
 		}
 
-		/*
+		
 		for (int i = 0; i < outline.size(); i++)
 		{
 			if (i == outline.size() - 1)
@@ -133,7 +173,7 @@ namespace fl
 			else
 				Debug::drawLine(outline[i], outline[i + 1]);
 		}
-		*/
+		
 	}
 
 	nlohmann::json SplineTerrain::serialize()

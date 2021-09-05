@@ -44,6 +44,10 @@ namespace fl
 		json["point"] = pointArr;
 		return json;
 	}
+	int GraphNode::GetType()
+	{
+		return 0;
+	}
 
 	//Beziernode
 	BezierNode::BezierNode(sf::Vector2f point, sf::Vector2f handle)
@@ -83,6 +87,10 @@ namespace fl
 		json["point"] = pointArr;
 		json["handle"] = handleArr;
 		return json;
+	}
+	int BezierNode::GetType()
+	{
+		return 1;
 	}
 
 	//Uneven bezier
@@ -129,6 +137,10 @@ namespace fl
 		json["handleL"] = handleLArr;
 		return json;
 	}
+	int UnevenBezierNode::GetType()
+	{
+		return 2;
+	}
 
 	//Graph
 	Graph::Graph(bool loop)
@@ -150,9 +162,38 @@ namespace fl
 	{
 		return graph.size();
 	}
+	GraphNode& Graph::getNode(int pos)
+	{
+		return *graph[pos].get();
+	}
 	sf::Vector2f Graph::getNodePos(int index)
 	{
 		return graph[index].get()->point;
+	}
+	float Graph::getNodeLength(int index)
+	{
+		return nodeLengths[index];
+	}
+	float Graph::getLength(GraphNode& a, GraphNode& b, float step)
+	{
+		float t = 0;
+		sf::Vector2f currentPos = a.point;
+		sf::Vector2f oldPos = currentPos;
+		float length = 0;
+		while (t < 1)
+		{
+			currentPos = evaluate(a, b, t);
+			auto a1 = powf(oldPos.x - currentPos.x, 2) + powf(oldPos.y - currentPos.y, 2);
+			auto a2 = sqrtf(a1);
+			length += sqrtf(powf(oldPos.x - currentPos.x, 2) + powf(oldPos.y - currentPos.y, 2));
+			oldPos = currentPos;
+			t += step;
+		}
+		return length;
+	}
+	int Graph::getNodeType(int index)
+	{
+		return graph[index].get()->GetType();
 	}
 	void Graph::addNode(nlohmann::json json, int index)
 	{
@@ -434,7 +475,7 @@ namespace fl
 	{
 		return (value - a) / (b - a);
 	}
-	float Graph::getLength(GraphNode& a, GraphNode& b, float step)
+	float getLength(GraphNode& a, GraphNode& b, float step)
 	{
 		float t = 0;
 		sf::Vector2f currentPos = a.point;
@@ -456,6 +497,13 @@ namespace fl
 		auto p0 = lerp(a.getHandle(true), b.getHandle(false), t);
 		auto p1 = lerp(a.getLerpPos(true, t), p0, t);
 		auto p2 = lerp(p0, b.getLerpPos(false, t), t);
+		return lerp(p1, p2, t);
+	}
+	sf::Vector2f evaluate(Graph& graph, int a, int b, float t)
+	{
+		auto p0 = lerp(graph.getNode(a).getHandle(true), graph.getNode(b).getHandle(false), t);
+		auto p1 = lerp(graph.getNode(a).getLerpPos(true, t), p0, t);
+		auto p2 = lerp(p0, graph.getNode(b).getLerpPos(false, t), t);
 		return lerp(p1, p2, t);
 	}
 }
