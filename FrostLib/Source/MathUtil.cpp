@@ -100,3 +100,11 @@ sf::Vector2f fl::Math::closestPointOnSegment(sf::Vector2f a, sf::Vector2f b, sf:
     else if (distance > 1) return b;
     else return a + AB * distance;
 }
+
+float fl::Math::findAngle(sf::Vector2f p0, sf::Vector2f p1, sf::Vector2f p2)
+{
+	float b = pow(p1.x - p0.x, 2) + pow(p1.y - p0.y, 2);
+	float a = pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2);
+	float c = pow(p2.x - p0.x, 2) + pow(p2.y - p0.y, 2);
+	return radToDeg(acos((a + b - c) / sqrtf(4 * a * b)));
+}

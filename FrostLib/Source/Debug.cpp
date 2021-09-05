@@ -45,7 +45,7 @@ namespace fl
 		circle.setFillColor(sf::Color::Transparent);
 		circle.setOutlineColor(color);
 		circle.setOutlineThickness(thickness);
-		ApplicationManager::getWindow()->draw(circle);
+		ApplicationManager::windowDrawElement(circle);
 	}
 
 	void Debug::drawRectangle(sf::Vector2f position, sf::Vector2f size, float rotation, float thickness, sf::Color color)
@@ -56,7 +56,7 @@ namespace fl
 		rect.setFillColor(sf::Color::Transparent);
 		rect.setOutlineColor(color);
 		rect.setOutlineThickness(thickness);
-		ApplicationManager::getWindow()->draw(rect);
+		ApplicationManager::windowDrawElement(rect);
 	}
 
 	void Debug::drawLine(sf::Vector2f begin, sf::Vector2f end, sf::Color color)

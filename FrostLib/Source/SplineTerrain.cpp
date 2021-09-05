@@ -1,7 +1,7 @@
 ﻿#include <SplineTerrain.h>
 #include <ApplicationManager.h>
 #include <Physics.h>
-#include <delaunator.hpp>
+#include <earcut.hpp>
 
 namespace fl
 {
@@ -28,14 +28,13 @@ namespace fl
 		generateOutline();
 		simplifyOutline(simplifyThreshold);
 		generateShape();
-		//generateCollider();
+		generateCollider();
 		setColor();
 	}
 
 	void SplineTerrain::generateOutline(float step)
 	{
 		float t = 0.f;
-
 		while (t < spline.length)
 		{
 			outline.push_back(spline.evaluateDistance(t));
@@ -62,29 +61,24 @@ namespace fl
 
 	void SplineTerrain::generateShape()
 	{
-		//These coordinated are formated as x0, y0, x1, y1, ...
-		std::vector<double> coords;
-		//Reserve double of the outline's size because x and y are separate
-		coords.reserve(outline.size() << 1);
+		//Define vector with size 1 for main polygon
+		std::vector<std::vector<std::array<float, 2>>> polygon(1);
+		for (auto& point : outline)
+			polygon[0].push_back({ point.x, point.y });
 
-		for (std::size_t i = 0; i < outline.size(); i++)
-		{
-			coords.push_back(outline[i].x);
-			coords.push_back(outline[i].y);
-		}
+		//Prepare indicies
+		std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygon);
 
-		delaunator::Delaunator triangulator(coords);
+		//Reserve a third of the size of the indicies because a triangle has 3 verts
+		shape.reserve(indices.size() / 3);
 
-		shape.reserve(triangulator.triangles.size());
-		for (std::size_t i = 0; i < triangulator.triangles.size(); i += 3)
+		//Iterate and add points
+		for (std::size_t i = 0; i < indices.size(); i += 3)
 		{
 			shape.push_back(sf::ConvexShape(3));
-			int indexA = triangulator.triangles[i] << 1;
-			int indexB = triangulator.triangles[i + 1] << 1;
-			int indexC = triangulator.triangles[i + 2] << 1;
-			shape[shape.size() - 1].setPoint(0, sf::Vector2f(triangulator.coords[indexA], triangulator.coords[indexA + 1]));
-			shape[shape.size() - 1].setPoint(1, sf::Vector2f(triangulator.coords[indexB], triangulator.coords[indexB + 1]));
-			shape[shape.size() - 1].setPoint(2, sf::Vector2f(triangulator.coords[indexC], triangulator.coords[indexC + 1]));
+			shape[shape.size() - 1].setPoint(0, sf::Vector2f(polygon[0][indices[i]][0], polygon[0][indices[i]][1]));
+			shape[shape.size() - 1].setPoint(1, sf::Vector2f(polygon[0][indices[i + 1]][0], polygon[0][indices[i + 1]][1]));
+			shape[shape.size() - 1].setPoint(2, sf::Vector2f(polygon[0][indices[i + 2]][0], polygon[0][indices[i + 2]][1]));
 		}
 	}
 
@@ -124,10 +118,14 @@ namespace fl
 		{
 			float x = i / (float)shape.size();
 			tri.setFillColor(sf::Color(x * 255, 0, 0));
-			ApplicationManager::getBuffer()->draw(tri);
+			ApplicationManager::bufferDrawElement(tri);
+			//Debug::drawLine(tri.getPoint(0), tri.getPoint(1), sf::Color(10 + x * 255, 0, 0));
+			//Debug::drawLine(tri.getPoint(1), tri.getPoint(2), sf::Color(0, 10 + x * 255, 0));
+			//Debug::drawLine(tri.getPoint(2), tri.getPoint(0), sf::Color(0, 0, 10 + x * 255));
 			++i;
 		}
 
+		/*
 		for (int i = 0; i < outline.size(); i++)
 		{
 			if (i == outline.size() - 1)
@@ -135,6 +133,7 @@ namespace fl
 			else
 				Debug::drawLine(outline[i], outline[i + 1]);
 		}
+		*/
 	}
 
 	nlohmann::json SplineTerrain::serialize()

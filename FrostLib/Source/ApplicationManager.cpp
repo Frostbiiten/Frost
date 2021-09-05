@@ -3,7 +3,6 @@
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include <InputMan.h>
-#include <Physics.h>
 #include <thread>
 
 namespace fl
@@ -83,6 +82,7 @@ namespace fl
 
 		void init()
 		{
+			//Run awake
 			awake();
 
 			//Initiating window and set viewsize
@@ -96,6 +96,7 @@ namespace fl
 			buffer = &buf;
 			sf::Sprite bufferSprite = sf::Sprite(buf.getTexture());
 
+			//Run start
 			start();
 
 			//Fixed timestep timer
@@ -141,6 +142,7 @@ namespace fl
 
 				// Clear screen
 				windowPtr->clear(backgroundColor);
+				buffer->clear(sf::Color::Transparent);
 
 				// Handle fixedUpdate
 				while (fixedTimer > fixedTimestep)
@@ -155,7 +157,8 @@ namespace fl
 
 				// Render after the scene's code has been run
 				buffer->display();
-				windowPtr->draw(bufferSprite);
+				bufferSprite.setOrigin(pixelSize / 2.f);
+				windowDrawElementRelative(bufferSprite);
 
 				//IMGUI
 				ImGui::SFML::Update(*windowPtr, imguiClock.restart());
@@ -164,19 +167,55 @@ namespace fl
 				}
 				ImGui::SFML::Render(*windowPtr);
 
-				// Update the window
+				// Display the window
 				windowPtr->display();
 			}
 		}
 
-		//DO NOT USE UNLESS YOU WANT NON-PIXEL RENDERING - USE "getBuffer()" instead
 		sf::RenderWindow* getWindow()
 		{
 			return windowPtr;
 		}
+		void windowDrawElement(sf::Drawable& drawable)
+		{
+			windowPtr->draw(drawable);
+		}
+		void windowDrawElementRelative(sf::Drawable& drawable)
+		{
+			//Keep track of old view
+			sf::View cachedView = windowPtr->getView();
+
+			//Change view to default view
+			windowPtr->setView(sf::View(sf::Vector2f(), pixelSize));
+
+			//Render drawable to window
+			windowPtr->draw(drawable);
+
+			//Change back to old view
+			windowPtr->setView(cachedView);
+		}
+
 		sf::RenderTexture* getBuffer()
 		{
 			return buffer;
+		}
+		void bufferDrawElement(sf::Drawable& drawable)
+		{
+			buffer->draw(drawable);
+		}
+		void bufferDrawElementRelative(sf::Drawable& drawable)
+		{
+			//Keep track of old view
+			sf::View cachedView = buffer->getView();
+
+			//Change view to default view
+			buffer->setView(sf::View(sf::Vector2f(), pixelSize));
+
+			//Render drawable to window
+			buffer->draw(drawable);
+
+			//Change back to old view
+			buffer->setView(cachedView);
 		}
 	}
 }

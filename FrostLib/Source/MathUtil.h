@@ -53,6 +53,9 @@ namespace fl
 
 		// Returns closest point on line segment
 		sf::Vector2f closestPointOnSegment(sf::Vector2f a, sf::Vector2f b, sf::Vector2f point);
+		
+		//The the angle of p1 which is between p0 and p2
+		float findAngle(sf::Vector2f p0, sf::Vector2f p1, sf::Vector2f p2);
 	};
 }
 

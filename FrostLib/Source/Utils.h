@@ -49,6 +49,16 @@ namespace fl
 		return uuids::to_string(guid);
 	}
 
+	//https://stackoverflow.com/a/57399634
+	template <typename t>
+	void move(std::vector<t>& v, size_t oldIndex, size_t newIndex)
+	{
+		if (oldIndex > newIndex)
+			std::rotate(v.rend() - oldIndex - 1, v.rend() - oldIndex, v.rend() - newIndex);
+		else
+			std::rotate(v.begin() + oldIndex, v.begin() + oldIndex + 1, v.begin() + newIndex + 1);
+	}
+
 	//Bitwise operations
 	template<class T> inline T operator~ (T a) { return (T)~(int)a; }
 	template<class T> inline T operator| (T a, T b) { return (T)((int)a | (int)b); }

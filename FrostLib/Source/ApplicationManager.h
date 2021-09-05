@@ -49,7 +49,18 @@ namespace fl
 		//Runs on frames based on a fixed step for scaling across different performances. Should mostly only be used for physics
 		void fixedUpdate();
 
+		//For non-pixel rendering
+		void windowDrawElement(sf::Drawable& drawable);
+		//For non-pixel window-relative rendering
+		void windowDrawElementRelative(sf::Drawable& drawable);
+		//For pixel rendering
+		void bufferDrawElement(sf::Drawable& drawable);
+		//For pixel window-relative rendering
+		void bufferDrawElementRelative(sf::Drawable& drawable);
+		
+		//Use with caution
 		sf::RenderWindow* getWindow();
+		//Use with caution
 		sf::RenderTexture* getBuffer();
 	}
 }
