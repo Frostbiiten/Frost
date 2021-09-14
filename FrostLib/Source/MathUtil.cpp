@@ -1,9 +1,11 @@
 #include <MathUtil.h>
 #include <algorithm>
 #include <cmath>
+#include <box2d/box2d.h>
 
 constexpr double pi = 3.1415926535897932384626433832795028841971693993751058209749445923078164062;
 constexpr float pi_f = 3.1415926535897932384626433832795028841971693993751058209749445923078164062;
+constexpr double minNormal = 1.17549435E-38;
 
 float fl::Math::lerp(float a, float b, float t)
 {
@@ -101,10 +103,53 @@ sf::Vector2f fl::Math::closestPointOnSegment(sf::Vector2f a, sf::Vector2f b, sf:
     else return a + AB * distance;
 }
 
-float fl::Math::findAngle(sf::Vector2f p0, sf::Vector2f p1, sf::Vector2f p2)
+
+//https://stackoverflow.com/a/48227232
+float fl::Math::getAngle(sf::Vector2f vector)
 {
-	float b = pow(p1.x - p0.x, 2) + pow(p1.y - p0.y, 2);
-	float a = pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2);
-	float c = pow(p2.x - p0.x, 2) + pow(p2.y - p0.y, 2);
-	return radToDeg(acos((a + b - c) / sqrtf(4 * a * b)));
+    if (vector.x == 0) // special cases
+        return (vector.y > 0) ? 90
+        : (vector.y == 0) ? 0
+        : 270;
+    else if (vector.y == 0) // special cases
+        return (vector.x >= 0) ? 0
+        : 180;
+    float ret = radToDeg(atanf(vector.y / vector.x));
+    if (vector.x < 0 && vector.y < 0) // quadrant III
+        ret = 180 + ret;
+    else if (vector.x < 0) // quadrant II
+        ret = 180 + ret;
+    else if (vector.y < 0) // quadrant IV
+        ret = 270 + (90 + ret);
+    return ret;
+}
+
+float fl::Math::getAngle(b2Vec2 vector)
+{
+    if (vector.x == 0) // special cases
+        return (vector.y > 0) ? 90
+        : (vector.y == 0) ? 0
+        : 270;
+    else if (vector.y == 0) // special cases
+        return (vector.x >= 0) ? 0
+        : 180;
+    float ret = radToDeg(atanf(vector.y / vector.x));
+    if (vector.x < 0 && vector.y < 0) // quadrant III
+        ret = 180 + ret;
+    else if (vector.x < 0) // quadrant II
+        ret = 180 + ret;
+    else if (vector.y < 0) // quadrant IV
+        ret = 270 + (90 + ret);
+    return ret;
+}
+
+bool fl::Math::nearEqual(float a, float b, float epsilon)
+{
+    const float absA = fabs(a);
+    const float absB = fabs(b);
+    const float diff = fabs(a - b);
+
+    if (a == b) return true;
+    else if (a == 0 || b == 0 || diff < minNormal) return diff < (epsilon * minNormal);
+    else return diff / (absA + absB) < epsilon;
 }

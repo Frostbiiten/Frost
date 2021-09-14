@@ -14,11 +14,11 @@ namespace fl
 
 			//X-Range
 			if (diff.x < -scrollRange.x || diff.x > scrollRange.x)
-				cameraPosition.x += diff.x;
+				cameraPosition.x += diff.x - scrollRange.x / 2.f;
 
 			//Y-Range
 			if (diff.y < -scrollRange.y || diff.y > scrollRange.y)
-				cameraPosition.y += diff.y;
+				cameraPosition.y += diff.y - scrollRange.y / 2.f;
 
 			cameraView.setCenter(Math::lerpVec(cameraView.getCenter(), cameraPosition, 0.1f));
 			//cameraView.setSize(cameraView.getSize() * 1.005f);

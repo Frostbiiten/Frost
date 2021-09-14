@@ -26,6 +26,8 @@ namespace fl
 		void update();
 		void fixedUpdate();
 
+		void changeState(PlayerState newState);
+
 		void updateRays();
 		Physics::maskedRayCallback raycast(Physics::ray& input, Layer layerMask);
 
