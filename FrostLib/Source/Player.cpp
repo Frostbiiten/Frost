@@ -39,6 +39,7 @@ namespace fl
 	grv: 0.21875; gravity
 	*/
 
+	float groundSpeed;
 	float gravity = 0.021875f;
 	float slopeFactor = 0.125f;
 	float acceleration = 0.046875f;
@@ -63,16 +64,37 @@ namespace fl
 	sf::Vector2f playerRect{ 19, 39 };
 	sf::Vector2f playerVelocity;
 
+	//Floor detection raycasting variables
+	float minADist = 1.f;
+	float minAAngle = 0.f;
+	float minBDist = 1.f;
+	float minBAngle = 0.f;
+	bool closerRay;
+	bool equalRayDistance;
+	float closerRayDistance = 0.f;
+	float rayAngle = 0.f;
+	b2Vec2 rayNormal;
+	b2Vec2 rayHitPoint;
+
 	Player::Player(nlohmann::json json, scene* scene)
 	{
 		name = json["name"];
 		uuid = uuids::uuid::from_string(json["uuid"].get<std::string>());
 		layer = json["layer"];
 		active = json["active"];
-		transform = deserializeTransform(json["transform"]);	
+		transform = deserializeTransform(json["transform"]);
 		components.push_back(std::make_unique<Physics::rigidBody>(this, Physics::pixelToBox2dUnits(playerRect)));
 		rb = dynamic_cast<Physics::rigidBody*>(components[0].get());
 		currentState = PlayerState::Airborne;
+
+		//Defaults to main player controller if none is specified
+		if (json["controller"] == 0)
+			this->playerControls = &fl::ApplicationManager::mainPlayer;
+		else
+		{
+			Debug::log("Alternative controllers not implemented, will default to main player");
+			this->playerControls = &fl::ApplicationManager::mainPlayer;
+		}
 	}
 
 	void Player::awake()
@@ -84,63 +106,167 @@ namespace fl
 	void Player::update()
 	{
 		drawDebug();
+		if (playerControls->button4 && currentState != PlayerState::Debug)
+		{
+			changeState(PlayerState::Debug);
+		}
+
+		Debug::drawLine(Physics::Box2dToPixelUnits(rayHitPoint), Physics::Box2dToPixelUnits(rayHitPoint) + Physics::Box2dToPixelUnits(rayNormal), sf::Color::White);
+
+		ApplicationManager::imGuiText(std::to_string(rayAngle));
+		ApplicationManager::imGuiText(std::to_string(groundSpeed));
+		std::stringstream ss;
+		ss << groundSpeed * cos(rayAngle);
+		ss << ", ";
+		ss << groundSpeed * sin(rayAngle);
+		ApplicationManager::imGuiText(ss.str());
 	}
 
-	void groundTick()
+	void Player::updateFloorRays()
 	{
 		//Rays extend twice the player's height
 		std::vector<float>::iterator minA = std::min(rayAResults.fractions.begin(), rayAResults.fractions.end());
 		std::vector<float>::iterator minB = std::min(rayBResults.fractions.begin(), rayBResults.fractions.end());
-		float minADist = 1.f;
-		float minAAngle = 0.f;
-		float minBDist = 1.f;
-		float minBAngle = 0.f;
 
+		//Predefine ray variables
+		b2Vec2 rayANormal;
+		b2Vec2 rayBNormal;
+		float rayAAngle;
+		float rayBAngle;
+		b2Vec2 rayAHitPoint;
+		b2Vec2 rayBHitPoint;
+
+		//Get the variables for the closest rays
 		if (minA != rayAResults.fractions.end())
 		{
 			minADist = *minA;
 			int index = std::distance(rayAResults.fractions.begin(), minA);
-			minAAngle = Math::getAngle(rayAResults.normals[index]) - 90.f;
+			rayANormal = rayAResults.normals[index];
+			minAAngle = Math::getAngle(rayAResults.normals[index]);
+			rayAHitPoint = rayAResults.points[index];
 		}
 		if (minB != rayBResults.fractions.end())
 		{
 			minBDist = *minB;
 			int index = std::distance(rayBResults.fractions.begin(), minB);
-			minBAngle = Math::getAngle(rayBResults.normals[index]) - 90.f;
+			rayBNormal = rayBResults.normals[index];
+			minBAngle = Math::getAngle(rayBResults.normals[index]);
+			rayBHitPoint = rayBResults.points[index];
 		}
 
 		//Right = true, Left = false
-		bool closerRay = playerVelocity.x > 0.f ? true : false;
-		bool equalRayDistance = Math::nearEqual(minADist, minBDist, 0.5f);
-		if (!equalRayDistance) closerRay = minBDist < minBDist ? true : false;
-		float closerRayDistance = closerRay ? minBDist : minADist;
-		float rayAngle = round(closerRay ? minBAngle : minAAngle);
+		//Defaults to the direction the player is moving in if the distances are too close (this is overriden later if they are not close)
+		closerRay = playerVelocity.x > 0.f ? true : false;
 
-		//Movement
+		//Check if the distances are approximately equal
+		equalRayDistance = Math::nearEqual(minADist, minBDist, 0.01f);
 
-		if ((playerVelocity.x > 0.f) != (ApplicationManager::mainPlayer.directionalInput.x > 0.f))
+		//If they are not "equal", override the closest ray
+		if (!equalRayDistance) closerRay = minBDist < minADist ? true : false;
+
+		//Set variables based on closest ray
+		if (closerRay)
 		{
-			playerVelocity.x -= ApplicationManager::mainPlayer.directionalInput.x * acceleration;
+			rayHitPoint = rayBHitPoint;
+			closerRayDistance = minBDist;
+			rayAngle = round(minBAngle);
+			rayNormal = rayBNormal;
 		}
 		else
 		{
-			playerVelocity.x -= ApplicationManager::mainPlayer.directionalInput.x * deceleration;
+			rayHitPoint = rayAHitPoint;
+			closerRayDistance = minADist;
+			rayAngle = round(minAAngle);
+			rayNormal = rayANormal;
 		}
+	}
 
-		//Slope physics
-		//playerVelocity.x -= slopeFactor * cosf(rayAngle);
-		//playerVelocity.y += slopeFactor * sinf(rayAngle);
-
-		playerVelocity.y += ((closerRayDistance - 0.5f) * playerRect.y) / 2;
+	void Player::updatePosition()
+	{
 		transform.move(playerVelocity);
 		transform.setRotation(Math::lerp(transform.getRotation(), 0.f, 0.2f));
 		rb->getBody()->SetTransform(Physics::pixelToBox2dUnits(transform.getPosition()), Math::degToRad(transform.getRotation()));
+	}
+
+	void Player::groundTick()
+	{
+		updateRays();
+		updateFloorRays();
+
+		//Input
+		float xInput = playerControls->directionalInput.x;
+		bool xPositiveInput = xInput > 0.f;
+		bool xPositiveSpeed = playerVelocity.x > 0.f;
+
+		//If both the input direction and movement are in the same direction, use acceleration. If not, use deceleration
+		if (playerControls->directionalInput.x != 0.f)
+		{
+			xPositiveInput == xPositiveSpeed ?
+				groundSpeed -= playerControls->directionalInput.x * deceleration :
+				groundSpeed -= playerControls->directionalInput.x * acceleration;
+		}
+
+		//The evaluated ground speed (split based on floor angle
+		sf::Vector2f evaluatedGroundSpeed = Math::rotateVector(sf::Vector2f(groundSpeed, 0.f), rayAngle);
+		playerVelocity.x = evaluatedGroundSpeed.x;
+		playerVelocity.y = -evaluatedGroundSpeed.y;
+
+		updatePosition();
 
 		//If the closest ray is outside the player's bound (> half ray length), change to airborne
-		if (closerRayDistance > 0.6f)
+		if (closerRayDistance > 0.5f) changeState(PlayerState::Airborne);
+	}
+
+	void Player::airTick()
+	{
+		updateRays();
+		updateFloorRays();
+
+		//Input variables
+		float xInput = playerControls->directionalInput.x;
+		bool xPositiveInput = xInput > 0.f;
+		bool xPositiveSpeed = playerVelocity.x > 0.f;
+
+		//If both the input direction and movement are in the same direction, use acceleration. If not, use deceleration
+		if (playerControls->directionalInput.x != 0.f)
+		{
+			xPositiveInput == xPositiveSpeed ?
+				playerVelocity.x -= playerControls->directionalInput.x * deceleration :
+				playerVelocity.x -= playerControls->directionalInput.x * acceleration;
+		}
+
+		//Apply air gravity
+		playerVelocity.y += gravity;
+
+
+		updatePosition();
+
+		//If the closest ray is outside the player's bound (> half ray length), change to airborne
+		if (closerRayDistance < 0.5f) changeState(PlayerState::Grounded);
+	}
+
+	float debugFlySpeed = 2.f;
+	void Player::debugModeTick()
+	{
+		updateRays();
+		updateFloorRays();
+		if (playerControls->directionalInput.x != 0.f || playerControls->directionalInput.y != 0.f)
+		{
+			playerVelocity = -playerControls->directionalInput * debugFlySpeed;
+			debugFlySpeed *= 1.005f;
+		}
+		else
+		{
+			debugFlySpeed = Math::lerp(debugFlySpeed, 2.f, 0.1f);
+			playerVelocity = sf::Vector2f();
+		}
+		
+		if (playerControls->button3)
 		{
 			changeState(PlayerState::Airborne);
 		}
+
+		updatePosition();
 	}
 
 	void Player::fixedUpdate()
@@ -152,19 +278,22 @@ namespace fl
 		{
 			case PlayerState::Grounded:
 			{
-
-
+				groundTick();
 				break;
 			}
 			case PlayerState::Airborne:
 			{
-
+				airTick();
 				break;
 			}
 			case PlayerState::Attacking:
 			{
 
 				break;
+			}
+			case PlayerState::Debug:
+			{
+				debugModeTick();
 			}
 		}
 		
@@ -174,7 +303,7 @@ namespace fl
 
 	void Player::changeState(PlayerState newState)
 	{
-		//Custom switch logic
+		//Custom switch logic for transitions, cancels, etc
 		switch (newState)
 		{
 			case PlayerState::Grounded:
@@ -182,6 +311,9 @@ namespace fl
 				Debug::log("Transitioned to grounded");
 				playerVelocity.y = 0.f;
 				currentState = newState;
+				/*Run groundTickt to prevent player from clipping
+				through ground when falling at a high speed*/
+				groundTick();
 				break;
 			}
 			case PlayerState::Airborne:
@@ -192,8 +324,14 @@ namespace fl
 			}
 			case PlayerState::Attacking:
 			{
+				Debug::log("Transitioned to attacking");
 				currentState = newState;
 				break;
+			}
+			case PlayerState::Debug:
+			{
+				Debug::log("Transitioned to debug mode");
+				currentState = newState;
 			}
 		}
 	}
@@ -211,6 +349,8 @@ namespace fl
 		rayBResults = raycast(rayB, Layer::All);
 
 		/*
+		Alternative rays for roof/wall detection
+
 		rayC.p1 = Physics::pixelToBox2dUnits(position);
 		rayC.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(0.f , playerRect.y / 2.f));
 		rayCResults = raycast(rayC, Layer::All);
@@ -269,6 +409,10 @@ namespace fl
 		{
 			json["children"].push_back(child->serialize());
 		}
+
+		//Serialize player
+		if (playerControls == &fl::ApplicationManager::mainPlayer) json["controller"] = 0;
+		else Debug::log("Alternate controllers have not been implemented yet. Player will not serialize fully");
 
 		return json;
 	}

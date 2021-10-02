@@ -21,6 +21,8 @@ namespace fl
 		//Pixel rendering
 		sf::RenderTexture* buffer;
 
+		std::vector<std::string> imguiDebugBuffer;
+
 		void awake()
 		{
 			fl::Debug::log("Application running awake");
@@ -46,9 +48,15 @@ namespace fl
 			//Runs on a fixed step
 		}
 
+		void imGuiText(std::string text)
+		{
+			imguiDebugBuffer.push_back(text);
+		}
+
 		void debugGui()
 		{
 			ImGui::Begin("Debugger");
+			ImGui::SetWindowFontScale(1.f);
 
 			std::stringstream fpsStream;
 			fpsStream << std::fixed << std::setprecision(2) << fps;
@@ -73,6 +81,11 @@ namespace fl
 			ImGui::Checkbox("Button D", &mainPlayer.button4);
 			ImGui::Checkbox("Special Button A", &mainPlayer.plus);
 			ImGui::Checkbox("Special Button B", &mainPlayer.minus);
+
+			for (auto& item : imguiDebugBuffer)
+			{
+				ImGui::Text(item.c_str());
+			}
 
 			ImGui::SetWindowSize(sf::Vector2f(200, 400));
 			ImGui::SetWindowPos(sf::Vector2i(windowPtr->getSize().x - 230, windowPtr->getSize().y / 2 - 200));
@@ -139,6 +152,7 @@ namespace fl
 
 				// Handle Input
 				mainPlayer.processInput();
+				mainPlayer.elapseTimer(deltaTime.asMilliseconds());
 
 				// Clear screen
 				windowPtr->clear(backgroundColor);
@@ -164,6 +178,7 @@ namespace fl
 				ImGui::SFML::Update(*windowPtr, imguiClock.restart());
 				{
 					debugGui();
+					imguiDebugBuffer.clear();
 				}
 				ImGui::SFML::Render(*windowPtr);
 

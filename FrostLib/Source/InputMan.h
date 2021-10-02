@@ -24,6 +24,16 @@ namespace fl
 			bool plus;
 			bool minus;
 
+			//If input is locked (timers can be used to stun player, etc.)
+			bool locked;
+
+			int timerMs;
+			//Lock and unlock input for ms milliseconds;
+			void lockInput(int ms);
+
+			//Elapse the lock timer using the deltaTime between current and last frame
+			void elapseTimer(int delta);
+
 			//Defaults to keyboard style
 			virtual void processInput();
 		};

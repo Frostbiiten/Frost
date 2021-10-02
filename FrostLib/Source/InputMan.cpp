@@ -5,6 +5,20 @@ namespace fl
 {
 	namespace InputMan
 	{
+		void inputMap::lockInput(int ms)
+		{
+			locked = true;
+			timerMs = ms;
+		}
+		void inputMap::elapseTimer(int delta)
+		{
+			//Exit if it is not locked in the first place
+			if (!locked) return;
+			//Subtract deltatime from timer and check if the time has run out
+			timerMs -= delta;
+			if (timerMs <= 0) locked = false;
+		}
+
 		void inputMap::processInput()
 		{
 			//Directional
@@ -57,10 +71,13 @@ namespace fl
 			this->button4Key = button4Key;
 			this->plusKey = plusKey;
 			this->minusKey = minusKey;
+			this->locked = false; //Never start locked
 		}
 
 		void keyboardMap::processInput()
 		{
+			if (locked) return;
+
 			//Directional
 			directionalInput = sf::Vector2f(0, 0);
 			directionalInput.x += sf::Keyboard::isKeyPressed(right);

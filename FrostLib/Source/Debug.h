@@ -78,6 +78,8 @@ namespace fl
 			std::cout << obj << '\n';
 		}
 
+		//TODO: override serialization operator (<<) for logging, fix const correctness creating errors while trying to log
+
 		void drawCircle(sf::Vector2f position, float radius, float thickness, sf::Color color = sf::Color::White);
 		void drawRectangle(sf::Vector2f position, sf::Vector2f size, float rotation, float thickness, sf::Color color = sf::Color::White);
 		void drawLine(sf::Vector2f begin, sf::Vector2f end, sf::Color color = sf::Color::White);

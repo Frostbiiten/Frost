@@ -55,6 +55,8 @@ namespace fl
 
 		// Returns closest point on line segment
 		sf::Vector2f closestPointOnSegment(sf::Vector2f a, sf::Vector2f b, sf::Vector2f point);
+
+		sf::Vector2f rotateVector(sf::Vector2f vector, float degrees);
 		
 		//Angle between a vector and the y axis
 		float getAngle(sf::Vector2f vector);

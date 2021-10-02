@@ -1,5 +1,6 @@
 #pragma once
 #include <gameObject.h>
+#include <InputMan.h>
 #include <Physics.h>
 #include <SFML/Graphics/Color.hpp>
 #include <box2d/box2d.h>
@@ -12,7 +13,8 @@ namespace fl
 	{
 		Grounded,
 		Airborne,
-		Attacking
+		Attacking,
+		Debug
 	};
 
 	class Player : public gameObject
@@ -21,9 +23,19 @@ namespace fl
 		Player(nlohmann::json json, scene* scene);
 	protected:
 		PlayerState currentState;
+		fl::InputMan::inputMap* playerControls;
 
 		void awake();
 		void update();
+		void updateFloorRays();
+
+		//Moves playbody in physics world and render world according to player velocity
+		void updatePosition();
+
+		//The player's default ground state code, runs on fixedUpdate
+		void groundTick();
+		void airTick();
+		void debugModeTick();
 		void fixedUpdate();
 
 		void changeState(PlayerState newState);

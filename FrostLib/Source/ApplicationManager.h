@@ -49,6 +49,8 @@ namespace fl
 		//Runs on frames based on a fixed step for scaling across different performances. Should mostly only be used for physics
 		void fixedUpdate();
 
+		void imGuiText(std::string text);
+
 		//For non-pixel rendering
 		void windowDrawElement(sf::Drawable& drawable);
 		//For non-pixel window-relative rendering

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cmath>
 #include <box2d/box2d.h>
+#include <iostream>
 
 constexpr double pi = 3.1415926535897932384626433832795028841971693993751058209749445923078164062;
 constexpr float pi_f = 3.1415926535897932384626433832795028841971693993751058209749445923078164062;
@@ -103,44 +104,28 @@ sf::Vector2f fl::Math::closestPointOnSegment(sf::Vector2f a, sf::Vector2f b, sf:
     else return a + AB * distance;
 }
 
+sf::Vector2f fl::Math::rotateVector(sf::Vector2f vector, float degrees)
+{
+	degrees = degToRad(degrees);
+    return sf::Vector2f(
+        vector.x * std::cosf(degrees) - vector.y * std::sin(degrees),
+        vector.x * std::sin(degrees) + vector.y * std::cos(degrees)
+    );
+}
 
-//https://stackoverflow.com/a/48227232
+//Fix angles
 float fl::Math::getAngle(sf::Vector2f vector)
 {
-    if (vector.x == 0) // special cases
-        return (vector.y > 0) ? 90
-        : (vector.y == 0) ? 0
-        : 270;
-    else if (vector.y == 0) // special cases
-        return (vector.x >= 0) ? 0
-        : 180;
-    float ret = radToDeg(atanf(vector.y / vector.x));
-    if (vector.x < 0 && vector.y < 0) // quadrant III
-        ret = 180 + ret;
-    else if (vector.x < 0) // quadrant II
-        ret = 180 + ret;
-    else if (vector.y < 0) // quadrant IV
-        ret = 270 + (90 + ret);
-    return ret;
+	float value = (float)((atan2(vector.x, vector.y) / pi) * 180.f);
+	if (value < 0) value += 360.f;
+	return 360.f - value;
 }
 
 float fl::Math::getAngle(b2Vec2 vector)
 {
-    if (vector.x == 0) // special cases
-        return (vector.y > 0) ? 90
-        : (vector.y == 0) ? 0
-        : 270;
-    else if (vector.y == 0) // special cases
-        return (vector.x >= 0) ? 0
-        : 180;
-    float ret = radToDeg(atanf(vector.y / vector.x));
-    if (vector.x < 0 && vector.y < 0) // quadrant III
-        ret = 180 + ret;
-    else if (vector.x < 0) // quadrant II
-        ret = 180 + ret;
-    else if (vector.y < 0) // quadrant IV
-        ret = 270 + (90 + ret);
-    return ret;
+	float value = (float)((atan2(vector.x, vector.y) / pi) * 180.f);
+	if (value < 0) value += 360.f;
+	return 360.f - value;
 }
 
 bool fl::Math::nearEqual(float a, float b, float epsilon)

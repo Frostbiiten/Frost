@@ -197,6 +197,9 @@
   <ItemGroup>
     <ResourceCompile Include="FrostLib.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="player.md" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
