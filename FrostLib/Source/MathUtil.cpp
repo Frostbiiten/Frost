@@ -4,9 +4,6 @@
 #include <box2d/box2d.h>
 #include <iostream>
 
-constexpr double pi = 3.1415926535897932384626433832795028841971693993751058209749445923078164062;
-constexpr float pi_f = 3.1415926535897932384626433832795028841971693993751058209749445923078164062;
-constexpr double minNormal = 1.17549435E-38;
 
 float fl::Math::lerp(float a, float b, float t)
 {
@@ -68,9 +65,22 @@ float fl::Math::degToRad(float degrees)
 	return (degrees * pi_f) / 180.f;
 }
 
+float fl::Math::roundToNearest(float n, float x)
+{
+	return round(n / x) * x;
+}
+
 sf::Vector2f fl::Math::lerpVec(sf::Vector2f a, sf::Vector2f b, float t)
 {
 	return sf::Vector2f( a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
+}
+
+float fl::Math::lerpAngle(float a, float b, float t)
+{
+    float delta = loop(0.f, (b - a), 360.f);
+    if (delta > 180)
+        delta -= 360;
+    return a + delta * clamp(0.f, 1.f, t);
 }
 
 // Returns the length of this vector (RO).

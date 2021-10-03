@@ -40,10 +40,14 @@ namespace fl
 	*/
 
 	float groundSpeed;
-	float gravity = 0.021875f;
+	float gravity = 0.046875f;
+	float friction = 0.046875f;
 	float slopeFactor = 0.125f;
 	float acceleration = 0.046875f;
 	float deceleration = 0.5f;
+	float topSpeed = 6.f;
+	float angle = 0.f; //Player angle in clockwise degrees
+	float rotationMultiple = 45.f;
 
 	Physics::ray rayA;
 	Physics::ray rayB;
@@ -72,7 +76,7 @@ namespace fl
 	bool closerRay;
 	bool equalRayDistance;
 	float closerRayDistance = 0.f;
-	float rayAngle = 0.f;
+	float rayAngle = 0.f; //ray angle in counter-clockwise degrees
 	b2Vec2 rayNormal;
 	b2Vec2 rayHitPoint;
 
@@ -112,27 +116,19 @@ namespace fl
 		}
 
 		Debug::drawLine(Physics::Box2dToPixelUnits(rayHitPoint), Physics::Box2dToPixelUnits(rayHitPoint) + Physics::Box2dToPixelUnits(rayNormal), sf::Color::White);
-
-		ApplicationManager::imGuiText(std::to_string(rayAngle));
-		ApplicationManager::imGuiText(std::to_string(groundSpeed));
-		std::stringstream ss;
-		ss << groundSpeed * cos(rayAngle);
-		ss << ", ";
-		ss << groundSpeed * sin(rayAngle);
-		ApplicationManager::imGuiText(ss.str());
+		ApplicationManager::imGuiText("Rayangle: " + std::to_string(rayAngle));
+		ApplicationManager::imGuiText("Angle   : " + std::to_string(transform.getRotation()));
 	}
 
 	void Player::updateFloorRays()
 	{
 		//Rays extend twice the player's height
-		std::vector<float>::iterator minA = std::min(rayAResults.fractions.begin(), rayAResults.fractions.end());
-		std::vector<float>::iterator minB = std::min(rayBResults.fractions.begin(), rayBResults.fractions.end());
+		std::vector<float>::iterator minA = std::min_element(rayAResults.fractions.begin(), rayAResults.fractions.end());
+		std::vector<float>::iterator minB = std::min_element(rayBResults.fractions.begin(), rayBResults.fractions.end());
 
 		//Predefine ray variables
 		b2Vec2 rayANormal;
 		b2Vec2 rayBNormal;
-		float rayAAngle;
-		float rayBAngle;
 		b2Vec2 rayAHitPoint;
 		b2Vec2 rayBHitPoint;
 
@@ -145,6 +141,10 @@ namespace fl
 			minAAngle = Math::getAngle(rayAResults.normals[index]);
 			rayAHitPoint = rayAResults.points[index];
 		}
+		else
+		{
+			minADist = 1.f;
+		}
 		if (minB != rayBResults.fractions.end())
 		{
 			minBDist = *minB;
@@ -152,6 +152,10 @@ namespace fl
 			rayBNormal = rayBResults.normals[index];
 			minBAngle = Math::getAngle(rayBResults.normals[index]);
 			rayBHitPoint = rayBResults.points[index];
+		}
+		else
+		{
+			minBDist = 1.f;
 		}
 
 		//Right = true, Left = false
@@ -184,26 +188,54 @@ namespace fl
 	void Player::updatePosition()
 	{
 		transform.move(playerVelocity);
-		transform.setRotation(Math::lerp(transform.getRotation(), 0.f, 0.2f));
+		//transform.setPosition(transform.getPosition() + sf::Vector2f(std::floor(playerVelocity.x), std::floor(playerVelocity.y)));
 		rb->getBody()->SetTransform(Physics::pixelToBox2dUnits(transform.getPosition()), Math::degToRad(transform.getRotation()));
+	}
+
+	void Player::move(sf::Vector2f delta)
+	{
+		transform.move(delta);
+		rb->getBody()->SetTransform(Physics::pixelToBox2dUnits(transform.getPosition()), Math::degToRad(transform.getRotation()));
+	}
+
+	void Player::updateRotation()
+	{
+		//transform.setRotation(((angle + rotationMultiple / 2) / rotationMultiple) * rotationMultiple);
+		transform.setRotation(angle);
 	}
 
 	void Player::groundTick()
 	{
-		updateRays();
-		updateFloorRays();
+		//Slope factor
+		groundSpeed -= slopeFactor * std::sin(Math::degToRad(rayAngle));
 
 		//Input
 		float xInput = playerControls->directionalInput.x;
 		bool xPositiveInput = xInput > 0.f;
-		bool xPositiveSpeed = playerVelocity.x > 0.f;
+		bool xPositiveSpeed = groundSpeed > 0.f;
 
 		//If both the input direction and movement are in the same direction, use acceleration. If not, use deceleration
-		if (playerControls->directionalInput.x != 0.f)
+		if (playerControls->directionalInput.x != 0.f && groundSpeed < topSpeed)
 		{
 			xPositiveInput == xPositiveSpeed ?
-				groundSpeed -= playerControls->directionalInput.x * deceleration :
-				groundSpeed -= playerControls->directionalInput.x * acceleration;
+				groundSpeed += playerControls->directionalInput.x * acceleration :
+				groundSpeed += playerControls->directionalInput.x * deceleration;
+		}
+
+		//Friction
+		if (playerControls->directionalInput.x == 0.0f)
+		{
+			bool speedDirection = groundSpeed > 0.0f;
+			float absGroundSpeed = std::abs(groundSpeed);
+			groundSpeed = absGroundSpeed - friction;
+			if (groundSpeed < 0.f)
+			{
+				groundSpeed = 0.0f;
+			}
+			else if (!speedDirection)
+			{
+				groundSpeed = -groundSpeed;
+			}
 		}
 
 		//The evaluated ground speed (split based on floor angle
@@ -211,10 +243,22 @@ namespace fl
 		playerVelocity.x = evaluatedGroundSpeed.x;
 		playerVelocity.y = -evaluatedGroundSpeed.y;
 
+		angle = Math::roundToNearest(360.f - rayAngle, 90.f);
+
 		updatePosition();
 
+		//Rays
+		updateRays();
+		updateFloorRays();
+		
+		//Move sonic (update ground angle + position)
+		sf::Vector2f alignDelta(0.0f, -(playerRect.y - (closerRayDistance * playerRect.y * 2.f)));
+		alignDelta = Math::rotateVector(alignDelta, transform.getRotation());
+		move(alignDelta);
+		updateRotation();
+
 		//If the closest ray is outside the player's bound (> half ray length), change to airborne
-		if (closerRayDistance > 0.5f) changeState(PlayerState::Airborne);
+		//if (closerRayDistance > 0.5f) changeState(PlayerState::Airborne);
 	}
 
 	void Player::airTick()
@@ -222,24 +266,29 @@ namespace fl
 		updateRays();
 		updateFloorRays();
 
-		//Input variables
-		float xInput = playerControls->directionalInput.x;
-		bool xPositiveInput = xInput > 0.f;
-		bool xPositiveSpeed = playerVelocity.x > 0.f;
-
-		//If both the input direction and movement are in the same direction, use acceleration. If not, use deceleration
-		if (playerControls->directionalInput.x != 0.f)
-		{
-			xPositiveInput == xPositiveSpeed ?
-				playerVelocity.x -= playerControls->directionalInput.x * deceleration :
-				playerVelocity.x -= playerControls->directionalInput.x * acceleration;
-		}
+		//Air has no distinction between acceleration and deceleration
+		playerVelocity.x += playerControls->directionalInput.x * acceleration * 2.f;
 
 		//Apply air gravity
 		playerVelocity.y += gravity;
 
+		if (playerVelocity.y < 0 && playerVelocity.y > -4)
+		{
+			playerVelocity.y -= ((playerVelocity.x / 0.125f) / 256.f);
+		}
+
+		//Rotate towards 0 rotation
+		if (transform.getRotation() > 180.f)
+		{
+			angle = Math::lerp(transform.getRotation(), 360.0f, 0.1f);
+		}
+		else
+		{
+			angle = Math::lerp(transform.getRotation(), 0.0f, 0.1f);
+		}
 
 		updatePosition();
+		updateRotation();
 
 		//If the closest ray is outside the player's bound (> half ray length), change to airborne
 		if (closerRayDistance < 0.5f) changeState(PlayerState::Grounded);
@@ -252,7 +301,7 @@ namespace fl
 		updateFloorRays();
 		if (playerControls->directionalInput.x != 0.f || playerControls->directionalInput.y != 0.f)
 		{
-			playerVelocity = -playerControls->directionalInput * debugFlySpeed;
+			playerVelocity = sf::Vector2f(playerControls->directionalInput.x, -playerControls->directionalInput.y) * debugFlySpeed;
 			debugFlySpeed *= 1.005f;
 		}
 		else
@@ -263,7 +312,7 @@ namespace fl
 		
 		if (playerControls->button3)
 		{
-			changeState(PlayerState::Airborne);
+			changeState(PlayerState::Grounded);
 		}
 
 		updatePosition();
@@ -339,13 +388,27 @@ namespace fl
 	void Player::updateRays()
 	{
 		sf::Vector2f position = transform.getPosition();
+		//Takes next frame position into account
+		//sf::Vector2f centerPosition = transform.getPosition() + playerRect / 2.f + playerVelocity;
+		sf::Vector2f centerPosition = transform.getPosition() + playerRect / 2.f;
 
+		//360 ray system
+		rayA.p1 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / -2.f, playerRect.y / -2.f), transform.getRotation()));
+		rayA.p2 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / -2.f, playerRect.y), transform.getRotation()));
+
+		rayB.p1 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / 2.f, playerRect.y / -2.f), transform.getRotation()));
+		rayB.p2 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / 2.f, playerRect.y), transform.getRotation()));
+
+		/*
+		//MODE 1
 		rayA.p1 = Physics::pixelToBox2dUnits(position + sf::Vector2f(0.f, 0.f));
 		rayA.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(0.f, playerRect.y * 2.f));
-		rayAResults = raycast(rayA, Layer::All);
 
 		rayB.p1 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, 0.f));
 		rayB.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, playerRect.y * 2.f));
+		*/
+
+		rayAResults = raycast(rayA, Layer::All);
 		rayBResults = raycast(rayB, Layer::All);
 
 		/*

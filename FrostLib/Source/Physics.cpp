@@ -32,13 +32,20 @@ namespace fl
 		//Masked raycallback
 		float maskedRayCallback::ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float fraction)
 		{
-			bodies.push_back(fixture);
-			points.push_back(point);
-			normals.push_back(normal);
-			fractions.push_back(fraction);
 			auto comp = static_cast<component*>(fixture->GetBody()->GetUserData().data);
 			if ((layerMask & comp->owner->layer) == comp->owner->layer)
+			{
+				bodies.push_back(fixture);
+				points.push_back(point);
+				normals.push_back(normal);
+				fractions.push_back(fraction);
 				components.push_back(comp);
+			}
+			else
+			{
+				std::cout << "!!!\n";
+			}
+
 			return 1.f;
 		}
 
@@ -71,7 +78,7 @@ namespace fl
 
 		rigidBody::~rigidBody()
 		{
-			physicsWorld.DestroyBody(body);
+			if(body) physicsWorld.DestroyBody(body);
 		}
 
 		void rigidBody::destroyFixture(int index)

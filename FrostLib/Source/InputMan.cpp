@@ -23,8 +23,8 @@ namespace fl
 		{
 			//Directional
 			directionalInput = sf::Vector2f(0, 0);
-			directionalInput.x += sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A);
-			directionalInput.x -= sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D);
+			directionalInput.x += sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D);
+			directionalInput.x -= sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A);
 			directionalInput.y += sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W);
 			directionalInput.y -= sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S);
 

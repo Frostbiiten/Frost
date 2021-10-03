@@ -26,7 +26,7 @@ namespace fl
 		inline sf::Vector2f pixelSize{ 424, 240 };
 
 		//Time: the timestep is in milliseconds
-		inline constexpr int fixedTimestep = 20;
+		inline constexpr int fixedTimestep = 16;
 		inline float fps;
 
 		//Input

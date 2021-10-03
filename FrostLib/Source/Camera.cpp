@@ -6,21 +6,18 @@ namespace fl
 	namespace Camera
 	{
 		sf::Vector2f scrollRange{ 8, 32 };
+		sf::Vector2f clampedPlayerPosition;
 
 		void updatePlayerCam(sf::Vector2f playerPosition)
 		{
-			//The difference between the camera position and the player
-			sf::Vector2f diff = playerPosition - cameraPosition;
+			clampedPlayerPosition = sf::Vector2f(
+				Math::clamp(playerPosition.x - scrollRange.x, playerPosition.x + scrollRange.x, clampedPlayerPosition.x),
+				Math::clamp(playerPosition.y - scrollRange.y, playerPosition.y + scrollRange.y, clampedPlayerPosition.y));
 
-			//X-Range
-			if (diff.x < -scrollRange.x || diff.x > scrollRange.x)
-				cameraPosition.x += diff.x - scrollRange.x / 2.f;
-
-			//Y-Range
-			if (diff.y < -scrollRange.y || diff.y > scrollRange.y)
-				cameraPosition.y += diff.y - scrollRange.y / 2.f;
+			cameraPosition = clampedPlayerPosition;
 
 			cameraView.setCenter(Math::lerpVec(cameraView.getCenter(), cameraPosition, 0.1f));
+			//cameraView.setCenter(cameraPosition);
 			//cameraView.setSize(cameraView.getSize() * 1.005f);
 			fl::ApplicationManager::getWindow()->setView(cameraView);
 			fl::ApplicationManager::getBuffer()->setView(cameraView);

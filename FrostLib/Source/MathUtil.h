@@ -6,6 +6,10 @@ namespace fl
 {
 	namespace Math
 	{
+		constexpr inline double pi = 3.1415926535897932384626433832795028841971693993751058209749445923078164062;
+		constexpr inline float pi_f = 3.1415926535897932384626433832795028841971693993751058209749445923078164062;
+		constexpr inline double minNormal = 1.17549435E-38;
+
 		enum class ClampMode
 		{
 			Clamp,
@@ -40,9 +44,14 @@ namespace fl
 		//Converts radians to degrees
 		float degToRad(float degrees);
 
+		float roundToNearest(float n, float x);
+
 		//Vector math
 		//Linearly interpolates from a to b respectively
 		sf::Vector2f lerpVec(sf::Vector2f a, sf::Vector2f b, float t);
+
+		//Correctly lerps an angle by the shortest path
+		float lerpAngle(float a, float b, float t);
 
 		// Returns the squared length of the vector
 		float sqrMagnitude(sf::Vector2f vector);
@@ -57,7 +66,7 @@ namespace fl
 		sf::Vector2f closestPointOnSegment(sf::Vector2f a, sf::Vector2f b, sf::Vector2f point);
 
 		sf::Vector2f rotateVector(sf::Vector2f vector, float degrees);
-		
+
 		//Angle between a vector and the y axis
 		float getAngle(sf::Vector2f vector);
 		float getAngle(b2Vec2 vector);

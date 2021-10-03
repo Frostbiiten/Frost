@@ -28,6 +28,7 @@ namespace fl
 			bool locked;
 
 			int timerMs;
+
 			//Lock and unlock input for ms milliseconds;
 			void lockInput(int ms);
 

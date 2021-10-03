@@ -135,7 +135,7 @@ namespace fl
 
 		for (int i = outline.size() - 1; i >= 0; i--)
 		{
-			b2Vec2 b2Point = Physics::pixelToBox2dUnits(outline[i]);
+			b2Vec2 b2Point = Physics::pixelToBox2dUnits(transform.getTransform().transformPoint(outline[i]));
 			verts[i].Set(b2Point.x, b2Point.y);
 		}
 
@@ -157,7 +157,7 @@ namespace fl
 		for (auto& tri : shape)
 		{
 			float x = i / (float)shape.size();
-			tri.setFillColor(sf::Color(x * 255, 0, 0));
+			//tri.setFillColor(sf::Color(x * 255, 0, 0));
 			//ApplicationManager::bufferDrawElement(tri);
 			Debug::drawLine(tri.getPoint(0), tri.getPoint(1), sf::Color(10 + x * 255, 0, 0));
 			Debug::drawLine(tri.getPoint(1), tri.getPoint(2), sf::Color(0, 10 + x * 255, 0));

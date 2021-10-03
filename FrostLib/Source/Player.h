@@ -31,6 +31,8 @@ namespace fl
 
 		//Moves playbody in physics world and render world according to player velocity
 		void updatePosition();
+		void move(sf::Vector2f delta);
+		void updateRotation();
 
 		//The player's default ground state code, runs on fixedUpdate
 		void groundTick();
