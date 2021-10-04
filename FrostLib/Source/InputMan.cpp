@@ -9,24 +9,47 @@ namespace fl
 		{
 			locked = true;
 			timerMs = ms;
+			directionalInput = sf::Vector2f();
 		}
+
+		void inputMap::lockDirectionalInput(int ms)
+		{
+			directionalLocked = true;
+			directionalTimerMs = ms;
+			directionalInput = sf::Vector2f();
+		}
+
 		void inputMap::elapseTimer(int delta)
 		{
-			//Exit if it is not locked in the first place
-			if (!locked) return;
-			//Subtract deltatime from timer and check if the time has run out
-			timerMs -= delta;
-			if (timerMs <= 0) locked = false;
+			if (locked)
+			{
+				//Subtract deltatime from timer and check if the time has run out
+				timerMs -= delta;
+				if (timerMs <= 0) locked = false;
+			}
+
+			if (directionalLocked && directionalManualTick)
+			{
+				//Subtract deltatime from timer and check if the time has run out
+				directionalTimerMs -= delta;
+				if (directionalTimerMs <= 0) directionalLocked = false;
+			}
 		}
 
 		void inputMap::processInput()
 		{
-			//Directional
+			if (locked) return;
+
 			directionalInput = sf::Vector2f(0, 0);
-			directionalInput.x += sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D);
-			directionalInput.x -= sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A);
-			directionalInput.y += sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W);
-			directionalInput.y -= sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S);
+
+			//Directional
+			if (!directionalLocked)
+			{
+				directionalInput.x += sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D);
+				directionalInput.x -= sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A);
+				directionalInput.y += sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W);
+				directionalInput.y -= sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S);
+			}
 
 			//Position relative to window
 			pointerPos = sf::Mouse::getPosition(*(fl::ApplicationManager::getWindow()));
@@ -72,18 +95,24 @@ namespace fl
 			this->plusKey = plusKey;
 			this->minusKey = minusKey;
 			this->locked = false; //Never start locked
+			this->directionalLocked = false; //Never start locked
+			this->directionalManualTick = true;
 		}
 
 		void keyboardMap::processInput()
 		{
 			if (locked) return;
 
-			//Directional
 			directionalInput = sf::Vector2f(0, 0);
-			directionalInput.x += sf::Keyboard::isKeyPressed(right);
-			directionalInput.x -= sf::Keyboard::isKeyPressed(left);
-			directionalInput.y += sf::Keyboard::isKeyPressed(up);
-			directionalInput.y -= sf::Keyboard::isKeyPressed(down);
+
+			//Directional
+			if (!directionalLocked)
+			{
+				directionalInput.x += sf::Keyboard::isKeyPressed(right);
+				directionalInput.x -= sf::Keyboard::isKeyPressed(left);
+				directionalInput.y += sf::Keyboard::isKeyPressed(up);
+				directionalInput.y -= sf::Keyboard::isKeyPressed(down);
+			}
 
 			//Position relative to window
 			pointerPos = sf::Mouse::getPosition(*(fl::ApplicationManager::getWindow()));

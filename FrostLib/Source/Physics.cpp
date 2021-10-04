@@ -41,10 +41,6 @@ namespace fl
 				fractions.push_back(fraction);
 				components.push_back(comp);
 			}
-			else
-			{
-				std::cout << "!!!\n";
-			}
 
 			return 1.f;
 		}

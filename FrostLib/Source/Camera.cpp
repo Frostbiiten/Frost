@@ -16,7 +16,7 @@ namespace fl
 
 			cameraPosition = clampedPlayerPosition;
 
-			cameraView.setCenter(Math::lerpVec(cameraView.getCenter(), cameraPosition, 0.1f));
+			cameraView.setCenter(Math::lerpVec(cameraView.getCenter(), cameraPosition, 0.5f));
 			//cameraView.setCenter(cameraPosition);
 			//cameraView.setSize(cameraView.getSize() * 1.005f);
 			fl::ApplicationManager::getWindow()->setView(cameraView);

@@ -26,11 +26,17 @@ namespace fl
 
 			//If input is locked (timers can be used to stun player, etc.)
 			bool locked;
+			bool directionalLocked;
 
 			int timerMs;
+			int directionalTimerMs;
+			bool directionalManualTick;
 
 			//Lock and unlock input for ms milliseconds;
 			void lockInput(int ms);
+
+			//Lock and unlock directional input for ms milliseconds;
+			void lockDirectionalInput(int ms);
 
 			//Elapse the lock timer using the deltaTime between current and last frame
 			void elapseTimer(int delta);

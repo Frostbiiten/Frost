@@ -46,6 +46,10 @@ namespace fl
 
 		float roundToNearest(float n, float x);
 
+		float sign(float f);
+
+		float moveTowards(float current, float target, float maxDelta);
+
 		//Vector math
 		//Linearly interpolates from a to b respectively
 		sf::Vector2f lerpVec(sf::Vector2f a, sf::Vector2f b, float t);

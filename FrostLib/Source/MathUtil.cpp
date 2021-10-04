@@ -70,6 +70,15 @@ float fl::Math::roundToNearest(float n, float x)
 	return round(n / x) * x;
 }
 
+float fl::Math::sign(float f) { return f >= 0.f ? 1.f : -1.f; }
+
+float fl::Math::moveTowards(float current, float target, float maxDelta)
+{
+    if (std::abs(target - current) <= maxDelta)
+        return target;
+    return current + sign(target - current) * maxDelta;
+}
+
 sf::Vector2f fl::Math::lerpVec(sf::Vector2f a, sf::Vector2f b, float t)
 {
 	return sf::Vector2f( a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
