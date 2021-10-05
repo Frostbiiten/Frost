@@ -1,190 +1,170 @@
 {
-    "gameObjects": [
-        {
-            "active": true,
-            "layer": 1,
-            "name": "player",
-            "transform": {
-                "origin": [
-                    0.0,
-                    0.0
-                ],
-                "position": [
-                    0.0,
-                    0.0
-                ],
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ]
-            },
-            "type": "player",
-            "uuid": "cb3b3d4e-cdb6-48e4-bb2a-cebbd325a858"
-        },
-        {
-            "active": true,
-            "layer": 16,
-            "name": "base terrain",
-            "spline": {
-                "loop": true,
-                "nodes": [
-                    {
-                        "point": [
-                            -100.0,
-                            50.0
-                        ]
-                    },
-                    {
-                        "point": [
-                            200.0,
-                            50.0
-                        ],
-                        "handle":[
-                            100.0,
-                            0.0  
-                        ]
-                    },
-                    {
-                        "point": [
-                            400.0,
-                            -150.0
-                        ],
-                        "handle":[
-                            0.0,
-                            -100.0  
-                        ]
-                    },
-                    {
-                        "point": [
-                            200.0,
-                            -350.0
-                        ],
-                        "handle":[
-                            -100.0,
-                            0.0  
-                        ]
-                    },
-                    {
-                        "point": [
-                            600.0,
-                            -350.0
-                        ]
-                    },
-                    {
-                        "point": [
-                            600.0,
-                            200.0
-                        ]
-                    },
-                    {
-                        "point": [
-                            -100.0,
-                            200.0
-                        ]
-                    }
-                ]
-            },
-            "threshold": 1.0,
-            "transform": {
-                "origin": [
-                    0.0,
-                    0.0
-                ],
-                "position": [
-                    0.0,
-                    0.0
-                ],
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ]
-            },
-            "type": "terrain",
-            "uuid": "aa3188b9-dd97-4875-abbd-a9e6e7c026b0"
-        },
-                {
-            "active": true,
-            "layer": 16,
-            "name": "rotated terrain",
-            "spline": {
-                "loop": true,
-                "nodes": [
-                    {
-                        "point": [
-                            -100.0,
-                            50.0
-                        ]
-                    },
-                    {
-                        "point": [
-                            200.0,
-                            50.0
-                        ],
-                        "handle":[
-                            100.0,
-                            0.0  
-                        ]
-                    },
-                    {
-                        "point": [
-                            400.0,
-                            -150.0
-                        ],
-                        "handle":[
-                            0.0,
-                            -100.0  
-                        ]
-                    },
-                    {
-                        "point": [
-                            200.0,
-                            -350.0
-                        ],
-                        "handle":[
-                            -100.0,
-                            0.0  
-                        ]
-                    },
-                    {
-                        "point": [
-                            600.0,
-                            -350.0
-                        ]
-                    },
-                    {
-                        "point": [
-                            600.0,
-                            200.0
-                        ]
-                    },
-                    {
-                        "point": [
-                            -100.0,
-                            200.0
-                        ]
-                    }
-                ]
-            },
-            "threshold": 1,
-            "transform": {
-                "origin": [
-                    0.0,
-                    0.0
-                ],
-                "position": [
-                    200.0,
-                    -300.0
-                ],
-                "rotation": 180.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ]
-            },
-            "type": "terrain",
-            "uuid": "06da12c9-377d-484e-8831-04852c7d606c"
-        }
-    ]
+  "gameObjects": [
+    {
+      "active": true,
+      "layer": 1,
+      "name": "player",
+      "transform": {
+        "origin": [
+          0,
+          0
+        ],
+        "position": [
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ]
+      },
+      "type": "player",
+      "uuid": "cb3b3d4e-cdb6-48e4-bb2a-cebbd325a858"
+    },
+    {
+      "active": true,
+      "layer": 16,
+      "name": "base terrain",
+      "spline": {
+        "loop": true,
+        "nodes": [
+          {
+            "point": [
+              -100,
+              50
+            ]
+          },
+          {
+            "point": [
+              200,
+              50
+            ],
+            "handle": [
+              100,
+              0
+            ]
+          },
+          {
+            "point": [
+              400,
+              -150
+            ],
+            "handle": [
+              0,
+              -100
+            ]
+          },
+          {
+            "point": [
+              600,
+              -150
+            ]
+          },
+          {
+            "point": [
+              600,
+              200
+            ]
+          },
+          {
+            "point": [
+              -100,
+              200
+            ]
+          }
+        ]
+      },
+      "threshold": 1,
+      "transform": {
+        "origin": [
+          0,
+          0
+        ],
+        "position": [
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ]
+      },
+      "type": "terrain",
+      "uuid": "aa3188b9-dd97-4875-abbd-a9e6e7c026b0"
+    },
+    {
+      "active": true,
+      "layer": 16,
+      "name": "terrain 2",
+      "spline": {
+        "loop": true,
+        "nodes": [
+          {
+            "point": [
+              100,
+              50
+            ]
+          },
+          {
+            "point": [
+              -200,
+              50
+            ],
+            "handle": [
+              -100,
+              0
+            ]
+          },
+          {
+            "point": [
+              -400,
+              -150
+            ],
+            "handle": [
+              0,
+              -100
+            ]
+          },
+          {
+            "point": [
+              -600,
+              -150
+            ]
+          },
+          {
+            "point": [
+              -600,
+              200
+            ]
+          },
+          {
+            "point": [
+              100,
+              200
+            ]
+          }
+        ]
+      },
+      "threshold": 1,
+      "transform": {
+        "origin": [
+          0,
+          0
+        ],
+        "position": [
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ]
+      },
+      "type": "terrain",
+      "uuid": "aa3188b9-dd97-4875-abbd-a9e6e7c026b0"
+    }
+  ]
 }

@@ -16,7 +16,16 @@ namespace fl
 		//Box2d does not operate with pixels as units. Y is inverted because sfml y starts at the top of the screen whereas box2d starts at bottom
 		inline b2Vec2 pixelToBox2dUnits(sf::Vector2f unit)
 		{
-			return b2Vec2(unit.x / pixelsPerUnit, -unit.y / pixelsPerUnit);
+			//Doesn't play well with values near zero - rounding must be done
+			float x = unit.x / pixelsPerUnit;
+			float y = -unit.y / pixelsPerUnit;
+			if (Math::nearEqual(unit.x, 0.0f, 0.001f)) x = 0.0f;
+			if (Math::nearEqual(unit.y, 0.0f, 0.001f)) y = 0.0f;
+			//if (std::abs(y) > 100.f || std::abs(x) > 100.f)
+			//{
+			//	int a;
+			//}
+			return b2Vec2(x, y);
 		}
 
 		inline sf::Vector2f Box2dToPixelUnits(b2Vec2 unit)

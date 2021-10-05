@@ -35,7 +35,7 @@ namespace fl
 		std::vector<std::unique_ptr<component>> components;
 
 		//The transform of the object. This is always local
-		sf::Transformable transform;
+		sf::Transformable transform{};
 		sf::Transform localTransform;
 		bool validLocalTransform;
 

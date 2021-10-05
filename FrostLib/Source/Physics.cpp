@@ -112,7 +112,7 @@ namespace fl
 			}
 			else
 			{
-				owner->transform.move(Box2dToPixelUnits(body->GetPosition()));
+				body->SetTransform(pixelToBox2dUnits(owner->transform.getPosition()), Math::degToRad(owner->transform.getRotation()));
 			}
 		}
 	}

@@ -8,7 +8,7 @@ namespace fl
 	namespace Camera
 	{
 		inline sf::Vector2f cameraPosition;
-		inline sf::View cameraView{ sf::Vector2f(), fl::ApplicationManager::pixelSize };
+		inline sf::View cameraView{ sf::Vector2f(), fl::ApplicationManager::pixelSize * 2.f };
 		void updatePlayerCam(sf::Vector2f playerPosition);
 	}
 }

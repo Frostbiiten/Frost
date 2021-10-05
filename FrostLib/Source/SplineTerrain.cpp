@@ -22,10 +22,11 @@ namespace fl
 		uuid = uuids::uuid::from_string(json["uuid"].get<std::string>());
 		layer = json["layer"];
 		active = json["active"];
-		transform = deserializeTransform(json["transform"]);	
+		transform = deserializeTransform(json["transform"]);
 		spline = Graph(json["spline"]);
 		simplifyThreshold = json["threshold"];
 		generateOutline();
+		transformOutline();
 		simplifyOutline(simplifyThreshold);
 		generateShape();
 		generateCollider();
@@ -37,10 +38,12 @@ namespace fl
 		for (std::size_t x = 0; x < spline.getNodeCount(); x++)
 		{
 			//Create first point
-			outline.push_back(transform.getTransform().transformPoint(spline.getNodePos(x)));
+			outline.push_back(spline.getNodePos(x));
+			int nextNode = x + 1;
+			if (nextNode >= spline.getNodeCount()) nextNode = 0;
 
 			//If the current and next node are not linear
-			if (spline.getNodeType(x) != 0 && spline.getNodeType(x + 1) != 0)
+			if (spline.getNodeType(x) != 0 && spline.getNodeType(nextNode) != 0)
 			{
 				//Don't start at zero because that node will already there
 				float t = step;
@@ -51,7 +54,7 @@ namespace fl
 					float distance = spline.getNodeLength(x);
 					while (t < distance)
 					{
-						outline.push_back(transform.getTransform().transformPoint(evaluate(spline, x, x + 1, t / distance)));
+						outline.push_back(evaluate(spline, x, x + 1, t / distance));
 						t += step;
 					}
 				}
@@ -80,6 +83,14 @@ namespace fl
 			t += step;
 		}
 		*/
+	}
+
+	void SplineTerrain::transformOutline()
+	{
+		for (auto& point : outline)
+		{
+			point = transform.getTransform().transformPoint(point);
+		}
 	}
 
 	void SplineTerrain::simplifyOutline(float threshold)
@@ -135,11 +146,13 @@ namespace fl
 
 		for (int i = outline.size() - 1; i >= 0; i--)
 		{
-			b2Vec2 b2Point = Physics::pixelToBox2dUnits(transform.getTransform().transformPoint(outline[i]));
+			b2Vec2 b2Point = Physics::pixelToBox2dUnits(outline[i]);
 			verts[i].Set(b2Point.x, b2Point.y);
 		}
 
 		chain.CreateLoop(verts.get(), outline.size());
+
+		rb->getBody()->SetTransform(b2Vec2(), 0.f);
 		rb->getBody()->CreateFixture(&chain, 100.f);
 	}
 
@@ -159,19 +172,36 @@ namespace fl
 			float x = i / (float)shape.size();
 			//tri.setFillColor(sf::Color(x * 255, 0, 0));
 			//ApplicationManager::bufferDrawElement(tri);
+
 			Debug::drawLine(tri.getPoint(0), tri.getPoint(1), sf::Color(10 + x * 255, 0, 0));
 			Debug::drawLine(tri.getPoint(1), tri.getPoint(2), sf::Color(0, 10 + x * 255, 0));
 			Debug::drawLine(tri.getPoint(2), tri.getPoint(0), sf::Color(0, 0, 10 + x * 255));
+			
 			++i;
 		}
 
-		
+		/*
 		for (int i = 0; i < outline.size(); i++)
 		{
 			if (i == outline.size() - 1)
 				Debug::drawLine(outline[i], outline[0]);
 			else
 				Debug::drawLine(outline[i], outline[i + 1]);
+		}
+		*/
+
+		// Physics body debug
+		Physics::rigidBody* rb = dynamic_cast<Physics::rigidBody*>(components[0].get());
+		b2ChainShape* chain = dynamic_cast<b2ChainShape*>(rb->getBody()->GetFixtureList()->GetShape());
+
+		// Visit each child edge.
+		for (int32 i = 0; i < rb->getBody()->GetFixtureList()->GetShape()->GetChildCount(); ++i)
+		{
+			b2EdgeShape edge;
+			chain->GetChildEdge(&edge, i);
+			sf::Vector2f p1 = Physics::Box2dToPixelUnits(edge.m_vertex1);
+			sf::Vector2f p2 = Physics::Box2dToPixelUnits(edge.m_vertex2);
+			Debug::drawLine(p1, p2, sf::Color::White);
 		}
 		
 	}

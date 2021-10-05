@@ -39,7 +39,7 @@ namespace fl
 	grv: 0.21875; gravity
 	*/
 
-	float groundSpeed;
+	float groundSpeed = 0.f;
 	float gravity = 0.21875f;
 	float friction = 0.046875f;
 	float slopeFactor = 0.125f;
@@ -49,6 +49,7 @@ namespace fl
 	float angle = 0.f; //Player angle in clockwise degrees
 	float rotationMultiple = 45.f;
 	float ySpeedLimit = 16.f;
+	sf::Vector2f maxVelocity = { 32.f, 32.f };
 
 	Physics::ray rayA;
 	Physics::ray rayB;
@@ -67,19 +68,25 @@ namespace fl
 	Physics::rigidBody* rb;
 	//Default player hitbox/bounds
 	sf::Vector2f playerRect{ 19, 39 };
-	sf::Vector2f playerVelocity;
+	sf::Vector2f playerVelocity{ 0.f, 0.f };
 
 	//Floor detection raycasting variables
 	float minADist = 1.f;
 	float minAAngle = 0.f;
 	float minBDist = 1.f;
 	float minBAngle = 0.f;
-	bool closerRay;
-	bool equalRayDistance;
+
+	float minEDist = 1.f;
+	float minEAngle = 0.f;
+	float minFDist = 1.f;
+	float minFAngle = 0.f;
+
+	bool closerRay = true;
+	bool equalRayDistance = false;
 	float closerRayDistance = 0.f;
 	float rayAngle = 0.f; //ray angle in counter-clockwise degrees
-	b2Vec2 rayNormal;
-	b2Vec2 rayHitPoint;
+	b2Vec2 rayNormal{0, 1};
+	b2Vec2 rayHitPoint{};
 
 	Player::Player(nlohmann::json json, scene* scene)
 	{
@@ -116,9 +123,15 @@ namespace fl
 			changeState(PlayerState::Debug);
 		}
 
-		Debug::drawLine(Physics::Box2dToPixelUnits(rayHitPoint), Physics::Box2dToPixelUnits(rayHitPoint) + Physics::Box2dToPixelUnits(rayNormal), sf::Color::White);
-		ApplicationManager::imGuiText("Rayangle: " + std::to_string(rayAngle));
-		ApplicationManager::imGuiText("Angle   : " + std::to_string(transform.getRotation()));
+		//ApplicationManager::imGuiText("Rayangle: " + std::to_string(rayAngle));
+		//ApplicationManager::imGuiText("Angle   : " + std::to_string(transform.getRotation()));
+		std::stringstream velo;
+		velo << "velocity: " << playerVelocity.x << ", " << playerVelocity.y;
+		ApplicationManager::imGuiText(velo.str());
+
+		std::stringstream position;
+		position << "position: " << transform.getPosition().x << ", " << transform.getPosition().y;
+		ApplicationManager::imGuiText(position.str());
 	}
 
 	void Player::updateFloorRays()
@@ -193,9 +206,50 @@ namespace fl
 		}
 	}
 
+	void Player::updateWallRays()
+	{
+		//Rays extend twice the player's height
+		std::vector<float>::iterator minE = std::min_element(rayEResults.fractions.begin(), rayEResults.fractions.end());
+		std::vector<float>::iterator minF = std::min_element(rayFResults.fractions.begin(), rayFResults.fractions.end());
+
+		//Predefine ray variables
+		b2Vec2 rayENormal;
+		b2Vec2 rayFNormal;
+		b2Vec2 rayEHitPoint;
+		b2Vec2 rayFHitPoint;
+
+		//Get the variables for the closest rays
+		if (minE != rayEResults.fractions.end())
+		{
+			minEDist = *minE;
+			int index = std::distance(rayEResults.fractions.begin(), minE);
+			rayENormal = rayEResults.normals[index];
+			rayEHitPoint = rayEResults.points[index];
+		}
+		else
+		{
+			minEDist = 2.f;
+		}
+		if (minF != rayFResults.fractions.end())
+		{
+			minFDist = *minF;
+			int index = std::distance(rayFResults.fractions.begin(), minF);
+			rayFNormal = rayFResults.normals[index];
+			rayFHitPoint = rayFResults.points[index];
+		}
+		else
+		{
+			minFDist = 2.f;
+		}
+	}
+
 	void Player::updatePosition()
 	{
-		transform.move(playerVelocity);
+		sf::Vector2f clampedVelocity{
+			std::clamp(playerVelocity.x, -maxVelocity.x, maxVelocity.y),
+			std::clamp(playerVelocity.y, -maxVelocity.y, maxVelocity.y)
+		};
+		transform.move(clampedVelocity);
 		//transform.setPosition(transform.getPosition() + sf::Vector2f(std::floor(playerVelocity.x), std::floor(playerVelocity.y)));
 		rb->getBody()->SetTransform(Physics::pixelToBox2dUnits(transform.getPosition()), Math::degToRad(transform.getRotation()));
 	}
@@ -216,6 +270,13 @@ namespace fl
 		{
 			transform.setRotation(angle);
 		}
+	}
+
+	bool Player::testFloorCollision()
+	{
+		float floorDistance = -(playerRect.y / 4.f) + closerRayDistance * playerRect.y;
+		return std::clamp(closerRayDistance, 0.25f, 0.65f) == closerRayDistance;
+		//return (floorDistance < std::min(std::abs(playerVelocity.x) + 4.f, 14.f) && floorDistance > 0.25f);
 	}
 
 	void Player::groundTick()
@@ -252,6 +313,21 @@ namespace fl
 			}
 		}
 
+		//TODO: RUN WALL/ROOF COLLISION TEST
+		updateWallRays();
+		if (minEDist <= 1.f && groundSpeed > 0.f)
+		{
+			float intersectionDistance = (1.f - minEDist) * playerRect.x / 2.f;
+			move(sf::Vector2f(-intersectionDistance + 0.0001f, 0.f)); //Add small offset so ray is still in wall (no twitching)
+			groundSpeed = 0.f;
+		}
+		if (minFDist <= 1.f && groundSpeed < 0.f)
+		{
+			float intersectionDistance = (1.f - minFDist) * playerRect.x / 2.f;
+			move(sf::Vector2f(intersectionDistance - 0.0001f, 0.f)); //Add small offset so ray is still in wall (no twitching)
+			groundSpeed = 0.f;
+		}
+
 		//The evaluated ground speed (split based on floor angle
 		sf::Vector2f evaluatedGroundSpeed = Math::rotateVector(sf::Vector2f(groundSpeed, 0.f), rayAngle);
 		playerVelocity.x = evaluatedGroundSpeed.x;
@@ -268,7 +344,8 @@ namespace fl
 		updateFloorRays();
 
 		//If the distance of the ray is in the allowable range, stay on floor. Else, go airborne
-		if (std::clamp(closerRayDistance, 0.1f, 0.7f) == closerRayDistance)
+		//TODO: variable max ray length depending on speed
+		if (testFloorCollision())
 		{
 			//Check if player should slip
 			if (std::abs(groundSpeed) < 2.5f && (rayAngle == std::clamp(rayAngle, 35.f, 326.f)))
@@ -340,50 +417,39 @@ namespace fl
 		}
 
 		//Check for ground transition
-		if (closerRayDistance > 0.25f && closerRayDistance < 0.7f)
+		//TODO: variable max ray length depending on speed
+		if (testFloorCollision())
 		{
-			if (playerVelocity.y <= 0.f)
-			{
-				if (rayAngle > 0.f && rayAngle < 23.f ||
-					rayAngle > 339.f && rayAngle < 360.f)
-				{
-					groundSpeed = playerVelocity.x;
-				}
-				else if (rayAngle < 45.f || rayAngle > 316.f)
-				{
-					if (std::abs(playerVelocity.x) > -playerVelocity.y)
-					{
-						groundSpeed = playerVelocity.x;
-					}
-					else
-					{
-						groundSpeed = playerVelocity.y * 0.5f * -sin(Math::degToRad(rayAngle));
-					}
-				}
-				else
-				{
-					if (std::abs(playerVelocity.x) > -playerVelocity.y)
-					{
-						groundSpeed = playerVelocity.x;
-					}
-					else
-					{
-						groundSpeed = playerVelocity.y * -sin(Math::degToRad(rayAngle));
-					}
-				}
-			}
-			
+			//Find how much speed should be retained
 
-			/*
-			float dotProduct = std::clamp(Math::dot(playerVelocity / Math::magnitude(playerVelocity), Physics::Box2dToPixelUnits(rayNormal)), 0.f, 1.f);
-			std::cout << dotProduct << '\n';
-			groundSpeed = dotProduct * Math::magnitude(playerVelocity);
-			*/
+			if (rayAngle < 23.f && rayAngle > 339.f)
+			{
+				groundSpeed = playerVelocity.x;
+			}
+			else
+			{
+				sf::Vector2f normalizedVelocity = playerVelocity / Math::magnitude(playerVelocity);
+				sf::Vector2f normalizedNormal = Physics::Box2dToPixelUnits(rayNormal); //Normal must be "normalized" because it is being converted from box2d units
+				normalizedNormal = normalizedNormal / Math::magnitude(normalizedNormal);
+				float dotProduct = Math::dot(normalizedVelocity, normalizedNormal);
+
+				//Check player velocity relative to the floor
+				//There are still some inaccuracies?
+				sf::Vector2f relativePlayerVelocity = Math::rotateVector(playerVelocity, rayAngle);
+
+				if (relativePlayerVelocity.x > 0.f)
+					groundSpeed = Math::magnitude(playerVelocity) * (1.f - std::abs(dotProduct));
+				else
+					groundSpeed = -Math::magnitude(playerVelocity) * (1.f - std::abs(dotProduct));
+			}
+
 			changeState(PlayerState::Grounded);
 		}
 	}
 
 	float debugFlySpeed = 2.f;
+	bool button2Old = false;
+	bool button2Ref = false;
 	void Player::debugModeTick()
 	{
 		updateRays();
@@ -399,9 +465,42 @@ namespace fl
 			playerVelocity = sf::Vector2f();
 		}
 
+		if (playerControls->button1)
+		{
+			transform.rotate(-0.5f);
+		}
+		if (playerControls->button2)
+		{
+			transform.rotate(0.5f);
+		}
+
 		if (playerControls->button3)
 		{
 			changeState(PlayerState::Airborne);
+		}
+
+		button2Old = button2Ref;
+		button2Ref = playerControls->button2;
+		if(button2Old != button2Ref && button2Ref)
+		{
+			Debug::log("");
+			Debug::log("Physics world debugger");
+			Debug::log("-----------------------");
+
+			Debug::log("\tPhysics world body list");
+			Debug::log("\t-----------------------");
+			auto element = Physics::physicsWorld.GetBodyList();
+			for (int i = 0; i < Physics::physicsWorld.GetBodyCount(); ++i)
+			{
+				Physics::rigidBody* comp = static_cast<Physics::rigidBody*>(element->GetUserData().data);
+				Debug::log("\t\t" + std::to_string(i) + ": " + comp->owner->name);
+				element = element->GetNext();
+				sf::Vector2f position = comp->owner->transform.getPosition();
+				sf::Vector2f scale = comp->owner->transform.getScale();
+				Debug::log("\t\t Position: " + std::to_string(position.x) + ", " + std::to_string(position.y));
+				Debug::log("\t\t Rotation: " + std::to_string(comp->owner->transform.getRotation()));
+				Debug::log("\t\t Scale: " + std::to_string(scale.x) + ", " + std::to_string(scale.y));
+			}
 		}
 
 		updatePosition();
@@ -483,10 +582,10 @@ namespace fl
 		{
 			//360 ray system
 			rayA.p1 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / -2.f, playerRect.y / -2.f), transform.getRotation()));
-			rayA.p2 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / -2.f, playerRect.y), transform.getRotation()));
+			rayA.p2 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / -2.f, playerRect.y * 1.5f), transform.getRotation()));
 
 			rayB.p1 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / 2.f, playerRect.y / -2.f), transform.getRotation()));
-			rayB.p2 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / 2.f, playerRect.y), transform.getRotation()));
+			rayB.p2 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / 2.f, playerRect.y * 1.5f), transform.getRotation()));
 		}
 		else
 		{
@@ -511,15 +610,46 @@ namespace fl
 		rayD.p1 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, 0.f));
 		rayD.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, playerRect.y / 2.f));
 		rayDResults = raycast(rayD, Layer::All);
-
-		rayE.p1 = Physics::pixelToBox2dUnits(position + sf::Vector2f(0.f, playerRect.y / 2.f));
-		rayE.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, playerRect.y) / 2.f);
-		rayEResults = raycast(rayE, Layer::All);
-
-		rayF.p1 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, playerRect.y / 2.f));
-		rayF.p2 = Physics::pixelToBox2dUnits(position + sf::Vector2f(playerRect.x, playerRect.y) / 2.f);
-		rayFResults = raycast(rayF, Layer::All);
 		*/
+
+		//Rays for wall detection
+		//Wall detection is run before movement is applied, so it MUST add the player's velocity to account for the lag
+		if (currentState == PlayerState::Grounded)
+		{
+			if (std::abs(std::floor(groundSpeed)) > 0.f)
+			{
+				rayE.p1 = Physics::pixelToBox2dUnits(centerPosition);
+				rayE.p2 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / 2.f, 0.f), transform.getRotation()));
+
+				rayF.p1 = Physics::pixelToBox2dUnits(centerPosition);
+				rayF.p2 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(-playerRect.x / 2.f, 0.f), transform.getRotation()));
+			}
+			else
+			{
+				//If player is not moving, offset rays by 8 down in y axis
+				const sf::Vector2f offset(0.f, 10.f);
+
+				rayE.p1 = Physics::pixelToBox2dUnits(centerPosition + offset);
+				rayE.p2 = Physics::pixelToBox2dUnits(centerPosition + offset + Math::rotateVector(sf::Vector2f(playerRect.x / 2.f, 0.f), transform.getRotation()));
+
+				rayF.p1 = Physics::pixelToBox2dUnits(centerPosition + offset);
+				rayF.p2 = Physics::pixelToBox2dUnits(centerPosition + offset + Math::rotateVector(sf::Vector2f(-playerRect.x / 2.f, 0.f), transform.getRotation()));
+			}
+
+
+		}
+		else
+		{
+			//Don't rotate rays while airborne
+			rayE.p1 = Physics::pixelToBox2dUnits(centerPosition);
+			rayE.p2 = Physics::pixelToBox2dUnits(centerPosition + sf::Vector2f(playerRect.x / 2.f, 0.f));
+
+			rayF.p1 = Physics::pixelToBox2dUnits(centerPosition);
+			rayF.p2 = Physics::pixelToBox2dUnits(centerPosition + sf::Vector2f(-playerRect.x / 2.f, 0.f));
+		}
+
+		rayEResults = raycast(rayE, Layer::All);
+		rayFResults = raycast(rayF, Layer::All);
 	}
 
 	Physics::maskedRayCallback Player::raycast(Physics::ray& input, Layer layerMask)
@@ -538,11 +668,31 @@ namespace fl
 	void Player::drawDebug()
 	{
 		//Draw player hitbox
-		//Debug::drawRectangle(transform.getPosition(), playerRect, transform.getRotation(), 0.5f, sf::Color::Blue);
+		sf::RectangleShape rect;
+		rect.setSize(playerRect);
+		rect.setOrigin(rect.getSize() / 2.f);
+		rect.setPosition(transform.getPosition() + rect.getSize() / 2.f); //Position is broken?
+		if (currentState == PlayerState::Grounded)
+			rect.setRotation(360.f - rayAngle);
+		else
+			rect.setRotation(transform.getRotation());
+
+		rect.setFillColor(sf::Color::Transparent);
+		rect.setOutlineColor(sf::Color::Blue);
+		rect.setOutlineThickness(1.f);
+		ApplicationManager::getWindow()->draw(rect);
 
 		//Draw player rays
+		/*
 		drawRay(rayA, sf::Color::Green);
 		drawRay(rayB, sf::Color(0, 255, 255));
+
+		drawRay(rayE, sf::Color(255, 192, 203));
+		drawRay(rayF, sf::Color::Red);
+		*/
+
+		//Draw hit ray
+		//Debug::drawLine(Physics::Box2dToPixelUnits(rayHitPoint), Physics::Box2dToPixelUnits(rayHitPoint) + Physics::Box2dToPixelUnits(rayNormal), sf::Color::White);
 		/*
 		drawRay(rayC, sf::Color::Blue);
 		drawRay(rayD, sf::Color::Yellow);

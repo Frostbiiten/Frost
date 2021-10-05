@@ -15,6 +15,7 @@ namespace fl
 		SplineTerrain(scene* scene, float simplifyThreshold = 1.f);
 		SplineTerrain(nlohmann::json json, scene* scene);
 		void generateOutline(float step = 10.f);
+		void transformOutline();
 		void simplifyOutline(float threshold = 1.f);
 		void generateShape();
 		void generateCollider();
