@@ -671,7 +671,7 @@ namespace fl
 		sf::RectangleShape rect;
 		rect.setSize(playerRect);
 		rect.setOrigin(rect.getSize() / 2.f);
-		rect.setPosition(transform.getPosition() + rect.getSize() / 2.f); //Position is broken?
+		rect.setPosition(transform.getPosition() + rect.getSize() / 2.f);
 		if (currentState == PlayerState::Grounded)
 			rect.setRotation(360.f - rayAngle);
 		else
@@ -682,8 +682,8 @@ namespace fl
 		rect.setOutlineThickness(1.f);
 		ApplicationManager::getWindow()->draw(rect);
 
-		//Draw player rays
 		/*
+		//Draw player rays
 		drawRay(rayA, sf::Color::Green);
 		drawRay(rayB, sf::Color(0, 255, 255));
 
@@ -692,7 +692,7 @@ namespace fl
 		*/
 
 		//Draw hit ray
-		//Debug::drawLine(Physics::Box2dToPixelUnits(rayHitPoint), Physics::Box2dToPixelUnits(rayHitPoint) + Physics::Box2dToPixelUnits(rayNormal), sf::Color::White);
+		Debug::drawLine(Physics::Box2dToPixelUnits(rayHitPoint), Physics::Box2dToPixelUnits(rayHitPoint) + Physics::Box2dToPixelUnits(rayNormal), sf::Color::White);
 		/*
 		drawRay(rayC, sf::Color::Blue);
 		drawRay(rayD, sf::Color::Yellow);

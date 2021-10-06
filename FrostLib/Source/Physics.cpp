@@ -46,7 +46,7 @@ namespace fl
 		}
 
 		//Rigidbody
-		rigidBody::rigidBody(gameObject* owner, b2Vec2 rectSize, b2BodyType bodyType)
+		rigidBody::rigidBody(gameObject* owner, b2Vec2 rectSize, b2BodyType bodyType, bool authoritativePosition)
 		{
 			this->owner = owner;
 			enabled = true;
@@ -55,12 +55,6 @@ namespace fl
 			//Define body
 			b2BodyDef bodyDef;
 			bodyDef.type = bodyType;
-			auto pos = pixelToBox2dUnits(owner->transform.getPosition());
-			bodyDef.position.Set(pos.x, pos.y);
-
-			//Set rotation (from degrees to radians)
-			auto rot = Math::degToRad(owner->transform.getRotation());
-			bodyDef.angle = rot;
 			body = physicsWorld.CreateBody(&bodyDef);
 
 			//Set "collider" using a polygon
@@ -70,6 +64,17 @@ namespace fl
 			//Finalize; user data is pointer to the component
 			body->CreateFixture(&collider, 0.f);
 			body->GetUserData().data = this;
+			if (authoritativePosition)
+			{
+				owner->transform.setPosition(Box2dToPixelUnits(body->GetPosition()));
+				owner->transform.setRotation(Math::radToDeg(body->GetAngle()));
+			}
+			else
+			{
+				auto pos = pixelToBox2dUnits(owner->transform.getPosition());
+				auto rot = Math::degToRad(owner->transform.getRotation());
+				body->SetTransform(pos, rot);
+			}
 		}
 
 		rigidBody::~rigidBody()
@@ -105,14 +110,18 @@ namespace fl
 
 		void rigidBody::fixedUpdate()
 		{
-			if (body->GetType() == b2BodyType::b2_kinematicBody)
+			if (body->GetType() != b2BodyType::b2_staticBody)
 			{
 				b2Vec2 deltaPos = body->GetPosition() - oldPos;
 				owner->transform.move(Box2dToPixelUnits(deltaPos));
 			}
 			else
 			{
-				body->SetTransform(pixelToBox2dUnits(owner->transform.getPosition()), Math::degToRad(owner->transform.getRotation()));
+				if (authoritativePosition)
+					owner->transform.setPosition(Box2dToPixelUnits(body->GetPosition()));//This isn't deterministic
+				else
+					body->SetTransform(pixelToBox2dUnits(owner->transform.getPosition()), Math::degToRad(owner->transform.getRotation())); //This breaks some levels
+
 			}
 		}
 	}
