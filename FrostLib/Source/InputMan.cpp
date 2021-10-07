@@ -40,6 +40,8 @@ namespace fl
 		{
 			if (locked) return;
 
+			processDeltaInput();
+
 			directionalInput = sf::Vector2f(0, 0);
 
 			//Directional
@@ -66,6 +68,46 @@ namespace fl
 			//Non-control buttons
 			plus = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Enter);
 			minus = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RShift);
+
+			button1Down = false;
+			button2Down = false;
+			button3Down = false;
+			button4Down = false;
+			button1Up = false;
+			button2Up = false;
+			button3Up = false;
+			button4Up = false;
+
+			if (button1Old != button1)
+			{
+				if (button1) button1Down = true;
+				else button1Up = true;
+			}
+
+			if (button2Old != button2)
+			{
+				if (button2) button2Down = true;
+				else button2Up = true;
+			}
+
+			if (button3Old != button3)
+			{
+				if (button3) button3Down = true;
+				else button3Up = true;
+			}
+
+			if (button4Old != button4)
+			{
+				if (button4) button4Down = true;
+				else button4Up = true;
+			}
+		}
+		void inputMap::processDeltaInput()
+		{
+			button1Old = button1;
+			button2Old = button2;
+			button3Old = button3;
+			button4Old = button4;
 		}
 
 		keyboardMap::keyboardMap

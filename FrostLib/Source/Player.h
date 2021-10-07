@@ -21,37 +21,36 @@ namespace fl
 	{
 	public:
 		Player(nlohmann::json json, scene* scene);
+		nlohmann::json serialize();
 	protected:
 		PlayerState currentState;
 		fl::InputMan::inputMap* playerControls;
 
 		void awake();
 		void update();
-		void updateFloorRays();
-		void updateWallRays();
-
-		//Moves playbody in physics world and render world according to player velocity
-		void updatePosition();
-		void move(sf::Vector2f delta);
-		void updateRotation(bool truncate = false);
-
-		bool testFloorCollision();
-
-		//The player's default ground state code, runs on fixedUpdate
-		void groundTick();
-		void airTick();
-		void debugModeTick();
 		void fixedUpdate();
-
-		void changeState(PlayerState newState);
 
 		void updateRays();
 		Physics::maskedRayCallback raycast(Physics::ray& input, Layer layerMask);
+		void updateFloorRays();
+		void updateWallRays();
+
+		void updatePosition();
+		void updateRotation(bool truncate = false);
+		void move(sf::Vector2f delta);
+
+		bool testFloorCollision();
+
+		void changeState(PlayerState newState);
+
+		void groundTick();
+		void airTick();
+		void debugModeTick();
+
+		void jump();
 
 		void drawRay(Physics::ray& ray, sf::Color color);
-
 		void drawDebug();
-		nlohmann::json serialize();
 	};
 }
 

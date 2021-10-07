@@ -1,6 +1,7 @@
 #include <Debug.h>
 
 #include <ApplicationManager.h>
+#include <Physics.h>
 #include <box2d/box2d.h>
 #include <algorithm>
 #include <filesystem>
@@ -116,5 +117,27 @@ namespace fl
 		vertices[3].color = color;
 
 		ApplicationManager::getWindow()->draw(vertices, 4, sf::Quads);
+	}
+
+	void Debug::dumpPhysicsWorld()
+	{
+		Debug::log("");
+		Debug::log("Physics world debugger");
+		Debug::log("-----------------------");
+
+		Debug::log("\tPhysics world body list");
+		Debug::log("\t-----------------------");
+		auto element = Physics::physicsWorld.GetBodyList();
+		for (int i = 0; i < Physics::physicsWorld.GetBodyCount(); ++i)
+		{
+			Physics::rigidBody* comp = static_cast<Physics::rigidBody*>(element->GetUserData().data);
+			Debug::log("\t\t" + std::to_string(i) + ": " + comp->owner->name);
+			element = element->GetNext();
+			sf::Vector2f position = comp->owner->transform.getPosition();
+			sf::Vector2f scale = comp->owner->transform.getScale();
+			Debug::log("\t\t Position: " + std::to_string(position.x) + ", " + std::to_string(position.y));
+			Debug::log("\t\t Rotation: " + std::to_string(comp->owner->transform.getRotation()));
+			Debug::log("\t\t Scale: " + std::to_string(scale.x) + ", " + std::to_string(scale.y));
+		}
 	}
 }

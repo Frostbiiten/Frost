@@ -9,6 +9,11 @@ namespace fl
 	{
 		struct inputMap
 		{
+			private:
+			bool button1Old, button2Old, button3Old, button4Old;
+			void processDeltaInput();
+
+			public:
 			//BUTTONS
 			//Main directional input
 			sf::Vector2f directionalInput;
@@ -19,6 +24,8 @@ namespace fl
 
 			//Generic remappable buttons
 			bool button1, button2, button3, button4;
+			bool button1Down, button2Down, button3Down, button4Down;
+			bool button1Up, button2Up, button3Up, button4Up;
 
 			//Non-control buttons
 			bool plus;

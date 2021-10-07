@@ -2,6 +2,7 @@
 #include <gameObject.h>
 #include <MathUtil.h>
 #include <box2d/box2d.h>
+#include <Debug.h>
 
 namespace fl
 {

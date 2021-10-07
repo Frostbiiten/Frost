@@ -86,6 +86,8 @@ namespace fl
 		void drawLineThick(sf::Vector2f begin, sf::Vector2f end, float thickness, sf::Color color = sf::Color::White);
 		void drawRay(sf::Vector2f begin, sf::Vector2f direction, sf::Color color = sf::Color::White);
 		void drawRayThick(sf::Vector2f begin, sf::Vector2f direction, float thickness, sf::Color color = sf::Color::White);
+		void dumpPhysicsWorld();
+
 	};
 
 	//https://stackoverflow.com/a/12262626

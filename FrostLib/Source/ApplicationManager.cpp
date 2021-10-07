@@ -66,28 +66,13 @@ namespace fl
 			ImGui::Separator();
 			ImGui::Text("");
 
-			ImGui::Text("Player Input Manager");
-			ImGui::Text("Directional Input:\n (%f, %f)", mainPlayer.directionalInput.x, mainPlayer.directionalInput.y);
-			ImGui::Text("Mouse Position:\n (%d, %d)", mainPlayer.pointerPos.x, mainPlayer.pointerPos.y);
-
-			ImGui::Text("");
-			ImGui::Separator();
-			ImGui::Text("");
-
-			ImGui::Checkbox("Clicking", &mainPlayer.isClicking);
-			ImGui::Checkbox("Button A", &mainPlayer.button1);
-			ImGui::Checkbox("Button B", &mainPlayer.button2);
-			ImGui::Checkbox("Button C", &mainPlayer.button3);
-			ImGui::Checkbox("Button D", &mainPlayer.button4);
-			ImGui::Checkbox("Special Button A", &mainPlayer.plus);
-			ImGui::Checkbox("Special Button B", &mainPlayer.minus);
 
 			for (auto& item : imguiDebugBuffer)
 			{
 				ImGui::Text(item.c_str());
 			}
 
-			ImGui::SetWindowSize(sf::Vector2f(200, 400));
+			ImGui::SetWindowSize(sf::Vector2f(220, 400));
 			ImGui::SetWindowPos(sf::Vector2i(windowPtr->getSize().x - 230, windowPtr->getSize().y / 2 - 200));
 
 			ImGui::End(); // end window
