@@ -1,5 +1,6 @@
 ﻿#include <ApplicationManager.h>
 #include <AnimationCurve.h>
+#include <Physics.h>
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include <InputMan.h>
@@ -114,6 +115,8 @@ namespace fl
 					{
 						fl::Debug::log("Closing window");
 						windowPtr->close();
+						currentScene.clearScene();
+						return;
 					}
 					if (event.type == sf::Event::Resized)
 					{

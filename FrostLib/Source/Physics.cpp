@@ -79,7 +79,7 @@ namespace fl
 
 		rigidBody::~rigidBody()
 		{
-			if(body) physicsWorld.DestroyBody(body);
+			physicsWorld.DestroyBody(body);
 		}
 
 		void rigidBody::destroyFixture(int index)

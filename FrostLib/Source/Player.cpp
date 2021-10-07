@@ -232,7 +232,6 @@ namespace fl
 		rayAResults = raycast(rayA, Layer::All);
 		rayBResults = raycast(rayB, Layer::All);
 
-
 		//Rays for wall detection
 		//Wall detection is run before movement is applied, so it MUST add the player's velocity to account for the lag
 		if (currentState == PlayerState::Grounded)
@@ -269,6 +268,29 @@ namespace fl
 
 		rayEResults = raycast(rayE, Layer::All);
 		rayFResults = raycast(rayF, Layer::All);
+
+		//Rays for roof detection
+
+		if (currentState == PlayerState::Grounded)
+		{
+			rayC.p1 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / -2.f, 0.f), transform.getRotation()));
+			rayC.p2 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / -2.f, playerRect.y / -2.f), transform.getRotation()));
+
+			rayD.p1 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / 2.f, 0.f), transform.getRotation()));
+			rayD.p2 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / 2.f, playerRect.y / -2.f), transform.getRotation()));
+		}
+		else
+		{
+			//Air physics makes no distinction of angles
+			rayC.p1 = Physics::pixelToBox2dUnits(sf::Vector2f(position.x, centerPosition.y));
+			rayC.p2 = Physics::pixelToBox2dUnits(position);
+
+			rayD.p1 = Physics::pixelToBox2dUnits(sf::Vector2f(position.x + playerRect.x, centerPosition.y));
+			rayD.p2 = Physics::pixelToBox2dUnits(sf::Vector2f(position.x + playerRect.x, position.y));
+		}
+
+		rayCResults = raycast(rayC, Layer::All);
+		rayDResults = raycast(rayD, Layer::All);
 	}
 
 	//Casts rays
@@ -620,6 +642,7 @@ namespace fl
 		}
 		else
 		{
+			//Check if you are no longer escaping the ground with jump (replace soon)
 			if (closerRayDistance > 0.6f)
 			{
 				jumpEscapingGround = false;
@@ -650,7 +673,6 @@ namespace fl
 	{
 		changeState(PlayerState::Airborne);
 		playerVelocity += sf::Vector2f(rayNormal.x, -rayNormal.y) * jmp;
-		std::cout << ".";
 	}
 
 	//Debug
@@ -674,7 +696,7 @@ namespace fl
 		rect.setFillColor(sf::Color::Transparent);
 		rect.setOutlineColor(sf::Color::Blue);
 		rect.setOutlineThickness(1.f);
-		ApplicationManager::getWindow()->draw(rect);
+		//ApplicationManager::getWindow()->draw(rect);
 
 		//Draw player rays
 		drawRay(rayA, sf::Color::Green);
@@ -683,14 +705,10 @@ namespace fl
 		drawRay(rayE, sf::Color(255, 192, 203));
 		drawRay(rayF, sf::Color::Red);
 
-		//Draw hit ray
-		Debug::drawLine(Physics::Box2dToPixelUnits(rayHitPoint), Physics::Box2dToPixelUnits(rayHitPoint) + Physics::Box2dToPixelUnits(rayNormal), sf::Color::White);
-		/*
 		drawRay(rayC, sf::Color::Blue);
 		drawRay(rayD, sf::Color::Yellow);
-		drawRay(rayE, sf::Color(255, 16, 240));
-		drawRay(rayF, sf::Color::Red);
-		*/
-	}
 
+		//Draw hit ray
+		Debug::drawLine(Physics::Box2dToPixelUnits(rayHitPoint), Physics::Box2dToPixelUnits(rayHitPoint) + Physics::Box2dToPixelUnits(rayNormal), sf::Color::White);
+	}
 }
