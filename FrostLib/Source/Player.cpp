@@ -49,7 +49,7 @@ namespace fl
 	float slopeFactor = 0.125f;
 	float acceleration = 0.046875f;
 	float deceleration = 0.5f;
-	float topSpeed = 6.f;
+	float topSpeed = 16.f;
 	float angle = 0.f; //Player angle in clockwise degrees
 	float rotationMultiple = 45.f;
 	float ySpeedLimit = 16.f;
@@ -73,6 +73,7 @@ namespace fl
 	//Default player hitbox/bounds
 	sf::Vector2f playerRect{ 19, 39 };
 	sf::Vector2f playerVelocity{ 0.f, 0.f };
+	MovementDirection movementDirection;
 
 	//Floor detection raycasting variables
 	float minADist = 1.f;
@@ -85,10 +86,17 @@ namespace fl
 	float minFDist = 1.f;
 	float minFAngle = 0.f;
 
+	float minCDist = 1.f;
+	float minCAngle = 0.f;
+	float minDDist = 1.f;
+	float minDAngle = 0.f;
+
 	bool closerRay = true;
 	bool equalRayDistance = false;
 	float closerRayDistance = 0.f;
+	float closerRoofRayDistance = 0.f;
 	float rayAngle = 0.f; //ray angle in counter-clockwise degrees
+	float roofRayAngle = 0.f; //ray angle in counter-clockwise degrees
 	b2Vec2 rayNormal{0, 1};
 	b2Vec2 rayHitPoint{};
 
@@ -169,6 +177,7 @@ namespace fl
 				break;
 		}
 		ApplicationManager::imGuiText(position.str());
+		ApplicationManager::imGuiText(std::to_string(closerRoofRayDistance));
 	}
 	void Player::fixedUpdate()
 	{
@@ -233,37 +242,36 @@ namespace fl
 		rayBResults = raycast(rayB, Layer::All);
 
 		//Rays for wall detection
-		//Wall detection is run before movement is applied, so it MUST add the player's velocity to account for the lag
+		//Wall detection is run before movement is applied, so it MUST add the player's velocity to account for the lag -> 0.001 offset so it goes further out than floor and ceiling rays
 		if (currentState == PlayerState::Grounded)
 		{
-			if (std::abs(std::floor(groundSpeed)) > 0.f)
+			if (std::abs(std::floor(playerVelocity.y)) != 0.f)
 			{
 				rayE.p1 = Physics::pixelToBox2dUnits(centerPosition);
-				rayE.p2 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / 2.f, 0.f), transform.getRotation()));
+				rayE.p2 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(playerRect.x / 2.f + 0.001f, 0.f), transform.getRotation()));
 
 				rayF.p1 = Physics::pixelToBox2dUnits(centerPosition);
-				rayF.p2 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(-playerRect.x / 2.f, 0.f), transform.getRotation()));
+				rayF.p2 = Physics::pixelToBox2dUnits(centerPosition + Math::rotateVector(sf::Vector2f(-playerRect.x / 2.f - 0.001f, 0.f), transform.getRotation()));
 			}
 			else
 			{
-				//If player is not moving, offset rays by 8 down in y axis
 				const sf::Vector2f offset(0.f, 10.f);
 
 				rayE.p1 = Physics::pixelToBox2dUnits(centerPosition + offset);
-				rayE.p2 = Physics::pixelToBox2dUnits(centerPosition + offset + Math::rotateVector(sf::Vector2f(playerRect.x / 2.f, 0.f), transform.getRotation()));
+				rayE.p2 = Physics::pixelToBox2dUnits(centerPosition + offset + Math::rotateVector(sf::Vector2f(playerRect.x / 2.f + 0.001f, 0.f), transform.getRotation()));
 
 				rayF.p1 = Physics::pixelToBox2dUnits(centerPosition + offset);
-				rayF.p2 = Physics::pixelToBox2dUnits(centerPosition + offset + Math::rotateVector(sf::Vector2f(-playerRect.x / 2.f, 0.f), transform.getRotation()));
+				rayF.p2 = Physics::pixelToBox2dUnits(centerPosition + offset + Math::rotateVector(sf::Vector2f(-playerRect.x / 2.f - 0.001f, 0.f), transform.getRotation()));
 			}
 		}
 		else
 		{
 			//Don't rotate rays while airborne
 			rayE.p1 = Physics::pixelToBox2dUnits(centerPosition);
-			rayE.p2 = Physics::pixelToBox2dUnits(centerPosition + sf::Vector2f(playerRect.x / 2.f, 0.f));
+			rayE.p2 = Physics::pixelToBox2dUnits(centerPosition + sf::Vector2f(playerRect.x / 2.f + 0.001f, 0.f));
 
 			rayF.p1 = Physics::pixelToBox2dUnits(centerPosition);
-			rayF.p2 = Physics::pixelToBox2dUnits(centerPosition + sf::Vector2f(-playerRect.x / 2.f, 0.f));
+			rayF.p2 = Physics::pixelToBox2dUnits(centerPosition + sf::Vector2f(-playerRect.x / 2.f - 0.001f, 0.f));
 		}
 
 		rayEResults = raycast(rayE, Layer::All);
@@ -289,8 +297,8 @@ namespace fl
 			rayD.p2 = Physics::pixelToBox2dUnits(sf::Vector2f(position.x + playerRect.x, position.y));
 		}
 
-		rayCResults = raycast(rayC, Layer::All);
-		rayDResults = raycast(rayD, Layer::All);
+		rayCResults = raycast(rayC, Layer::All ^ Layer::JumpThroughLand);
+		rayDResults = raycast(rayD, Layer::All ^ Layer::JumpThroughLand);
 	}
 
 	//Casts rays
@@ -349,6 +357,7 @@ namespace fl
 		//If they are not "equal", override the closest ray
 		if (!equalRayDistance) closerRay = minBDist < minADist ? true : false;
 
+		closerRayDistance = 2.f;
 		//Set variables based on closest ray
 		if (closerRay)
 		{
@@ -401,6 +410,62 @@ namespace fl
 			minFDist = 2.f;
 		}
 	}
+	void Player::updateRoofRays()
+	{
+		std::vector<float>::iterator minC = std::min_element(rayCResults.fractions.begin(), rayCResults.fractions.end());
+		std::vector<float>::iterator minD = std::min_element(rayDResults.fractions.begin(), rayDResults.fractions.end());
+
+		//Predefine ray variables
+		b2Vec2 rayCNormal;
+		b2Vec2 rayDNormal;
+		b2Vec2 rayCHitPoint;
+		b2Vec2 rayDHitPoint;
+
+		//Get the variables for the closest rays
+		if (minC != rayCResults.fractions.end())
+		{
+			minCDist = *minC;
+			int index = std::distance(rayCResults.fractions.begin(), minC);
+			rayCNormal = rayCResults.normals[index];
+			rayCHitPoint = rayCResults.points[index];
+		}
+		else
+		{
+			minCDist = 2.f;
+		}
+		if (minD != rayDResults.fractions.end())
+		{
+			minDDist = *minD;
+			int index = std::distance(rayDResults.fractions.begin(), minD);
+			rayDNormal = rayDResults.normals[index];
+			rayDHitPoint = rayDResults.points[index];
+		}
+		else
+		{
+			minDDist = 2.f;
+		}
+
+		bool closerRoofRay = playerVelocity.x > 0.f ? true : false;
+
+		//Check if the distances are approximately equal
+		bool equalRoofRayDistance = Math::nearEqual(minCDist, minDDist, 0.01f);
+
+		//If they are not "equal", override the closest ray
+		if (!equalRoofRayDistance) closerRoofRay = minDDist < minCDist ? true : false;
+
+		closerRoofRayDistance = 2.f;
+		//Set variables based on closest ray
+		if (closerRoofRay)
+		{
+			closerRoofRayDistance = minDDist;
+			roofRayAngle = minDAngle;
+		}
+		else
+		{
+			closerRoofRayDistance = minCDist;
+			roofRayAngle = minCAngle;
+		}
+	}
 
 	//Applies velocity to transforms
 	void Player::updatePosition()
@@ -423,12 +488,47 @@ namespace fl
 		transform.move(delta);
 		rb->getBody()->SetTransform(Physics::pixelToBox2dUnits(transform.getPosition()), Math::degToRad(transform.getRotation()));
 	}
+	void Player::updateMovementDirection()
+	{
+		if (std::abs(playerVelocity.x) >= std::abs(playerVelocity.y))
+		{
+			if (playerVelocity.x > 0.f) movementDirection = MovementDirection::Right;
+			else movementDirection = MovementDirection::Left;
+		}
+		else
+		{
+			if (playerVelocity.y > 0.f) movementDirection = MovementDirection::Down;
+			else movementDirection = MovementDirection::Up;
+		}
+	}
 
 	//Test for floor collision
 	bool Player::testFloorCollision()
 	{
 		float floorDistance = (closerRayDistance * playerRect.y) - playerRect.y / 2.f;
-		return (floorDistance < std::min(std::abs(playerVelocity.x) + 4.f, 14.f)); //Add line for playerVelocity.y when on walls
+		if (currentState == PlayerState::Grounded)
+		{
+			return (floorDistance < std::min(std::abs(playerVelocity.x) + 4.f, 14.f)); //Add line for playerVelocity.y when on walls
+		}
+		else if (currentState == PlayerState::Airborne)
+		{
+			updateMovementDirection();
+			if(closerRayDistance <= 0.55f)
+			{
+				if (movementDirection == MovementDirection::Down)
+				{
+					if (floorDistance >= -(playerVelocity.y + 8)) return true;
+				}
+				else if (movementDirection == MovementDirection::Right || movementDirection == MovementDirection::Left)
+				{
+					if (playerVelocity.y >= 0.f) return true;
+				}
+			}
+			return false;
+		}
+
+		fl::Debug::log("no floor collision state override! Defaulting to no collision");
+		return false;
 	}
 
 	//Change state
@@ -463,7 +563,11 @@ namespace fl
 							groundSpeed = Math::magnitude(playerVelocity) * (1.f - std::abs(dotProduct));
 						else
 							groundSpeed = -Math::magnitude(playerVelocity) * (1.f - std::abs(dotProduct));
+
+						relativePlayerVelocity.y = 0.f;
+						playerVelocity = Math::rotateVector(relativePlayerVelocity, 360.f - rayAngle);
 					}
+					transform.setRotation(360.f - rayAngle);
 				}
 				currentState = newState;
 				break;
@@ -498,7 +602,7 @@ namespace fl
 		bool xPositiveSpeed = groundSpeed > 0.f;
 
 		//If both the input direction and movement are in the same direction, use acceleration. If not, use deceleration
-		if (playerControls->directionalInput.x != 0.f && groundSpeed < topSpeed)
+		if (playerControls->directionalInput.x != 0.f && std::abs(groundSpeed) < topSpeed)
 		{
 			xPositiveInput == xPositiveSpeed ?
 				groundSpeed += playerControls->directionalInput.x * acceleration :
@@ -561,7 +665,7 @@ namespace fl
 		//Update position based on velocity
 		updatePosition();
 
-		//Rays
+		//Update rays after updating position
 		updateRays();
 		updateFloorRays();
 
@@ -593,27 +697,69 @@ namespace fl
 			alignDelta = Math::rotateVector(alignDelta, transform.getRotation());
 			move(alignDelta);
 			updateRotation();
+			updateRays();
+			updateFloorRays();
 		}
 		else
 		{
 			changeState(PlayerState::Airborne);
 		}
 	}
-
 	void Player::airTick()
 	{
 		// Note: Regardless of the Player's Ground Angle, their airborne sensors do not rotate. Air collision essentially ignores the Player's angle and treats it as floor mode at all times. 
 		updateRays();
 		updateFloorRays();
+		updateRoofRays();
+		updateWallRays();
 		
 		//Air has no distinction between acceleration and deceleration
 		playerVelocity.x += playerControls->directionalInput.x * acceleration * 2.f;
 
+		//Variable jump height
 		if (!playerControls->button1 && jumping)
 		{
 			if (playerVelocity.y < -4.f)
 				playerVelocity.y = -4.f;
 		}
+
+		//wall detect (ran before roof to stop roof-clipping
+		if (minEDist <= 1.f && playerVelocity.x > 0.f)
+		{
+			float intersectionDistance = (1.f - minEDist) * playerRect.x / 2.f;
+			move(sf::Vector2f(-intersectionDistance + 0.0001f, 0.f)); //Add small offset so ray is still in wall (no twitching)
+			playerVelocity.x = 0.f;
+		}
+		if (minFDist <= 1.f && playerVelocity.x < 0.f)
+		{
+			float intersectionDistance = (1.f - minFDist) * playerRect.x / 2.f;
+			move(sf::Vector2f(intersectionDistance - 0.0001f, 0.f)); //Add small offset so ray is still in wall (no twitching)
+			playerVelocity.x = 0.f;
+		}
+
+		//Update rays after moving
+		updateRays();
+		updateFloorRays();
+		updateRoofRays();
+
+		//roof detect
+		if (closerRoofRayDistance <= 1.f)
+		{
+			//1. remove velocity perpendicular to wall
+			sf::Vector2f localRoofVelocity = Math::rotateVector(playerVelocity, roofRayAngle);
+			localRoofVelocity.y = 0.f;
+			playerVelocity = Math::rotateVector(localRoofVelocity, 360.f - roofRayAngle);
+
+			//2. push out of wall
+			//std::cout << 1.f - closerRoofRayDistance << '\n';
+			float distance = (1.f - closerRoofRayDistance) * (playerRect.y / 2.f);
+			move(sf::Vector2f(0.f, distance + 0.0001f));
+		}
+
+		//Update rays after moving
+		updateRays();
+		updateFloorRays();
+		updateRoofRays();
 
 		//Apply air gravity
 		playerVelocity.y += gravity;
@@ -679,7 +825,7 @@ namespace fl
 	void Player::drawRay(Physics::ray& ray, sf::Color color)
 	{
 		Debug::drawLine(Physics::Box2dToPixelUnits(ray.p1), Physics::Box2dToPixelUnits(ray.p2), color);
-		Debug::drawRectangle(Physics::Box2dToPixelUnits(ray.p1), sf::Vector2f(0.01f, 0.01f), 0.f, 1.f, sf::Color::White);
+		Debug::drawRectangle(Physics::Box2dToPixelUnits(ray.p1), sf::Vector2f(0.005f, 0.005f), 0.f, 1.f, sf::Color(255, 255, 255, color.a));
 	}
 	void Player::drawDebug()
 	{
@@ -696,19 +842,20 @@ namespace fl
 		rect.setFillColor(sf::Color::Transparent);
 		rect.setOutlineColor(sf::Color::Blue);
 		rect.setOutlineThickness(1.f);
-		//ApplicationManager::getWindow()->draw(rect);
+		ApplicationManager::getWindow()->draw(rect);
 
+		sf::Int8 rayTransparency = 50;
 		//Draw player rays
-		drawRay(rayA, sf::Color::Green);
-		drawRay(rayB, sf::Color(0, 255, 255));
+		drawRay(rayA, sf::Color(0, 255, 0, rayTransparency));
+		drawRay(rayB, sf::Color(0, 255, 255, rayTransparency));
 
-		drawRay(rayE, sf::Color(255, 192, 203));
-		drawRay(rayF, sf::Color::Red);
+		drawRay(rayE, sf::Color(255, 192, 203, rayTransparency));
+		drawRay(rayF, sf::Color(255, 0, 0, rayTransparency));
 
-		drawRay(rayC, sf::Color::Blue);
-		drawRay(rayD, sf::Color::Yellow);
+		drawRay(rayC, sf::Color(0, 0, 255, rayTransparency));
+		drawRay(rayD, sf::Color(255, 255, 0, equalRayDistance));
 
 		//Draw hit ray
-		Debug::drawLine(Physics::Box2dToPixelUnits(rayHitPoint), Physics::Box2dToPixelUnits(rayHitPoint) + Physics::Box2dToPixelUnits(rayNormal), sf::Color::White);
+		Debug::drawLine(Physics::Box2dToPixelUnits(rayHitPoint), Physics::Box2dToPixelUnits(rayHitPoint) + Physics::Box2dToPixelUnits(rayNormal), sf::Color(255, 255, 255, rayTransparency));
 	}
 }

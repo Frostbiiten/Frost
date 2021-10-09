@@ -16,7 +16,8 @@ namespace fl
 		Enemy = 1 << 2,
 		Collectible = 1 << 3,
 		Land = 1 << 4,
-		All = Default | Player | Enemy | Collectible | Land,
+		JumpThroughLand = 1 << 5,
+		All = Default | Player | Enemy | Collectible | Land | JumpThroughLand,
 	};
 
 	//Forward declarations

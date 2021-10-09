@@ -45,7 +45,7 @@ namespace fl
 
 	gameObject::~gameObject()
 	{
-		components.clear();
+		components.clear(); 
 		fl::Debug::log("Destroy gameobject " + uuids::to_string(uuid));
 	}
 

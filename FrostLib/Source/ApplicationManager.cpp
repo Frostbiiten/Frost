@@ -63,7 +63,6 @@ namespace fl
 			fpsStream << std::fixed << std::setprecision(2) << fps;
 			ImGui::Text("FPS: %s", fpsStream.str().c_str());
 
-			ImGui::Text("");
 			ImGui::Separator();
 			ImGui::Text("");
 

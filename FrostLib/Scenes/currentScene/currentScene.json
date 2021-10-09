@@ -85,7 +85,7 @@
           }
         ]
       },
-      "threshold": 1.0,
+      "threshold": 1,
       "transform": {
         "origin": [
           0.0,
@@ -97,8 +97,8 @@
         ],
         "rotation": 0.0,
         "scale": [
-          1.0,
-          1.0
+          0.75,
+          0.75
         ]
       },
       "type": "terrain",
@@ -174,13 +174,221 @@
           0.0
         ],
         "position": [
-          200.0,
-          -300.0
+          100.0,
+          -225.0
         ],
         "rotation": 180.0,
         "scale": [
-          1.0,
-          1.0
+          0.75,
+          0.75
+        ]
+      },
+      "type": "terrain",
+      "uuid": "06da12c9-377d-484e-8831-04852c7d606c"
+    },
+    {
+      "active": true,
+      "layer": 32,
+      "name": "box",
+      "spline": {
+        "loop": true,
+        "nodes": [
+          {
+            "point": [
+              -100.0,
+              50.0
+            ]
+          },
+          {
+            "point": [
+              100.0,
+              50.0
+            ]
+          },
+          {
+            "point": [
+              100.0,
+              -50.0
+            ]
+          },
+                    {
+            "point": [
+              -100.0,
+              -50.0
+            ]
+          }
+        ]
+      },
+      "threshold": 0.2,
+      "transform": {
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "position": [
+          50.0,
+          -30.0
+        ],
+        "rotation": 0.0,
+        "scale": [
+          0.75,
+          0.05
+        ]
+      },
+      "type": "terrain",
+      "uuid": "06da12c9-377d-484e-8831-04852c7d606c"
+    },
+    {
+      "active": true,
+      "layer": 16,
+      "name": "box",
+      "spline": {
+        "loop": true,
+        "nodes": [
+          {
+            "point": [
+              -100.0,
+              100.0
+            ]
+          },
+          {
+            "point": [
+              100.0,
+              100.0
+            ]
+          },
+          {
+            "point": [
+              100.0,
+              -100.0
+            ]
+          },
+                    {
+            "point": [
+              -100.0,
+              -100.0
+            ]
+          }
+        ]
+      },
+      "threshold": 0.2,
+      "transform": {
+        "origin": [
+          0.5,
+          0.0
+        ],
+        "position": [
+          50.0,
+          -40.0
+        ],
+        "rotation": 0.0,
+        "scale": [
+          0.2,
+          0.1
+        ]
+      },
+      "type": "terrain",
+      "uuid": "06da12c9-377d-484e-8831-04852c7d606c"
+    },
+    {
+      "active": true,
+      "layer": 16,
+      "name": "box",
+      "spline": {
+        "loop": true,
+        "nodes": [
+          {
+            "point": [
+              -100.0,
+              100.0
+            ]
+          },
+          {
+            "point": [
+              100.0,
+              100.0
+            ]
+          },
+          {
+            "point": [
+              100.0,
+              -100.0
+            ]
+          },
+                    {
+            "point": [
+              -100.0,
+              -100.0
+            ]
+          }
+        ]
+      },
+      "threshold": 0.2,
+      "transform": {
+        "origin": [
+          0.5,
+          0.0
+        ],
+        "position": [
+          60.0,
+          -35.0
+        ],
+        "rotation": 0.0,
+        "scale": [
+          0.2,
+          0.05
+        ]
+      },
+      "type": "terrain",
+      "uuid": "06da12c9-377d-484e-8831-04852c7d606c"
+    },
+    {
+      "active": true,
+      "layer": 16,
+      "name": "box",
+      "spline": {
+        "loop": true,
+        "nodes": [
+          {
+            "point": [
+              -100.0,
+              100.0
+            ]
+          },
+          {
+            "point": [
+              100.0,
+              100.0
+            ]
+          },
+          {
+            "point": [
+              100.0,
+              -100.0
+            ]
+          },
+                    {
+            "point": [
+              -100.0,
+              -100.0
+            ]
+          }
+        ]
+      },
+      "threshold": 0.2,
+      "transform": {
+        "origin": [
+          0.5,
+          0.0
+        ],
+        "position": [
+          40.0,
+          -35.0
+        ],
+        "rotation": 0.0,
+        "scale": [
+          0.2,
+          0.05
         ]
       },
       "type": "terrain",

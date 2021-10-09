@@ -17,6 +17,14 @@ namespace fl
 		Debug
 	};
 
+	enum class MovementDirection
+	{
+		Up,
+		Down,
+		Left,
+		Right
+	};
+
 	class Player : public gameObject
 	{
 	public:
@@ -34,10 +42,12 @@ namespace fl
 		Physics::maskedRayCallback raycast(Physics::ray& input, Layer layerMask);
 		void updateFloorRays();
 		void updateWallRays();
+		void updateRoofRays();
 
 		void updatePosition();
 		void updateRotation(bool truncate = false);
 		void move(sf::Vector2f delta);
+		void updateMovementDirection();
 
 		bool testFloorCollision();
 
