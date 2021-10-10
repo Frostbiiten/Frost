@@ -18,23 +18,29 @@ namespace fl
 		sf::Time deltaTime;
 		sf::Clock imguiClock;
 		sf::Clock deltaTimeClock;
+		sf::Clock appClock;
 
 		//Pixel rendering
 		sf::RenderTexture* buffer;
 
 		std::vector<std::string> imguiDebugBuffer;
 
-		void awake()
-		{
-			fl::Debug::log("Application running awake");
-			currentScene.loadScene("currentScene");
-			currentScene.awake();
-		}
+		//Thread for loading
+		std::thread loadThread;
 
-		void start()
+		float logoTimerBegin;
+		sf::Texture* logoImage;
+		sf::Sprite logo;
+		AnimationCurve logoAnimationGraph;
+		void displayLoadingScreen()
 		{
-			fl::Debug::log("Application running start");
-			currentScene.start();
+			std::string output;
+			AssetMan::readFile("SonicTeam.png", output, true, "Common/");
+			logoImage = new sf::Texture();
+			logoImage->loadFromMemory(output.c_str(), output.size());
+			logo.setTexture(*logoImage);
+			AssetMan::readFile("logoCurve.anim", output, true, "Common/");
+			logoAnimationGraph = AnimationCurve(nlohmann::json::parse(output));
 		}
 
 		void update()
@@ -80,8 +86,7 @@ namespace fl
 
 		void init()
 		{
-			//Run awake
-			awake();
+			appClock.restart();
 
 			//Initiating window and set viewsize
 			windowPtr = new sf::RenderWindow(sf::VideoMode(1060, 600), applicationName, sf::Style::Default);
@@ -94,9 +99,6 @@ namespace fl
 			buffer = &buf;
 			sf::Sprite bufferSprite = sf::Sprite(buf.getTexture());
 
-			//Run start
-			start();
-
 			//Fixed timestep timer
 			float fixedTimer = 0;
 
@@ -104,6 +106,79 @@ namespace fl
 			ImGui::SFML::Init(*windowPtr);
 			windowPtr->resetGLStates();
 
+			//Load entry scene
+			loadThread = std::thread(&scene::loadScene, &currentScene, "currentScene");
+			displayLoadingScreen();
+			logoTimerBegin = appClock.getElapsedTime().asSeconds();
+
+			//Loading cycle
+			while (currentScene.loading && windowPtr->isOpen())
+			{
+				// Process events
+				sf::Event event;
+				while (windowPtr->pollEvent(event))
+				{
+					if (event.type == sf::Event::Closed)
+					{
+						fl::Debug::log("Closing window");
+						windowPtr->close();
+						currentScene.clearScene();
+						return;
+					}
+					if (event.type == sf::Event::Resized)
+					{
+						sf::Vector2u size = windowPtr->getSize();
+						constexpr float heightRatio = 30.f / 53.f;
+						constexpr float widthRatio = 53.f / 30.f;
+						#pragma warning(push)
+						#pragma warning(disable: 4244)
+						if (size.y * widthRatio <= size.x)
+							size.x = size.y * widthRatio;
+						else if (size.x * heightRatio <= size.y)
+							size.y = size.x * heightRatio;
+						#pragma warning(pop)
+						windowPtr->setSize(size);
+					}
+				}
+
+				// Handle Deltatime + fps
+				deltaTime = deltaTimeClock.restart();
+				fps = 1000000.f / deltaTime.asMicroseconds();
+
+				// Handle Input
+				mainPlayer.processInput();
+				mainPlayer.elapseTimer(deltaTime.asMilliseconds());
+
+				// Clear screen
+				windowPtr->clear(backgroundColor);
+				buffer->clear(sf::Color::Transparent);
+
+				// Handle fixedUpdate
+				while (fixedTimer > fixedTimestep)
+				{
+					fixedTimer -= fixedTimestep;
+					//fixedUpdate();
+				}
+				fixedTimer += deltaTime.asMilliseconds();
+				
+				//update();
+				logo.setOrigin(logo.getTexture()->getSize().x / 2, logo.getTexture()->getSize().y / 2);
+				float size = logoAnimationGraph.evaluate(appClock.getElapsedTime().asSeconds() - logoTimerBegin);
+				logo.setScale(sf::Vector2f(size, size));
+				fl::Debug::log("Loading Progress : " + std::to_string(currentScene.loadingProgress * 100.f) + "%");
+			
+				windowPtr->draw(logo);
+
+				// Render after the scene's code has been run
+				buffer->display();
+				bufferSprite.setOrigin(pixelSize / 2.f);
+				windowDrawElementRelative(bufferSprite);
+
+				// Display the window
+				windowPtr->display();
+			}
+			loadThread.join();
+			Debug::log("Finished loading scene");
 			while (windowPtr->isOpen())
 			{
 				// Process events

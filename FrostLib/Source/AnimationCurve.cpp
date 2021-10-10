@@ -296,7 +296,7 @@ namespace fl
 			if (pos.x > t) break;
 			oldPos = pos;
 		}
-
+		
 		//Approximate where between the 2 points
 		return fl::lerp(oldPos, pos, fl::inverseLerp(oldPos.x, pos.x, t)).y;
 	}

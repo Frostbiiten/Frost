@@ -6,6 +6,7 @@
 #include <Physics.h>
 #include <Utils.h>
 #include <vector>
+#include <thread>
 
 //Custom object types
 #include <Player.h>
@@ -25,20 +26,10 @@ namespace fl
 	
 	void scene::awake()
 	{
-		/*
-		gameObjects.push_back(std::make_unique<SplineTerrain>(this));
-		SplineTerrain* terrainPtr = dynamic_cast<SplineTerrain*>(gameObjects[gameObjects.size() - 1].get());
-		terrainPtr->spline.addNode(sf::Vector2f(0.f, 100.f), sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f), 0);
-		terrainPtr->spline.addNode(sf::Vector2f(50.f, 0.f), sf::Vector2f(-50.f, 0.f), sf::Vector2f(50.f, 0.f), 1);
-		terrainPtr->spline.addNode(sf::Vector2f(100.f, 100.f), sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f), 2);
-		terrainPtr->generateOutline();
-		terrainPtr->simplifyOutline();
-		terrainPtr->generateShape();
-		terrainPtr->generateCollider();
-		*/
-		//saveScene(4);
 		for (auto& element : gameObjects)
 			if (element->active) element->awake();
+
+		start();
 	}
 	
 	void scene::start()
@@ -101,6 +92,8 @@ namespace fl
 
 	bool scene::loadScene(std::string sceneName)
 	{
+		loading = true;
+
 		//Json representation
 		nlohmann::json json;
 
@@ -116,16 +109,25 @@ namespace fl
 		catch (nlohmann::json::exception err)
 		{
 			fl::Debug::log("JSON ERROR " + err.id + std::string(": ") + err.what());
+			loading = false;
 			return false;
 		}
 
+		int totalCount = json["gameObjects"].size();
+		int index = 0;
+		loadingProgress = 0.f;
+
 		//Construct all the scene elements
-		gameObjects.reserve(json["gameObjects"].size());
+		gameObjects.reserve(totalCount);
 		for (nlohmann::json& element : json["gameObjects"])
 		{
 			createGameObject(element);
+			index++;
+			loadingProgress = (float)json["gameObjects"].size() / (float)index;
 		}
 
+		loading = false;
+		awake();
 		return true;
 	}
 

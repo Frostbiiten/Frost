@@ -11,7 +11,7 @@
 bool fl::AssetMan::init()
 {
 	if (PHYSFS_isInit()) return false;
-	if (!PHYSFS_init(NULL)) arc_logLatestError();
+	if (!PHYSFS_init(NULL) && isInit) arc_logLatestError();
 	PHYSFS_permitSymbolicLinks(1);
 
 	//Mount all archives in subdirectories.
@@ -26,9 +26,6 @@ bool fl::AssetMan::init()
 			arc_mountDir(entry.path().string());
 		}
 	}
-
-	//Open b2d dump
-	
 
 	isInit = true;
 	return true;
@@ -136,6 +133,51 @@ std::string fl::AssetMan::getBaseDirectory()
 	return std::filesystem::current_path().string();
 }
 
+bool fl::AssetMan::fileSize(std::string fileName, bool relative, std::string path)
+{
+	if (!isInit) init();
+
+	std::string filePath;
+	if (relative)
+		filePath = "./" + path + fileName;
+	else
+		filePath = path + fileName;
+
+	//STD::FILESYSTEM SECTION
+
+	//Only run std::filesytem code if it exists in the current path and is a normal file
+	if (std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath))
+	{
+		std::error_code error;
+		int fileSize = std::filesystem::file_size(filePath, error);
+		if (error.value() == 0) return fileSize;
+		else
+		{
+			fs_logError(error);
+			return -1;
+		}
+	}
+
+	//PHYSFS SECTION
+
+	//Removes ./ for physfs
+	std::string PHYSFSPath = filePath.substr(2, filePath.size() - 2);
+	PHYSFS_file* fileData = PHYSFS_openRead(PHYSFSPath.c_str());
+
+	if (fileData != nullptr)
+	{
+		//Attempt to close file handle
+		if (!PHYSFS_close(fileData)) arc_logLatestError();
+
+		//Return file size in bytes
+		return PHYSFS_fileLength(fileData);
+	}
+	else arc_logLatestError();
+
+	//defults to failiure
+	return -1;
+}
+
 bool fl::AssetMan::readFile(std::string fileName, std::string& output, bool relative, std::string path)
 {
 	if (!isInit) init();
@@ -152,7 +194,8 @@ bool fl::AssetMan::readFile(std::string fileName, std::string& output, bool rela
 	if (std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath))
 	{
 		output.clear();
-		std::ifstream stream(filePath);
+		std::ifstream stream(filePath, std::ios::binary);
+		stream.unsetf(std::ios::skipws);
 		if (!stream.is_open()) return false;
 		output = std::string((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
 		return true;
@@ -186,21 +229,29 @@ bool fl::AssetMan::readFile(std::string fileName, std::string& output, bool rela
 			//Data has not been read properly, clear buffer memory
 			delete[] buffer;
 			arc_logLatestError();
+
+			//Attempt to close file handle
+			if (!PHYSFS_close(fileData)) arc_logLatestError();
+
 			return false;
 		}
 		else
 		{
 			//Copies buffer into output
-			output = std::string(buffer);
+			output = std::string(buffer, fileSize);
+
+			//Attempt to close file handle
+			if (!PHYSFS_close(fileData)) arc_logLatestError();
+
 			//clear buffer memory
 			delete[] buffer;
 			return true;
 		}
-
-		//Attempt to close file handle
-		if (!PHYSFS_close(fileData)) arc_logLatestError();
 	}
 	else arc_logLatestError();
+
+	//Attempt to close file handle
+	if (!PHYSFS_close(fileData)) arc_logLatestError();
 
 	//defults to failiure
 	return false;

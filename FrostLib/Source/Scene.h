@@ -17,6 +17,9 @@ namespace fl
 	struct scene
 	{
 		std::string sceneName;
+		bool loading;
+		//How much of the scene has been loaded (from 0 to 1)
+		float loadingProgress;
 
 		//Top-layer objects
 		std::vector<std::unique_ptr<gameObject>> gameObjects;

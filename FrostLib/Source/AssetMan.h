@@ -35,6 +35,9 @@ namespace fl
 		//Returns the directory that the application was launched from
 		std::string getBaseDirectory();
 
+		//Get file size in bytes
+		bool fileSize(std::string fileName, bool relative, std::string path);
+
 		//Loads data from file into string - prefers std::filesystem over
 		bool readFile(std::string fileName, std::string& output, bool relative = false, std::string path = "");
 

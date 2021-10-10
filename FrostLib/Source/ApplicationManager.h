@@ -37,12 +37,6 @@ namespace fl
 		//Runs to start the application
 		void init();
 
-		//Runs before the window is created or any object-specific code is ran
-		void awake();
-
-		//Runs after the window is created. Object-specific code starts running
-		void start();
-
 		//Runs every frame while the application is open
 		void update();
 
