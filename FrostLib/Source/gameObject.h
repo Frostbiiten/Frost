@@ -47,10 +47,10 @@ namespace fl
 		std::vector<std::unique_ptr<gameObject>> children;
 
 		//Constructor/Destructor for non-serialized objects
-		gameObject(fl::scene* scene = nullptr, gameObject* parent = nullptr, std::string name = "", Layer layer = Layer::Default, sf::Vector2f position = sf::Vector2f(0.f, 0.f), float rotation = 0.f, sf::Vector2f scale = sf::Vector2f(1.f, 1.f));
+		gameObject(std::string name = "", Layer layer = Layer::Default, sf::Vector2f position = sf::Vector2f(0.f, 0.f), float rotation = 0.f, sf::Vector2f scale = sf::Vector2f(1.f, 1.f));
 		
 		//Sample json constructor
-		gameObject(nlohmann::json json, fl::scene* scene = nullptr);
+		gameObject(nlohmann::json json);
 
 		//Remove copy and assign
 		gameObject(const gameObject&) = delete;

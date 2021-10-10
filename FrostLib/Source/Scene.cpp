@@ -69,62 +69,34 @@ namespace fl
 	{
 		std::string jsonType = json["type"];
 
-		//Custom types can be defined here, they should be ordered from most common to rarest. i.e. collectibles (hundreds) to player (one)
-		if (!parent)
+		std::vector<std::unique_ptr<gameObject>>* objectVector = parent ? &parent->children : &gameObjects;
+
+		if (jsonType == "terrain")
 		{
-			if (jsonType == "terrain")
-			{
-				gameObjects.push_back(std::make_unique<SplineTerrain>(json, this));
-			}
-			else if (jsonType == "player")
-			{
-				gameObjects.push_back(std::make_unique<Player>(json, this));
-			}
-			else if (jsonType == "basic")
-			{
-				gameObjects.push_back(std::make_unique<gameObject>(json, this));
-			}
-			else
-				throw std::invalid_argument(Formatter() << "No appropriate constructor for object type \"" << jsonType << "\"");
-
-			//Returns newly added object
-			gameObject* obj = gameObjects[gameObjects.size() - 1].get();
-
-			for (auto& child : json["children"])
-			{
-				createGameObject(child, obj);
-			}
-
-			//Returns newly added object
-			return obj;
+			objectVector->push_back(std::make_unique<SplineTerrain>(json));
+		}
+		else if (jsonType == "player")
+		{
+			objectVector->push_back(std::make_unique<Player>(json));
+		}
+		else if (jsonType == "basic")
+		{
+			objectVector->push_back(std::make_unique<gameObject>(json));
 		}
 		else
+			throw std::invalid_argument(Formatter() << "No appropriate constructor for object type \"" << jsonType << "\"");
+
+		//Returns newly added object
+		gameObject* obj = gameObjects[gameObjects.size() - 1].get();
+		obj->ownerScene = this;
+
+		for (auto& child : json["children"])
 		{
-			if (jsonType == "terrain")
-			{
-				gameObjects.push_back(std::make_unique<SplineTerrain>(json, this));
-			}
-			else if (jsonType == "player")
-			{
-				parent->children.push_back(std::make_unique<Player>(json, this));
-			}
-			else if (jsonType == "basic")
-			{
-				parent->children.push_back(std::make_unique<gameObject>(json, this));
-			}
-			else
-				throw std::invalid_argument(Formatter() << "No appropriate constructor for object type \"" << jsonType << "\"");
-
-			gameObject* obj = parent->children[gameObjects.size() - 1].get();
-
-			for (auto& child : json["children"])
-			{
-				createGameObject(child, obj);
-			}
-
-			//Returns newly added object
-			return obj;
+			createGameObject(child, obj);
 		}
+
+		//Returns newly added object
+		return obj;
 	}
 
 	bool scene::loadScene(std::string sceneName)

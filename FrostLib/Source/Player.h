@@ -28,7 +28,7 @@ namespace fl
 	class Player : public gameObject
 	{
 	public:
-		Player(nlohmann::json json, scene* scene);
+		Player(nlohmann::json json);
 		nlohmann::json serialize();
 	protected:
 		PlayerState currentState;

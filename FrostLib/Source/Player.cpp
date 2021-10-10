@@ -100,7 +100,7 @@ namespace fl
 	b2Vec2 rayNormal{0, 1};
 	b2Vec2 rayHitPoint{};
 
-	Player::Player(nlohmann::json json, scene* scene)
+	Player::Player(nlohmann::json json)
 	{
 		name = json["name"];
 		uuid = uuids::uuid::from_string(json["uuid"].get<std::string>());

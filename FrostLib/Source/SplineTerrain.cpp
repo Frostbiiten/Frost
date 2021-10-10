@@ -5,7 +5,7 @@
 
 namespace fl
 {
-	SplineTerrain::SplineTerrain(scene* scene, float simplifyThreshold)
+	SplineTerrain::SplineTerrain(float simplifyThreshold)
 	{
 		uuid = uuids::uuid_random_generator{}();
 		name = uuids::to_string(uuid);
@@ -16,7 +16,7 @@ namespace fl
 		this->simplifyThreshold = simplifyThreshold;
 	}
 
-	SplineTerrain::SplineTerrain(nlohmann::json json, scene* scene)
+	SplineTerrain::SplineTerrain(nlohmann::json json)
 	{
 		name = json["name"];
 		uuid = uuids::uuid::from_string(json["uuid"].get<std::string>());

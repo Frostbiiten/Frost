@@ -3,21 +3,10 @@
 
 namespace fl
 {
-	gameObject::gameObject(fl::scene* scene, gameObject* parent, std::string name, Layer layer, sf::Vector2f position, float rotation, sf::Vector2f scale)
+	gameObject::gameObject(std::string name, Layer layer, sf::Vector2f position, float rotation, sf::Vector2f scale)
 	{
 		active = true;
-		this->ownerScene = scene;
 		uuid = uuids::uuid_random_generator{}();
-		if (parent)
-		{
-			parent->moveChildFrom(this, scene);
-			this->name != "" ? this->name = name : this->name = "gameObject " + std::to_string(this->parent->children.size());
-		}
-		else
-		{
-			this->name != "" ? this->name = name : this->name = uuids::to_string(uuid);
-		}
-
 		this->layer = layer;
 
 		transform.setPosition(position);
@@ -29,18 +18,13 @@ namespace fl
 		validLocalTransform = false;
 	}
 
-	gameObject::gameObject(nlohmann::json json, fl::scene* scene)
+	gameObject::gameObject(nlohmann::json json)
 	{
 		name = json["name"];
 		uuid = uuids::uuid::from_string(json["uuid"].get<std::string>());
 		layer = json["layer"];
 		active = json["active"];
 		transform = deserializeTransform(json["transform"]);
-
-		for (auto& child : json["children"])
-		{
-			scene->createGameObject(child, this);
-		}
 	}
 
 	gameObject::~gameObject()
