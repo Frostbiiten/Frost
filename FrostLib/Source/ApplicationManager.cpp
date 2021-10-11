@@ -14,11 +14,34 @@ namespace fl
 		fl::scene currentScene{ "currentScene" };
 		sf::RenderWindow* windowPtr;
 
-		//20 milliseconds = 0.02 seconds ~ 50 times per frame
 		sf::Time deltaTime;
 		sf::Clock imguiClock;
 		sf::Clock deltaTimeClock;
 		sf::Clock appClock;
+		unsigned long long frameCount;
+
+		namespace fpsCounter
+		{
+			namespace
+			{
+				constexpr float interval = 1.f;
+				unsigned long long referenceFrame;
+				sf::Clock clock;
+			}
+
+			void init()
+			{
+				while (true)
+				{
+					fps = (frameCount - referenceFrame) / interval;
+
+					//Reset clock, set current frame and sleep
+					sf::Time elapsed = clock.restart();
+					referenceFrame = frameCount;
+					sf::sleep(sf::seconds(interval));
+				}
+			}
+		}
 
 		//Pixel rendering
 		sf::RenderTexture* buffer;
@@ -29,19 +52,12 @@ namespace fl
 		std::thread loadThread;
 
 		float logoTimerBegin;
-		//sf::Texture* logoImage;
 		sf::Sprite logo;
-		sf::Sprite logo2;
 		AnimationCurve logoAnimationGraph;
 		void displayLoadingScreen()
 		{
 			std::string output;
-			//AssetMan::readFile("SonicTeam.png", output, true, "Common/");
-			//logoImage = new sf::Texture();
-			//logoImage->loadFromMemory(output.c_str(), output.size());
-			//logo.setTexture(*logoImage);
 			logo.setTexture(*ResourceMan::getTexture("Common/", "SonicTeam.png", true));
-			logo2.setTexture(*ResourceMan::getTexture("Common/", "sample.png", true));
 			AssetMan::readFile("logoCurve.anim", output, true, "Common/");
 			logoAnimationGraph = AnimationCurve(nlohmann::json::parse(output));
 		}
@@ -114,9 +130,14 @@ namespace fl
 			displayLoadingScreen();
 			logoTimerBegin = appClock.getElapsedTime().asSeconds();
 
+			//Start fps counter
+			sf::Thread fpsThread(&fpsCounter::init);
+			fpsThread.launch();
+
 			//Loading cycle
 			while (currentScene.loading && windowPtr->isOpen())
 			{
+				frameCount++;
 				// Process events
 				sf::Event event;
 				while (windowPtr->pollEvent(event))
@@ -146,7 +167,6 @@ namespace fl
 
 				// Handle Deltatime + fps
 				deltaTime = deltaTimeClock.restart();
-				fps = 1000000.f / deltaTime.asMicroseconds();
 
 				// Handle Input
 				mainPlayer.processInput();
@@ -168,7 +188,6 @@ namespace fl
 				logo.setOrigin(logo.getTexture()->getSize().x / 2, logo.getTexture()->getSize().y / 2);
 				float size = logoAnimationGraph.evaluate(appClock.getElapsedTime().asSeconds() - logoTimerBegin);
 				logo.setScale(sf::Vector2f(size, size));
-				fl::Debug::log("Loading Progress : " + std::to_string(currentScene.loadingProgress * 100.f) + "%");
 			
 				windowPtr->draw(logo);
 
@@ -184,6 +203,7 @@ namespace fl
 			Debug::log("Finished loading scene");
 			while (windowPtr->isOpen())
 			{
+				frameCount++;
 				// Process events
 				sf::Event event;
 				while (windowPtr->pollEvent(event))
@@ -213,7 +233,6 @@ namespace fl
 
 				// Handle Deltatime + fps
 				deltaTime = deltaTimeClock.restart();
-				fps = 1000000.f / deltaTime.asMicroseconds();
 
 				// Handle Input
 				mainPlayer.processInput();

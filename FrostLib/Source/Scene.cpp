@@ -12,6 +12,7 @@
 #include <Player.h>
 #include <SplineTerrain.h>
 #include <AudioSource.h>
+#include <MusicPlayer.h>
 
 namespace fl
 {
@@ -75,6 +76,10 @@ namespace fl
 		{
 			objectVector->push_back(std::make_unique<Player>(json));
 		}
+		else if (jsonType == "MusicPlayer")
+		{
+			objectVector->push_back(std::make_unique<Audio::MusicPlayer>(json));
+		}
 		else if (jsonType == "basic")
 		{
 			objectVector->push_back(std::make_unique<gameObject>(json));
@@ -82,9 +87,10 @@ namespace fl
 		else
 			throw std::invalid_argument(Formatter() << "No appropriate constructor for object type \"" << jsonType << "\"");
 
-		//Returns newly added object
 		gameObject* obj = gameObjects[gameObjects.size() - 1].get();
 		obj->ownerScene = this;
+
+		obj->customInit();
 
 		for (auto& child : json["children"])
 		{
@@ -128,7 +134,7 @@ namespace fl
 		{
 			createGameObject(element);
 			index++;
-			loadingProgress = (float)json["gameObjects"].size() / (float)index;
+			loadingProgress = (float)index / (float)json["gameObjects"].size();
 		}
 
 		loading = false;

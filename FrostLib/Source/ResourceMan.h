@@ -9,6 +9,7 @@ namespace fl
 	{
 		sf::Texture* getTexture(std::string path, std::string name, bool relative = false);
 		sf::SoundBuffer* getSound(std::string path, std::string name, bool relative = false);
+		sf::Music* getMusic(std::string path, std::string name, bool relative = false);
 		void purgeResources();
 	}
 }

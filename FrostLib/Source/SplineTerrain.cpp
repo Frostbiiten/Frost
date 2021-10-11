@@ -170,8 +170,8 @@ namespace fl
 		for (auto& tri : shape)
 		{
 			float x = i / (float)shape.size();
-			//tri.setFillColor(sf::Color(x * 255, 0, 0));
-			//ApplicationManager::bufferDrawElement(tri);
+			tri.setFillColor(sf::Color(x * 255, 0, 0));
+			ApplicationManager::bufferDrawElement(tri);
 
 			Debug::drawLine(tri.getPoint(0), tri.getPoint(1), sf::Color(10 + x * 255, 0, 0));
 			Debug::drawLine(tri.getPoint(1), tri.getPoint(2), sf::Color(0, 10 + x * 255, 0));

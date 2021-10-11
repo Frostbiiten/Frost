@@ -172,6 +172,7 @@
     <ClCompile Include="Source\InputMan.cpp" />
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\MathUtil.cpp" />
+    <ClCompile Include="Source\MusicPlayer.cpp" />
     <ClCompile Include="Source\Physics.cpp" />
     <ClCompile Include="Source\Player.cpp" />
     <ClCompile Include="Source\ResourceMan.cpp" />
@@ -191,6 +192,7 @@
     <ClInclude Include="Source\Graph.h" />
     <ClInclude Include="Source\InputMan.h" />
     <ClInclude Include="Source\MathUtil.h" />
+    <ClInclude Include="Source\MusicPlayer.h" />
     <ClInclude Include="Source\Physics.h" />
     <ClInclude Include="Source\Player.h" />
     <ClInclude Include="Source\ResourceMan.h" />

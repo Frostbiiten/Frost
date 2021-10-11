@@ -397,9 +397,12 @@
     {
       "active": true,
       "layer": 1,
-      "name": "audiosource",
-      "preLoad": false,
-      "clipName": "song.flac",
+      "name": "music player",
+      "preLoad": true,
+      "autoPlay": true,
+      "clipName": "song.wav",
+      "common": true,
+      "loop": true,
       "transform": {
         "origin": [
           0.5,
@@ -415,7 +418,7 @@
           1.0
         ]
       },
-      "type": "AudioSource",
+      "type": "MusicPlayer",
       "uuid": "0e173aab-35a7-4922-9a37-d6653e5be013"
     }
   ]

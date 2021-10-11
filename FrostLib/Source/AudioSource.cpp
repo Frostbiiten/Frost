@@ -1,4 +1,4 @@
-#include "AudioSource.h"
+#include <AudioSource.h>
 
 #include <AssetMan.h>
 #include <ResourceMan.h>
@@ -17,11 +17,11 @@ namespace fl
 			transform = deserializeTransform(json["transform"]);
 			clipName = json["clipName"];
 			preLoad = json["preLoad"];
-			if (preLoad) loadAudio(*this);
+			common = json["common"];
 			loaded = preLoad;
 		}
 
-		AudioSource::AudioSource(std::string clipName, bool preLoad)
+		AudioSource::AudioSource(std::string clipName, bool preLoad, bool common)
 		{
 			uuid = uuids::uuid_random_generator{}();
 			name = uuids::to_string(uuid);
@@ -30,7 +30,7 @@ namespace fl
 			transform = sf::Transformable();
 			this->clipName = clipName;
 			this->preLoad = preLoad;
-			if (preLoad) loadAudio(*this);
+			this->common = common;
 			loaded = preLoad;
 		}
 
@@ -41,6 +41,7 @@ namespace fl
 			json["type"] = "AudioSource";
 			json["clipName"] = clipName;
 			json["preLoad"] = preLoad;
+			json["common"] = common;
 
 			for (auto& child : children)
 			{
@@ -50,9 +51,9 @@ namespace fl
 			return json;
 		}
 
-		void AudioSource::awake()
+		void AudioSource::customInit()
 		{
-			play();
+			if (preLoad) loadAudio(*this);
 		}
 
 		void AudioSource::play()
@@ -65,7 +66,8 @@ namespace fl
 		{
 			try
 			{
-				audioSource.sound.setBuffer(*ResourceMan::getSound("Scenes/" + audioSource.ownerScene->sceneName + "/Audio/", audioSource.clipName, true));
+				if (audioSource.common) audioSource.sound.setBuffer(*ResourceMan::getSound("Common/Audio/", audioSource.clipName, true));
+				else audioSource.sound.setBuffer(*ResourceMan::getSound("Scenes/" + audioSource.ownerScene->sceneName + "/Audio/", audioSource.clipName, true));
 			}
 			catch (std::runtime_error err)
 			{

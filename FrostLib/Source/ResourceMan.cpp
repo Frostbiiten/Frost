@@ -12,6 +12,7 @@ namespace fl
 		std::map<std::string, std::unique_ptr<sf::Texture>> textureMap;
 		std::map<std::string, std::unique_ptr<sf::SoundBuffer>> soundMap;
 		std::map<std::string, std::unique_ptr<sf::Music>> musicMap;
+		std::map<sf::Music*, std::string> musicMemoryMap;
 
 		sf::Texture* getTexture(std::string path, std::string name, bool relative)
 		{
@@ -51,7 +52,8 @@ namespace fl
 				std::string output;
 				if (!AssetMan::readFile(name, output, relative, path)) throw std::invalid_argument("Unable to read \"" + name + "\"");
 				std::unique_ptr<sf::Music> music = std::make_unique<sf::Music>();
-				if (!music->openFromMemory(output.c_str(), output.size())) throw std::runtime_error("Failed to load music: invalid memory");
+				musicMemoryMap.insert(std::make_pair(music.get(), std::move(output)));
+				if (!music->openFromMemory(musicMemoryMap[music.get()].c_str(), musicMemoryMap[music.get()].size())) throw std::runtime_error("Failed to load music: invalid memory");
 				musicMap.insert(std::make_pair(name, std::move(music)));
 			}
 
