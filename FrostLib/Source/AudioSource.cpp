@@ -1,13 +1,13 @@
 #include "AudioSource.h"
 
 #include <AssetMan.h>
+#include <ResourceMan.h>
 #include <Debug.h>
 
 namespace fl
 {
 	namespace Audio
 	{
-
 		AudioSource::AudioSource(nlohmann::json json)
 		{
 			name = json["name"];
@@ -50,42 +50,28 @@ namespace fl
 			return json;
 		}
 
+		void AudioSource::awake()
+		{
+			play();
+		}
+
 		void AudioSource::play()
 		{
 			if (!loaded) loaded = loadAudio(*this);
-
 			sound.play();
 		}
 
-		std::string audioFile;
 		bool loadAudio(AudioSource& audioSource)
 		{
-			//If clip is not in memory, load it
-			if (loadedAudio.count(audioSource.clipName) == 0)
+			try
 			{
-				loadedAudio.insert(std::make_pair(audioSource.clipName, sf::SoundBuffer()));
-
-				//Find audiofile
-				std::map<std::string, sf::SoundBuffer>::iterator it = loadedAudio.find(audioSource.clipName);
-				sf::SoundBuffer buf;
-
-				std::string filePath = "Scenes/" + audioSource.ownerScene->sceneName + "/Audio/";
-				int fileSize = AssetMan::fileSize(audioSource.clipName, true, filePath);
-				//audioFile.reserve(fileSize);
-				//Buffer for audiofile
-				if (AssetMan::readFile(audioSource.clipName, audioFile, true, filePath))
-				{
-					bool success = buf.loadFromMemory(&audioFile, fileSize);
-				}
-				else
-				{
-					Debug::log("Could not load audio file: \"" + audioSource.clipName + "\"");
-					return false;
-				}
+				audioSource.sound.setBuffer(*ResourceMan::getSound("Scenes/" + audioSource.ownerScene->sceneName + "/Audio/", audioSource.clipName, true));
 			}
-
-			std::map<std::string, sf::SoundBuffer>::iterator it = loadedAudio.find(audioSource.clipName);
-			audioSource.sound.setBuffer(it->second);
+			catch (std::runtime_error err)
+			{
+				Debug::log(std::string("Audio loading runtime error: ") + err.what());
+				return false;
+			}
 			return true;
 		}
 	}

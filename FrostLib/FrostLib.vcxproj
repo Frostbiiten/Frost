@@ -164,6 +164,7 @@
     <ClCompile Include="Source\AnimationCurve.cpp" />
     <ClCompile Include="Source\ApplicationManager.cpp" />
     <ClCompile Include="Source\AssetMan.cpp" />
+    <ClCompile Include="Source\AudioSource.cpp" />
     <ClCompile Include="Source\Camera.cpp" />
     <ClCompile Include="Source\Debug.cpp" />
     <ClCompile Include="Source\gameObject.cpp" />
@@ -173,6 +174,7 @@
     <ClCompile Include="Source\MathUtil.cpp" />
     <ClCompile Include="Source\Physics.cpp" />
     <ClCompile Include="Source\Player.cpp" />
+    <ClCompile Include="Source\ResourceMan.cpp" />
     <ClCompile Include="Source\RoundedRectangleShape.cpp" />
     <ClCompile Include="Source\Scene.cpp" />
     <ClCompile Include="Source\SplineTerrain.cpp" />
@@ -182,6 +184,7 @@
     <ClInclude Include="Source\AnimationCurve.h" />
     <ClInclude Include="Source\ApplicationManager.h" />
     <ClInclude Include="Source\AssetMan.h" />
+    <ClInclude Include="Source\AudioSource.h" />
     <ClInclude Include="Source\Camera.h" />
     <ClInclude Include="Source\Debug.h" />
     <ClInclude Include="Source\gameObject.h" />
@@ -190,6 +193,7 @@
     <ClInclude Include="Source\MathUtil.h" />
     <ClInclude Include="Source\Physics.h" />
     <ClInclude Include="Source\Player.h" />
+    <ClInclude Include="Source\ResourceMan.h" />
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\SplineTerrain.h" />
     <ClInclude Include="Source\Utils.h" />

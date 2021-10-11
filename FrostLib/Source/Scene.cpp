@@ -11,6 +11,7 @@
 //Custom object types
 #include <Player.h>
 #include <SplineTerrain.h>
+#include <AudioSource.h>
 
 namespace fl
 {
@@ -65,6 +66,10 @@ namespace fl
 		if (jsonType == "terrain")
 		{
 			objectVector->push_back(std::make_unique<SplineTerrain>(json));
+		}
+		else if (jsonType == "AudioSource")
+		{
+			objectVector->push_back(std::make_unique<Audio::AudioSource>(json));
 		}
 		else if (jsonType == "player")
 		{

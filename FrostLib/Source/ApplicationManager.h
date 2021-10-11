@@ -1,5 +1,6 @@
 #pragma once
 #include <AssetMan.h>
+#include <ResourceMan.h>
 #include <Debug.h>
 #include <InputMan.h>
 #include <Utils.h>

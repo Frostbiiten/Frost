@@ -6,10 +6,14 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <mutex>
 
+sf::Mutex ioMutex;
 
 bool fl::AssetMan::init()
 {
+	sf::Lock lock{ioMutex};
+
 	if (PHYSFS_isInit()) return false;
 	if (!PHYSFS_init(NULL) && isInit) arc_logLatestError();
 	PHYSFS_permitSymbolicLinks(1);
@@ -180,6 +184,7 @@ bool fl::AssetMan::fileSize(std::string fileName, bool relative, std::string pat
 
 bool fl::AssetMan::readFile(std::string fileName, std::string& output, bool relative, std::string path)
 {
+	sf::Lock lock{ioMutex};
 	if (!isInit) init();
 
 	std::string filePath;
@@ -335,6 +340,7 @@ bool fl::AssetMan::removeFile(std::string fileName, bool relative, std::string p
 
 bool fl::AssetMan::writeFile(std::string fileName, std::string data, bool append, bool relative, std::string path)
 {
+	sf::Lock lock{ioMutex};
 	std::string filePath;
 	if (relative)
 		filePath = "./" + path + fileName;

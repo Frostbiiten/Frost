@@ -7,12 +7,9 @@ namespace fl
 {
 	namespace Audio
 	{
-		//Global audio memory buffer
-		inline std::map<std::string, sf::SoundBuffer> loadedAudio;
-
 		struct AudioSource : gameObject
 		{
-			std::string clipName; //Name of audiocliip with file extension
+			std::string clipName; //Name of audioclip with file extension
 			sf::Sound sound;
 			bool loaded;
 			bool preLoad;
@@ -20,6 +17,8 @@ namespace fl
 			AudioSource(std::string clipName, bool preLoad = false);
 			AudioSource(nlohmann::json json);
 			nlohmann::json serialize();
+
+			void awake();
 
 			void play();
 		};

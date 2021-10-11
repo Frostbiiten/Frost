@@ -29,16 +29,19 @@ namespace fl
 		std::thread loadThread;
 
 		float logoTimerBegin;
-		sf::Texture* logoImage;
+		//sf::Texture* logoImage;
 		sf::Sprite logo;
+		sf::Sprite logo2;
 		AnimationCurve logoAnimationGraph;
 		void displayLoadingScreen()
 		{
 			std::string output;
-			AssetMan::readFile("SonicTeam.png", output, true, "Common/");
-			logoImage = new sf::Texture();
-			logoImage->loadFromMemory(output.c_str(), output.size());
-			logo.setTexture(*logoImage);
+			//AssetMan::readFile("SonicTeam.png", output, true, "Common/");
+			//logoImage = new sf::Texture();
+			//logoImage->loadFromMemory(output.c_str(), output.size());
+			//logo.setTexture(*logoImage);
+			logo.setTexture(*ResourceMan::getTexture("Common/", "SonicTeam.png", true));
+			logo2.setTexture(*ResourceMan::getTexture("Common/", "sample.png", true));
 			AssetMan::readFile("logoCurve.anim", output, true, "Common/");
 			logoAnimationGraph = AnimationCurve(nlohmann::json::parse(output));
 		}

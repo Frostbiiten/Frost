@@ -393,6 +393,30 @@
       },
       "type": "terrain",
       "uuid": "06da12c9-377d-484e-8831-04852c7d606c"
+    },
+    {
+      "active": true,
+      "layer": 1,
+      "name": "audiosource",
+      "preLoad": false,
+      "clipName": "song.flac",
+      "transform": {
+        "origin": [
+          0.5,
+          0.0
+        ],
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation": 0.0,
+        "scale": [
+          1.0,
+          1.0
+        ]
+      },
+      "type": "AudioSource",
+      "uuid": "0e173aab-35a7-4922-9a37-d6653e5be013"
     }
   ]
 }
