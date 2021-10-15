@@ -152,10 +152,7 @@ namespace fl
 			if (currentState == PlayerState::Debug) changeState(PlayerState::Airborne);
 			else changeState(PlayerState::Debug);
 		}
-
-		std::stringstream position;
-		position << "position: " << transform.getPosition().x << ", " << transform.getPosition().y;
-
+	
 		switch (currentState)
 		{
 			case PlayerState::Grounded:
@@ -176,8 +173,10 @@ namespace fl
 				ApplicationManager::imGuiText("State: Attacking");
 				break;
 		}
+
+		std::stringstream position;
+		position << "position: " << transform.getPosition().x << ", " << transform.getPosition().y;
 		ApplicationManager::imGuiText(position.str());
-		ApplicationManager::imGuiText(std::to_string(closerRoofRayDistance));
 	}
 	void Player::fixedUpdate()
 	{

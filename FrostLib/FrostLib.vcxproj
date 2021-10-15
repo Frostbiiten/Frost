@@ -176,7 +176,6 @@
     <ClCompile Include="Source\Physics.cpp" />
     <ClCompile Include="Source\Player.cpp" />
     <ClCompile Include="Source\ResourceMan.cpp" />
-    <ClCompile Include="Source\RoundedRectangleShape.cpp" />
     <ClCompile Include="Source\Scene.cpp" />
     <ClCompile Include="Source\SplineTerrain.cpp" />
   </ItemGroup>

@@ -166,44 +166,11 @@ namespace fl
 
 	void SplineTerrain::update()
 	{
-		int i = 0;
-		for (auto& tri : shape)
+		for (std::size_t i = 0; i < outline.size(); i++)
 		{
-			float x = i / (float)shape.size();
-			tri.setFillColor(sf::Color(x * 255, 0, 0));
-			ApplicationManager::bufferDrawElement(tri);
-
-			Debug::drawLine(tri.getPoint(0), tri.getPoint(1), sf::Color(10 + x * 255, 0, 0));
-			Debug::drawLine(tri.getPoint(1), tri.getPoint(2), sf::Color(0, 10 + x * 255, 0));
-			Debug::drawLine(tri.getPoint(2), tri.getPoint(0), sf::Color(0, 0, 10 + x * 255));
-			
-			++i;
+			if (i == outline.size() - 1) Debug::drawLine(outline[i], outline[0]);
+			else Debug::drawLine(outline[i], outline[i + 1]);
 		}
-
-		/*
-		for (int i = 0; i < outline.size(); i++)
-		{
-			if (i == outline.size() - 1)
-				Debug::drawLine(outline[i], outline[0]);
-			else
-				Debug::drawLine(outline[i], outline[i + 1]);
-		}
-		*/
-
-		// Physics body debug
-		Physics::rigidBody* rb = dynamic_cast<Physics::rigidBody*>(components[0].get());
-		b2ChainShape* chain = dynamic_cast<b2ChainShape*>(rb->getBody()->GetFixtureList()->GetShape());
-
-		// Visit each child edge.
-		for (int32 i = 0; i < rb->getBody()->GetFixtureList()->GetShape()->GetChildCount(); ++i)
-		{
-			b2EdgeShape edge;
-			chain->GetChildEdge(&edge, i);
-			sf::Vector2f p1 = Physics::Box2dToPixelUnits(edge.m_vertex1);
-			sf::Vector2f p2 = Physics::Box2dToPixelUnits(edge.m_vertex2);
-			Debug::drawLine(p1, p2, sf::Color::White);
-		}
-		
 	}
 
 	nlohmann::json SplineTerrain::serialize()

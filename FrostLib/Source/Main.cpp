@@ -9,11 +9,8 @@ void countLines()
 	//Count lines of code!!!
 	for (auto const& dir_entry : std::filesystem::directory_iterator{ "Source" })
 	{
-		//std::string data;
-		//fl::AssetMan::readFile(dir_entry.path().string(), data);
 		std::fstream fileStream;
 		std::string name = dir_entry.path().string();
-		if (name.find("RoundedRectangleShape.cpp") != std::string::npos) continue;
 		fileStream.open(name);
 		std::string line;
 		int lineCount = 0;
@@ -47,7 +44,6 @@ void countLines()
 
 int main()
 {
-	countLines();
 	fl::ApplicationManager::init();
 	return EXIT_SUCCESS;
 }
