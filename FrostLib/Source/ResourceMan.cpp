@@ -1,5 +1,6 @@
 #include "ResourceMan.h"
 
+#include <Debug.h>
 #include <AssetMan.h>
 #include <iostream>
 #include <map>
@@ -60,10 +61,33 @@ namespace fl
 			return musicMap[name].get();
 		}
 
+		void logResources()
+		{
+			Debug::log(std::to_string(textureMap.size()) + " Textures loaded:");
+			for (auto& entry : textureMap) Debug::log('\t' + entry.first);
+			Debug::log(std::to_string(soundMap.size()) + " Sounds loaded:");
+			for (auto& entry : soundMap) Debug::log('\t' + entry.first);
+			Debug::log(std::to_string(musicMap.size()) + " Music tracks loaded: ");
+			for (auto& entry : musicMap) Debug::log('\t' + entry.first + " (" + std::to_string(musicMemoryMap[entry.second.get()].size()) + " bytes)");
+		}
+
 		void purgeResources()
 		{
+			logResources();
+			std::size_t texCount = textureMap.size();
+			std::size_t soundCount = soundMap.size();
+			std::size_t musicCount = musicMap.size();
+			for (auto& song : musicMap)
+			{
+				song.second->stop();
+			}
 			textureMap.clear();
 			soundMap.clear();
+			musicMap.clear();
+			musicMemoryMap.clear();
+			std::cout << "Cleared " << texCount << " textures\n";
+			std::cout << "Cleared " << soundCount << " sounds\n";
+			std::cout << "Cleared " << musicCount << " music tracks\n";
 		}
 	}
 }

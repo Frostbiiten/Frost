@@ -1,6 +1,7 @@
 ﻿#include <ApplicationManager.h>
 #include <AnimationCurve.h>
 #include <Physics.h>
+#include <SpriteAnimator.h>
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include <InputMan.h>
@@ -31,7 +32,7 @@ namespace fl
 
 			void init()
 			{
-				while (true)
+				while (windowPtr->isOpen())
 				{
 					fps = (frameCount - referenceFrame) / interval;
 
@@ -46,6 +47,8 @@ namespace fl
 		namespace loadingScreen
 		{
 			sf::RectangleShape fadeRect;
+			sf::Sprite loadingAnimation;
+			SpriteAnimator loadingAnimationAnimator;
 			bool solid = true;
 			float step = 0.1f;
 
@@ -87,6 +90,19 @@ namespace fl
 					fadeOpacity(0, step);
 				}
 			}
+
+			float logoTimerBegin;
+			sf::Sprite loadingImage;
+			AnimationCurve loadingImageAnimationGraph;
+
+			void displayLoadingScreen()
+			{
+				std::string output;
+				loadingImage.setTexture(*ResourceMan::getTexture("Common/", "Loading.png", true));
+				loadingScreen::loadingImage.setOrigin(loadingScreen::loadingImage.getTexture()->getSize().x / 2, loadingScreen::loadingImage.getTexture()->getSize().y / 2);
+				AssetMan::readFile("logoCurve.anim", output, true, "Common/");
+				loadingImageAnimationGraph = AnimationCurve(nlohmann::json::parse(output));
+			}
 		}
 
 		//Pixel rendering
@@ -97,23 +113,12 @@ namespace fl
 		//Thread for loading
 		std::thread loadThread;
 
-		float logoTimerBegin;
-		sf::Sprite logo;
-		AnimationCurve logoAnimationGraph;
-		void displayLoadingScreen()
-		{
-			std::string output;
-			logo.setTexture(*ResourceMan::getTexture("Common/", "Loading.png", true));
-			AssetMan::readFile("logoCurve.anim", output, true, "Common/");
-			logoAnimationGraph = AnimationCurve(nlohmann::json::parse(output));
-		}
-
 		void update()
 		{
 			currentScene.update();
 			//Do frame stuff
 			 
-			loadingScreen::tickFade(0.07f);
+			loadingScreen::tickFade(deltaTime.asSeconds());
 			windowPtr->draw(loadingScreen::fadeRect);
 		}
 
@@ -175,8 +180,8 @@ namespace fl
 		void loadEntryScene()
 		{
 			loadThread = std::thread(&scene::loadScene, &currentScene, "currentScene");
-			displayLoadingScreen();
-			logoTimerBegin = appClock.getElapsedTime().asSeconds();
+			loadingScreen::displayLoadingScreen();
+			loadingScreen::logoTimerBegin = appClock.getElapsedTime().asSeconds();
 		}
 
 		//Process window events
@@ -279,14 +284,12 @@ namespace fl
 				processFixedUpdate();
 				
 				// Render after the scene's code has been run
-				logo.setOrigin(logo.getTexture()->getSize().x / 2, logo.getTexture()->getSize().y / 2);
-				float size = logoAnimationGraph.evaluate(appClock.getElapsedTime().asSeconds() - logoTimerBegin);
-				logo.setScale(sf::Vector2f(size, size));
-				windowPtr->draw(logo);
+				float size = loadingScreen::loadingImageAnimationGraph.evaluate(appClock.getElapsedTime().asSeconds() - loadingScreen::logoTimerBegin);
+				loadingScreen::loadingImage.setScale(sf::Vector2f(size, size));
+				windowPtr->draw(loadingScreen::loadingImage);
 				render(buf, bufferSprite);
 			}
 			loadThread.join(); //Join loading thread when finished playing
-			//sf::Thread t(std::bind(&loadingScreen::fade, false));
 			loadingScreen::fade(false);
 			while (windowPtr->isOpen())
 			{
@@ -305,6 +308,8 @@ namespace fl
 				debugGui::update();
 				render(buf, bufferSprite);
 			}
+			fpsThread.join();
+			ResourceMan::purgeResources();
 		}
 
 		sf::RenderWindow* getWindow()

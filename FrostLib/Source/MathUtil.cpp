@@ -25,7 +25,8 @@ float fl::Math::loop01(float t)
 
 float fl::Math::loop(float a, float b, float t)
 {
-	return fl::Math::lerp(a, b, loop01(t));
+    float len = b - a;
+    return std::clamp(t - std::floor(t / len) * len, 0.0f, len);
 }
 
 float fl::Math::pingPong01(float t)

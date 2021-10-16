@@ -178,6 +178,7 @@
     <ClCompile Include="Source\ResourceMan.cpp" />
     <ClCompile Include="Source\Scene.cpp" />
     <ClCompile Include="Source\SplineTerrain.cpp" />
+    <ClCompile Include="Source\SpriteAnimator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -197,6 +198,7 @@
     <ClInclude Include="Source\ResourceMan.h" />
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\SplineTerrain.h" />
+    <ClInclude Include="Source\SpriteAnimator.h" />
     <ClInclude Include="Source\Utils.h" />
   </ItemGroup>
   <ItemGroup>

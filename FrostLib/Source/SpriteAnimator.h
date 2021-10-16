@@ -25,6 +25,8 @@ namespace fl
 		float speedMultiplier = 1.f;
 
 	public:
+		SpriteAnimator();
+
 		//Initialize from a sprite sheet and frames
 		SpriteAnimator(nlohmann::json json, sf::Sprite& sprite);
 
@@ -35,10 +37,10 @@ namespace fl
 		void createRects(int frames, sf::Vector2i frameSize);
 
 		//Creates a vector of frames from a frame count and the size of each frame. Order is left to right, top to bottom
-		void createRects(nlohmann::json json);
+		void createRects(nlohmann::json& json);
 
 		//Creates animations based on frames specified from json
-		void createAnimations(nlohmann::json json);
+		void createAnimations(nlohmann::json& json);
 
 		//Tick the current frame based on the animation playing and time since last frame (deltaTime)
 		//This should be called every frame animation will be updated

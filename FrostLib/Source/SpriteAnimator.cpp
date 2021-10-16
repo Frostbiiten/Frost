@@ -1,5 +1,6 @@
 #include <SpriteAnimator.h>
 #include <MathUtil.h>
+#include <iostream>
 
 namespace fl
 {
@@ -7,20 +8,24 @@ namespace fl
 
 	Animation::Animation(nlohmann::json json)
 	{
-		clampMode = json["clampMode"];
+		std::cout << json.dump(4);
+		clampMode = json["clampMode"].get<Math::ClampMode>();
 		frameDuration = json["frameDuration"];
 		animation = json["frames"].get<std::vector<int>>();
 	}
+
+	SpriteAnimator::SpriteAnimator(){}
 
 	SpriteAnimator::SpriteAnimator(nlohmann::json json, sf::Sprite& sprite)
 	{
 		//Create rects from the json
 		createRects(json["textures"]);
-		createAnimations(json["textures"]);
+		createAnimations(json["animations"]);
 		this->sprite = &sprite;
+		currentAnimation = nullptr;
 	}
 
-	void SpriteAnimator::createAnimations(nlohmann::json json)
+	void SpriteAnimator::createAnimations(nlohmann::json& json)
 	{
 		for (auto& entry : json)
 		{
@@ -41,11 +46,13 @@ namespace fl
 		}
 	}
 
-	void SpriteAnimator::createRects(nlohmann::json json)
+	void SpriteAnimator::createRects(nlohmann::json& json)
 	{
-		frameRects.resize(json["images"].size());
+		auto images = json["images"];
+		auto t = images.type();
+		frameRects.resize(images.size());
 		int index = 0;
-		for (auto& entry : json["images"])
+		for (auto& entry : images)
 		{
 			frameRects[index] = sf::IntRect(sf::Vector2i(entry["x"], entry["y"]), sf::Vector2i(entry["w"], entry["h"]));
 			index++;
@@ -54,11 +61,13 @@ namespace fl
 
 	void SpriteAnimator::tick(float deltaTime)
 	{
+		if (!currentAnimation) return;
+
 		//Clamp animation timer to the range of the current animation
-		animationTimer = Math::clamp(0, currentAnimation->animation.size() - currentAnimation->frameDuration, animationTimer, currentAnimation->clampMode);
+		animationTimer = Math::clamp(0, currentAnimation->animation.size() * currentAnimation->frameDuration, animationTimer, currentAnimation->clampMode);
 
 		//Get current frame of animation (local to sheet)
-		int currentFrame = animationTimer / currentAnimation->frameDuration;
+		int currentFrame = std::floor(animationTimer / currentAnimation->frameDuration);
 		currentFrame = currentAnimation->animation[currentFrame];
 
 		//Sets the rect of the sprite
@@ -77,6 +86,10 @@ namespace fl
 			animationTimer = 0.f;
 			//Set pointer to the found animation
 			currentAnimation = &animations[name];
+		}
+		else
+		{
+			currentAnimation = nullptr;
 		}
 	}
 
