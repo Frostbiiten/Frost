@@ -1,6 +1,7 @@
 ﻿#include <AppMan.h>
 #include <Transform.h>
 #include <SceneMan.h>
+#include <SerializedTypes.h>
 
 namespace fl
 {
@@ -83,6 +84,9 @@ namespace fl
 			buf.create((int)pixelSize.x, (int)pixelSize.y);
 			buffer = &buf;
 			sf::Sprite bufferSprite = sf::Sprite(buf.getTexture());
+
+			// Register types for serialization
+			SerializedTypes::RegisterTypes();
 
 			// Ready loops
 			SceneMan::Reset(*windowPtr, *buffer);

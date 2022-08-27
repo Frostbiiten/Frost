@@ -14,5 +14,6 @@ namespace fl
 
 		void logResources();
 		void purgeResources();
+		unsigned int getTextureID(sf::Texture* texture);
 	}
 }

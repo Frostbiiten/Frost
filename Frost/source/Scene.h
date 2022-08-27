@@ -5,7 +5,7 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <nlohmann/json.hpp>
 #include <Transform.h>
-#include <SceneArchive.h>
+#include <entt_snapshot/entt_snapshot.hpp>
 
 namespace fl
 {
@@ -20,7 +20,7 @@ namespace fl
 
 		// Loading & Saving
 		void Load(std::string_view data, bool additive);
-		void Serialize(SceneSaveArchive& archive);
+		void Serialize(snapshot::OutputArchive& archive);
 
 		entt::entity CreateEntity();
 		void DestroyEntity(entt::entity);

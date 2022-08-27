@@ -24,6 +24,7 @@
 
 // Vector2 printing
 #include <spdlog/fmt/fmt.h>
+
 template<> struct fmt::formatter<sf::Vector2f>
 {
 	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) { return ctx.end(); }

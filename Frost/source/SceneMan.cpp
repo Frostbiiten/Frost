@@ -8,6 +8,9 @@
 #include <entt/core/hashed_string.hpp>
 using entt::operator""_hs;
 
+// Serialization
+#include <SpriteRenderer.h>
+
 namespace fl
 {
 	namespace SceneMan
@@ -24,13 +27,20 @@ namespace fl
 		sf::RenderWindow* windowPtr;
 		sf::RenderTarget* bufferPtr;
 
+		// Forward declaration
+		void SaveScene(std::string_view sceneName);
+
 		void Reset(sf::RenderWindow& window, sf::RenderTarget& buffer)
 		{
 			// Scene management
 			SceneMan::ClearScene();
-			SceneMan::LoadScene("test_scene", false);
+
+			TEST(SceneMan::LoadScene("test_scene", false););
+
 			SceneMan::Awake();
 			SceneMan::Start();
+
+			TEST(SceneMan::SaveScene("test_scene_save"););
 
 			// Time management
 			deltaTimeClock.restart();
@@ -59,12 +69,14 @@ namespace fl
 		// Loads scene data from a file
 		void SaveScene(std::string_view sceneName)
 		{
-			SceneSaveArchive archive{};
+			std::stringstream sceneData;
+			cereal::JSONOutputArchive output { sceneData };
+			snapshot::OutputArchive archive { output };
 			currentScene.Serialize(archive);
-			std::string sceneData;
-			archive.root.to_msgpack(sceneData);
 
-			if (AssetMan::writeFile(std::filesystem::path(fmt::format("scenes/{0}/{0}.scene", sceneName)), sceneData))
+			Debug::log()->info(sceneData.str());
+
+			if (AssetMan::writeFile(std::filesystem::path(fmt::format("scenes/{0}/{0}.scene", sceneName)), sceneData.str()))
 			{
 				Debug::log()->info("Successfully saved scene \'{}\'!", sceneName);
 			}

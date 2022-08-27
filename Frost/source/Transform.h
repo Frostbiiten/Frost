@@ -4,6 +4,9 @@
 #include <SFML/Graphics/Transform.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+// cereal
+#include <cereal/cereal.hpp>
+
 namespace fl
 {
 	struct Transform
@@ -29,6 +32,19 @@ namespace fl
 		friend void to_json(nlohmann::json&, const Transform&);
 		friend void from_json(const nlohmann::json&, Transform&);
 
+		template<class Archive>
+		void serialize(Archive& ar)
+		{
+			ar
+			(
+				cereal::make_nvp("position", position),
+				cereal::make_nvp("pivot", pivot),
+				cereal::make_nvp("scale", scale),
+				cereal::make_nvp("rotation", rotation),
+				cereal::make_nvp("depth", depth)
+			);
+		}
+
 	protected:
 		// Global transform
 		sf::Transform globalTransform;
@@ -43,12 +59,24 @@ namespace fl
 
 		friend void to_json(nlohmann::json&, const Transform&);
 		friend void from_json(const nlohmann::json&, Transform&);
+
+		template<class Archive>
+		void serialize(Archive& ar)
+		{
+			ar ();
+		}
 	};
 
 	struct Parent
 	{
 		// Reference to parent entity
 		entt::entity entity {entt::null};
+
+		template<class Archive>
+		void serialize(Archive& ar)
+		{
+			ar (entity);
+		}
 	};
 
 	struct Relationship
@@ -57,5 +85,11 @@ namespace fl
 		entt::entity firstChild {entt::null}; // First child
 		entt::entity next {entt::null}; // Next sibling
 		entt::entity prev {entt::null}; // Previous sibling
+
+		template<class Archive>
+		void serialize(Archive& ar)
+		{
+			ar (children, firstChild, next, prev);
+		}
 	};
 }

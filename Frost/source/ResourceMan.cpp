@@ -89,5 +89,22 @@ namespace fl
 			Debug::log()->info("Cleared {} sounds", soundCount);
 			Debug::log()->info("Cleared {} music tracks", musicCount);
 		}
+
+		std::map<sf::Texture*, unsigned int> textureIDs;
+		unsigned int getTextureID(sf::Texture* texture)
+		{
+			std::map<sf::Texture*, unsigned int>::iterator id = textureIDs.find(texture);
+			if (id == textureIDs.end())
+			{
+				// Not found, insert id and return
+				textureIDs[texture] = textureIDs.size();
+				return textureIDs.size() - 1;
+			}
+			else
+			{
+				// Found, return id
+				return id->second;
+			}
+		}
 	}
 }

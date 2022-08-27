@@ -9,6 +9,15 @@
 // spdlog
 #include <spdlog/async.h>
 
+// Debug mode
+#define DEBUG_MODE 0;
+
+#ifdef DEBUG_MODE
+#define TEST(x) do { x } while(0)
+#else
+#define TEST(x) do { } while(0)
+#endif
+
 namespace fl
 {
 	namespace Debug

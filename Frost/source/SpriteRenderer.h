@@ -9,19 +9,44 @@
 #include <nlohmann/detail/macro_scope.hpp>
 #include <nlohmann/json.hpp>
 
+// cereal
+#include <cereal/cereal.hpp>
+
 namespace fl
 {
 	enum class SortingLayer
 	{
-		Background = -1,
-		Default = 0,
-		Foreground = 1,
+		Background,
+		Default,
+		Foreground
 	};
 
-	inline std::vector<std::filesystem::path> textureIDs;
+	template <class Archive>
+	std::string save_minimal(Archive const&, SortingLayer const& obj)
+	{
+		switch (obj)
+		{
+			case SortingLayer::Background: return "background";
+			case SortingLayer::Default: return "default";
+			case SortingLayer::Foreground: return "foreground";
+		}
+
+		// Default if invalid
+		return "default";
+	}
+
+	template <class Archive>
+	void load_minimal(Archive const &, SortingLayer & obj, std::string const & value)
+	{
+		if (value == "background") obj = SortingLayer::Background;
+		else if (value == "default") obj = SortingLayer::Default;
+		else if (value == "foreground") obj = SortingLayer::Foreground;
+		else obj = SortingLayer::Default;
+	}
+
 
 	/*
-	NLOHMANN_JSON_SERIALIZE_ENUM(SortingLayer, 
+	NLOHMANN_JSON_SERIALIZE_ENUM(SortingLayer,
 	{
 		{Background, "bg"},
 		{Midground, "mg"},
@@ -31,19 +56,21 @@ namespace fl
 
 	struct SpriteRenderer
 	{
-		std::size_t textureID;
 		sf::Texture* texture;
 		SortingLayer layer;
 
-		SpriteRenderer(std::filesystem::path texture = std::filesystem::path("common/null.png"), SortingLayer layer = SortingLayer::Default)
-			: texture(ResourceMan::getTexture(texture)), layer(layer)
-		{
-			textureID = textureIDs.size();
-			textureIDs.push_back(texture); 
-		};
+		SpriteRenderer(std::filesystem::path texture = std::filesystem::path("common/null.png"), SortingLayer layer = SortingLayer::Default) :
+			texture(ResourceMan::getTexture(texture)), layer(layer) {};
 
 		// Serialization
 		friend void to_json(nlohmann::json&, const SpriteRenderer&);
 		friend void from_json(const nlohmann::json&, SpriteRenderer&);
+
+		template<class Archive>
+		void serialize(Archive& ar)
+		{
+			// Sprites that share the same texture will share the same texture pointer address, use this to serialize
+			ar (cereal::make_nvp("texture_id", ResourceMan::getTextureID(texture)), cereal::make_nvp("layer", layer));
+		}
 	};
 }

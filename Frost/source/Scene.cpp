@@ -4,15 +4,15 @@
 #include <queue>
 #include <nlohmann/json.hpp>
 #include <Debug.h>
-#include <SceneArchive.h>
 
 #include <AssetMan.h>
-#include <SpriteRenderer.h>
+#include <SerializedTypes.h>
 
 // entt
 #include <entt/entt.hpp>
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
+#include <entt_snapshot/entt_snapshot.hpp>
 
 namespace fl
 {
@@ -24,13 +24,12 @@ namespace fl
 
 	void Scene::Load(std::string_view data, bool additive)
 	{
-		//nlohmann::json j = nlohmann::json::from_msgpack(data);
 	}
-	void Scene::Serialize(SceneSaveArchive& archive)
+
+	void Scene::Serialize(snapshot::OutputArchive& archive)
 	{
-		entt::basic_snapshot snapshot(registry);
-		snapshot.entities(archive).component<Transform, SpriteRenderer>(archive);
-		archive.Close();
+		snapshot::Snapshot snap;
+		snap.save(archive, registry, SerializedTypes::Types());
 	}
 
 	entt::entity Scene::CreateEntity()
@@ -43,6 +42,7 @@ namespace fl
 	}
 	void Scene::Clear()
 	{
+		// TODO: verify that this actually deletes all entities
 		registry.clear();
 	}
 
@@ -142,18 +142,7 @@ namespace fl
 	int total = 1000;
 	void Scene::Awake()
 	{
-		std::string output;
-		AssetMan::readFile(std::filesystem::path("scenes/test_scene.scene"), output);
-
-		/*
-		Debug::log()->info(registry.size());
-		SceneLoadArchive archive{output};
-		entt::basic_snapshot_loader<entt::entity> l {registry};
-		l.entities(archive).component<Transform, SpriteRenderer>(archive);
-		Debug::log()->info(registry.size());
-		//*/
-
-		///*
+		///* SAMPLE
 		for (int x = 0; x < total; ++x)
 		{
 			entt::entity e = registry.create();
@@ -170,24 +159,6 @@ namespace fl
 			auto& r = registry.emplace<SpriteRenderer>(e);
 			r = SpriteRenderer();
 		}
-		//*/
-
-		///*
-		SceneSaveArchive arc{};
-		Serialize(arc);
-		std::string test;
-
-		try
-		{
-			nlohmann::json::to_msgpack(arc.root, test);
-		}
-		catch (nlohmann::json::type_error e)
-		{
-			Debug::log()->error("{}: {}", e.id, e.what());
-		}
-
-		AssetMan::writeFile(std::filesystem::path("scenes/test_scene.scene"), test, false);
-		//AssetMan::writeFile(std::filesystem::path("scenes/test_scene2.scene"), arc.AsString(0), false);
 		//*/
 	}
 	void Scene::Start()
@@ -214,7 +185,7 @@ namespace fl
 			transform.position = sf::Vector2f(std::cos(time + (i) * 0.1f) * 30.f, std::sin(time + (i) * freq) * 30.f);
 
 			//transform.rotation += (deltaTime * 0.0001f);
-			transform.depth = (std::cos(time + (i) * freq) + 0.5) * 100;
+			transform.depth = (std::cos(time + (i) * freq) + 0.5f) * 100.f;
 
 			++index;
 		}
@@ -233,8 +204,8 @@ namespace fl
 		sf::Sprite sprite {};
 
 		///*
-		registry.sort<Transform>([](const auto& lhs, const auto& rhs) {return lhs.depth < rhs.depth; });
-		//registry.sort<Transform, SpriteRenderer>();
+		registry.sort<Transform>([](const auto& lhs, const auto& rhs) { return lhs.depth < rhs.depth; });
+		//registry.sort<Transform, SpriteRenderer>(); ^^ sort transforms by depth and then sort spriterenderers by transforms
 		registry.sort<SpriteRenderer, Transform>();
 		//*/
 
