@@ -22,8 +22,11 @@ namespace fl
 		registry = entt::registry();
 	}
 
-	void Scene::Load(std::string_view data, bool additive)
+	// TODO: implement additive
+	void Scene::Deserialize(snapshot::InputArchive& archive, bool additive)
 	{
+		snapshot::SnapshotLoader loader;
+		loader.load(archive, registry, SerializedTypes::Types());
 	}
 
 	void Scene::Serialize(snapshot::OutputArchive& archive)
@@ -142,7 +145,7 @@ namespace fl
 	int total = 1000;
 	void Scene::Awake()
 	{
-		///* SAMPLE
+		/* SAMPLE
 		for (int x = 0; x < total; ++x)
 		{
 			entt::entity e = registry.create();
@@ -153,12 +156,13 @@ namespace fl
 				sf::Vector2f(0.f, (x - total / 2) * (0.f / total)), // position
 				sf::Vector2f(0.f, 0.f), // pivot
 				0, //x * (360.f / total), // rotation
-				0.f, sf::Vector2f(5.f, 0.5f) // scale
+				0.f, sf::Vector2f(0.1f, 0.1f) // scale
 			);
 
 			auto& r = registry.emplace<SpriteRenderer>(e);
-			r = SpriteRenderer();
+			r = SpriteRenderer("common/test.png");
 		}
+		Update(160000);
 		//*/
 	}
 	void Scene::Start()
@@ -221,7 +225,7 @@ namespace fl
 			sprite.setScale(transform.scale);
 			sprite.setRotation(transform.rotation);
 			sprite.setPosition(transform.position);
-			sprite.setColor(sf::Color(100 + transform.depth, 100 + transform.depth, 100 + transform.depth));
+			sprite.setColor(sf::Color(80 + transform.depth, 80 + transform.depth, 80 + transform.depth));
 
 			//Debug::log()->info("{}", x);
 
@@ -229,6 +233,7 @@ namespace fl
 		}
 	}
 
+	// TODO: ...
 	void Scene::DumpRegistry()
 	{
 	}

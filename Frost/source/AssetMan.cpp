@@ -158,7 +158,7 @@ namespace fl
 		return -1;
 	}
 
-	bool AssetMan::readFile(std::filesystem::path file, std::string& output)
+	bool AssetMan::readFile(std::filesystem::path file, std::stringstream& output)
 	{
 		sf::Lock lock{ioMutex};
 		if (!isInit) init();
@@ -172,7 +172,7 @@ namespace fl
 			std::ifstream stream(file, std::ios::binary);
 			stream.unsetf(std::ios::skipws);
 			if (!stream.is_open()) return false;
-			output = std::string((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+			output << std::string((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
 			return true;
 		}
 
@@ -211,7 +211,7 @@ namespace fl
 			else
 			{
 				//Copies buffer into output ... inefficient?
-				output = std::string(buffer, fileSize);
+				output << std::string(buffer, fileSize);
 
 				//Attempt to close file handle
 				if (!PHYSFS_close(fileData)) arc_LogLatestError();
@@ -230,13 +230,21 @@ namespace fl
 		return false;
 	}
 
+	bool AssetMan::readFile(std::filesystem::path file, std::string& output)
+	{
+		std::stringstream sstream;
+		bool success = readFile(file, sstream);
+		output = std::move(sstream).str();
+		return success;
+	}
+
 	bool AssetMan::createDirectory(std::filesystem::path path)
 	{
 		std::error_code err;
 		bool success = std::filesystem::create_directory(path, err);
 
 		if (success) return success;
-		
+
 		fs_LogError(err);
 
 		return false;

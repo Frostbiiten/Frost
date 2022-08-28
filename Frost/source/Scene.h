@@ -18,8 +18,8 @@ namespace fl
 		Scene(std::string name);
 		~Scene() {};
 
-		// Loading & Saving
-		void Load(std::string_view data, bool additive);
+		// For loading & Saving
+		void Deserialize(snapshot::InputArchive& archive, bool additive);
 		void Serialize(snapshot::OutputArchive& archive);
 
 		entt::entity CreateEntity();

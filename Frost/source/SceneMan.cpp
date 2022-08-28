@@ -35,12 +35,12 @@ namespace fl
 			// Scene management
 			SceneMan::ClearScene();
 
-			TEST(SceneMan::LoadScene("test_scene", false););
+			TEST(SceneMan::LoadScene("test_scene_save", false););
 
 			SceneMan::Awake();
 			SceneMan::Start();
 
-			TEST(SceneMan::SaveScene("test_scene_save"););
+			//TEST(SceneMan::SaveScene("test_scene_save"););
 
 			// Time management
 			deltaTimeClock.restart();
@@ -53,12 +53,24 @@ namespace fl
 		}
 
 		// Loads scene data from a file
+		// TODO: implement additive loading
 		void LoadScene(std::string_view sceneName, bool additive)
 		{
-			std::string sceneData;
+			std::stringstream sceneData;
 			if (AssetMan::readFile(std::filesystem::path(fmt::format("scenes/{0}/{0}.scene", sceneName)), sceneData))
 			{
-				currentScene.Load(sceneData, additive);
+				nlohmann::json sceneJson = nlohmann::json::parse(sceneData);
+
+				// Load textureIDS
+				ResourceMan::loadTextureIDs(sceneJson["textureIDs"], additive);
+
+				// Load registry part of json
+				std::stringstream registry (sceneJson["registry"].get<std::string>()); // HACK: I imagine this is very inefficient
+				cereal::JSONInputArchive registryInput { registry };
+				snapshot::InputArchive archive { registryInput };
+
+				// Finally deserialize
+				currentScene.Deserialize(archive, additive);
 			}
 			else
 			{
@@ -69,14 +81,22 @@ namespace fl
 		// Loads scene data from a file
 		void SaveScene(std::string_view sceneName)
 		{
-			std::stringstream sceneData;
-			cereal::JSONOutputArchive output { sceneData };
-			snapshot::OutputArchive archive { output };
-			currentScene.Serialize(archive);
+			std::stringstream registryData;
+			nlohmann::json sceneJson;
 
-			Debug::log()->info(sceneData.str());
+			{
+				// Serialize registry
+				cereal::JSONOutputArchive registryOutput { registryData };
+				snapshot::OutputArchive archive { registryOutput };
+				currentScene.Serialize(archive);
+			}
 
-			if (AssetMan::writeFile(std::filesystem::path(fmt::format("scenes/{0}/{0}.scene", sceneName)), sceneData.str()))
+			sceneJson["registry"] = registryData.str(); // Just store raw string
+			sceneJson["textureIDs"] = ResourceMan::getTextureIDMap();
+
+			Debug::log()->info(sceneJson.dump());
+
+			if (AssetMan::writeFile(std::filesystem::path(fmt::format("scenes/{0}/{0}.scene", sceneName)), sceneJson.dump()))
 			{
 				Debug::log()->info("Successfully saved scene \'{}\'!", sceneName);
 			}

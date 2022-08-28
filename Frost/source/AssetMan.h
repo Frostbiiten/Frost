@@ -10,7 +10,7 @@ namespace fl
 	{
 		inline bool isInit;
 
-		// Initiates the basics 
+		// Initiates the basics
 		bool init();
 
 		// Logs the latest PHYSFS error that occured
@@ -39,6 +39,9 @@ namespace fl
 
 		// Get file size in bytes
 		bool fileSize(std::filesystem::path file);
+
+		// Loads data from file into string stream
+		bool readFile(std::filesystem::path file, std::stringstream& output);
 
 		// Loads data from file into string
 		bool readFile(std::filesystem::path file, std::string& output);

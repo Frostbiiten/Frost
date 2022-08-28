@@ -21,6 +21,7 @@ namespace fl
 		Foreground
 	};
 
+	/*
 	template <class Archive>
 	std::string save_minimal(Archive const&, SortingLayer const& obj)
 	{
@@ -43,6 +44,7 @@ namespace fl
 		else if (value == "foreground") obj = SortingLayer::Foreground;
 		else obj = SortingLayer::Default;
 	}
+	*/
 
 
 	/*
@@ -66,11 +68,30 @@ namespace fl
 		friend void to_json(nlohmann::json&, const SpriteRenderer&);
 		friend void from_json(const nlohmann::json&, SpriteRenderer&);
 
+		/*
 		template<class Archive>
 		void serialize(Archive& ar)
 		{
 			// Sprites that share the same texture will share the same texture pointer address, use this to serialize
 			ar (cereal::make_nvp("texture_id", ResourceMan::getTextureID(texture)), cereal::make_nvp("layer", layer));
+		}
+		*/
+
+		// TODO: Serialize sorting layer enum
+		template<class Archive>
+		void save(Archive& archive) const
+		{
+			archive(cereal::make_nvp("id", ResourceMan::getTextureID(texture).first));
+		}
+
+		template<class Archive>
+		void load(Archive& archive) const
+		{
+			int id;
+			archive(cereal::make_nvp("id", id));
+
+			SpriteRenderer& ref = const_cast<SpriteRenderer&>(*this);
+			ref.texture = ResourceMan::getIDTexture(id);
 		}
 	};
 }

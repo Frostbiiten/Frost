@@ -12,17 +12,17 @@
 namespace sf
 {
 	// Vector
-	template<typename Archive> void serialize(Archive& ar, sf::Vector2f vec)
+	template<typename Archive> void serialize(Archive& ar, sf::Vector2f & vec)
 	{
 		ar(cereal::make_nvp("x", vec.x), cereal::make_nvp("y", vec.y));
 	}
 
-	template<typename Archive> void serialize(Archive& ar, sf::Vector2i vec)
+	template<typename Archive> void serialize(Archive& ar, sf::Vector2i & vec)
 	{
 		ar(cereal::make_nvp("x", vec.x), cereal::make_nvp("y", vec.y));
 	}
 
-	template<typename Archive> void serialize(Archive& ar, sf::Vector2u vec)
+	template<typename Archive> void serialize(Archive& ar, sf::Vector2u & vec)
 	{
 		ar(cereal::make_nvp("x", vec.x), cereal::make_nvp("y", vec.y));
 	}
