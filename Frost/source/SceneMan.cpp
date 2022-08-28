@@ -11,6 +11,8 @@ using entt::operator""_hs;
 // Serialization
 #include <SpriteRenderer.h>
 
+#include <Compression.h>
+
 namespace fl
 {
 	namespace SceneMan
@@ -32,10 +34,12 @@ namespace fl
 
 		void Reset(sf::RenderWindow& window, sf::RenderTarget& buffer)
 		{
+			Compression::Test();
+
 			// Scene management
 			SceneMan::ClearScene();
 
-			TEST(SceneMan::LoadScene("test_scene_save", false););
+			//TEST(SceneMan::LoadScene("test_scene_save", false););
 
 			SceneMan::Awake();
 			SceneMan::Start();

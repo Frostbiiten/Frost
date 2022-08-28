@@ -162,6 +162,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="source\AppMan.cpp" />
     <ClCompile Include="source\AssetMan.cpp" />
+    <ClCompile Include="source\Compression.cpp" />
     <ClCompile Include="source\Debug.cpp" />
     <ClCompile Include="source\SceneMan.cpp" />
     <ClCompile Include="source\ResourceMan.cpp" />
@@ -172,6 +173,7 @@
   <ItemGroup>
     <ClInclude Include="source\AppMan.h" />
     <ClInclude Include="source\AssetMan.h" />
+    <ClInclude Include="source\Compression.h" />
     <ClInclude Include="source\Debug.h" />
     <ClInclude Include="source\Instrumentor.h" />
     <ClInclude Include="source\SceneMan.h" />

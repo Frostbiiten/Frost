@@ -142,10 +142,10 @@ namespace fl
 		}
 	}
 
-	int total = 1000;
+	int total = 10000;
 	void Scene::Awake()
 	{
-		/* SAMPLE
+		///* SAMPLE
 		for (int x = 0; x < total; ++x)
 		{
 			entt::entity e = registry.create();
@@ -177,7 +177,7 @@ namespace fl
 	{
 		auto renderers = registry.view<Transform, SpriteRenderer>();
 
-		double freq = 0.02;
+		double freq = 0.025;
 		time += deltaTime * 0.00008f * freq;
 
 		int index = 0;
@@ -186,10 +186,12 @@ namespace fl
 		{
 			i = index / (float)total * 360;
 			Transform& transform = renderers.get<Transform>(entity);
+
+			transform.depth = (std::cos(time + (i) * freq) + 0.5f) * 90.f;
+
 			transform.position = sf::Vector2f(std::cos(time + (i) * 0.1f) * 30.f, std::sin(time + (i) * freq) * 30.f);
 
 			//transform.rotation += (deltaTime * 0.0001f);
-			transform.depth = (std::cos(time + (i) * freq) + 0.5f) * 100.f;
 
 			++index;
 		}
@@ -225,7 +227,7 @@ namespace fl
 			sprite.setScale(transform.scale);
 			sprite.setRotation(transform.rotation);
 			sprite.setPosition(transform.position);
-			sprite.setColor(sf::Color(80 + transform.depth, 80 + transform.depth, 80 + transform.depth));
+			sprite.setColor(sf::Color(100 + transform.depth, 100 + transform.depth, 100 + transform.depth));
 
 			//Debug::log()->info("{}", x);
 

@@ -37,6 +37,12 @@
     <Filter Include="Header Files\Debug">
       <UniqueIdentifier>{b555af8f-c69d-4f5d-a327-aced5e60a257}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Compression">
+      <UniqueIdentifier>{4e055f35-dc66-4126-bf2e-efa3cb4e8da4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Compression">
+      <UniqueIdentifier>{8124602f-fc96-413e-9059-3f3ee0aa3e1d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\AppMan.cpp">
@@ -65,6 +71,9 @@
     </ClCompile>
     <ClCompile Include="source\Debug.cpp">
       <Filter>Source Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Compression.cpp">
+      <Filter>Source Files\Compression</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -97,6 +106,9 @@
     </ClInclude>
     <ClInclude Include="source\SerializedTypes.h">
       <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Compression.h">
+      <Filter>Header Files\Compression</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

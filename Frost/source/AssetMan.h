@@ -5,7 +5,8 @@
 
 namespace fl
 {
-	//Unified* io class
+	// Unified* io class
+	// TODO: change physfs functions to utilize mutable .data from strings instead of doing dealing with char*
 	namespace AssetMan
 	{
 		inline bool isInit;
