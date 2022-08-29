@@ -5,6 +5,7 @@
 #include <Physics.h>
 #include <box2d/box2d.h>
 */
+#include <Instrumentor.h>
 #include <algorithm>
 #include <filesystem>
 #include <iomanip>
@@ -54,6 +55,9 @@ namespace fl
 		std::ostringstream dateStream;
 		dateStream << "logs/" << std::put_time(&newtime, "%d-%m-%Y %H-%M-%S") << ".log";
 		std::string logName = dateStream.str();
+
+		// Profiler
+		Instrumentor::Instance().beginSession("Profiler", "profile.json");
 
 		checkFolder();
 

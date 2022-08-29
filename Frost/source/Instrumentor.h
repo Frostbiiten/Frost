@@ -19,7 +19,7 @@ struct ProfileResult
 {
     const std::string name;
     long long start, end;
-    uint32_t threadID;
+    std::size_t threadID;
 };
 
 class Instrumentor

@@ -1,7 +1,9 @@
-﻿#include <AppMan.h>
+﻿#include <cstdlib>
+#include <AppMan.h>
 #include <Transform.h>
 #include <SceneMan.h>
 #include <SerializedTypes.h>
+#include <Instrumentor.h>
 
 namespace fl
 {
@@ -66,9 +68,16 @@ namespace fl
 			windowPtr->display();
 		}
 
+		void Terminate()
+		{
+			// End session on terminate
+			Instrumentor::Instance().endSession();
+		}
+
 		// ENTRY POINT
 		void Init()
 		{
+			std::atexit(Terminate);
 			Debug::init();
 
 			// Reset app clock

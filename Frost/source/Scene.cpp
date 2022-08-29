@@ -142,7 +142,7 @@ namespace fl
 		}
 	}
 
-	int total = 10000;
+	int total = 1000;
 	void Scene::Awake()
 	{
 		///* SAMPLE
