@@ -15,14 +15,14 @@ namespace fl
 	{
 		extern sf::RenderWindow* windowPtr;
 
-		//Appinfo
+		// Appinfo
 		static const std::string applicationName { "FL Prototype" };
 		static const std::string developer { "Default Developer" };
 
-		//The desired background color for the application
+		// The desired background color for the application
 		static sf::Color backgroundColor{ 20, 20, 20 };
 
-		//Pixel buffer resolution
+		// Pixel buffer resolution
 		inline sf::Vector2f pixelSize{ 424, 240 };
 
 		//Input
@@ -33,15 +33,6 @@ namespace fl
 		//Runs to start the application
 		void Init();
 
-		//For non-pixel rendering
-		void windowDrawElement(sf::Drawable& drawable);
-		//For non-pixel window-relative rendering
-		void windowDrawElementRelative(sf::Drawable& drawable);
-		//For pixel rendering
-		void bufferDrawElement(sf::Drawable& drawable);
-		//For pixel window-relative rendering
-		void bufferDrawElementRelative(sf::Drawable& drawable);
-		
 		//Use with caution
 		sf::RenderWindow* getWindow();
 		//Use with caution

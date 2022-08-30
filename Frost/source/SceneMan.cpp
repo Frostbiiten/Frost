@@ -149,7 +149,8 @@ namespace fl
 
 		void Draw()
 		{
-			currentScene.Draw(*windowPtr);
+			currentScene.Draw(*windowPtr); // native res drawing
+			//currentScene.Draw(*bufferPtr); // pixel drawing
 		}
 
 		void Tick()

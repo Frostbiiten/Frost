@@ -229,10 +229,13 @@ namespace fl
 			sprite.setPosition(transform.position);
 			sprite.setColor(sf::Color(100 + transform.depth, 100 + transform.depth, 100 + transform.depth));
 
-			//Debug::log()->info("{}", x);
-
 			target.draw(sprite);
 		}
+
+		sf::CircleShape s(50, 100);
+		s.setOrigin(sf::Vector2f(50, 50));
+		s.setPosition(400.f, 0.f);
+		target.draw(s);
 	}
 
 	// TODO: ...
