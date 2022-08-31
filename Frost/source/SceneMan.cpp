@@ -3,6 +3,11 @@
 #include <fmt/core.h>
 #include <Scene.h>
 #include <Debug.h>
+#include <imgui.h>
+
+// Editor
+#include <SceneHierarchy.h>
+#include <MenuBar.h>
 
 // For entt hashed string
 #include <entt/core/hashed_string.hpp>
@@ -11,7 +16,9 @@ using entt::operator""_hs;
 // Serialization
 #include <SpriteRenderer.h>
 
+// Editor
 #include <Compression.h>
+#include <Inspector.h>
 
 namespace fl
 {
@@ -28,6 +35,10 @@ namespace fl
 		// Drawing targets
 		sf::RenderWindow* windowPtr;
 		sf::RenderTarget* bufferPtr;
+
+		// Editor
+		Editor::SceneHierarchy hierarchy{currentScene};
+		Editor::Inspector inspector{currentScene};
 
 		// Forward declaration
 		void SaveScene(std::string_view sceneName);
@@ -145,12 +156,17 @@ namespace fl
 		{
 			deltaTime = deltaTimeClock.restart();
 			currentScene.Update(deltaTime.asMicroseconds());
+			inspector.ProcessEditQueue();
 		}
 
 		void Draw()
 		{
 			currentScene.Draw(*windowPtr); // native res drawing
 			//currentScene.Draw(*bufferPtr); // pixel drawing
+
+			hierarchy.Draw();
+			inspector.Draw();
+			Editor::MenuBar::DrawBar();
 		}
 
 		void Tick()

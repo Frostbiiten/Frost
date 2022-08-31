@@ -50,6 +50,13 @@ namespace fl
 		sf::Transform globalTransform;
 	};
 
+
+	void DumpEntity(entt::registry& registry, entt::entity entity, std::size_t depth = 0);
+	void DumpHierarchy(entt::registry& registry);
+
+	// Can be used to remove parent too
+	void SetParent(entt::registry& registry, entt::entity entity, entt::entity parent);
+
 	// Dirtied transform flag
 	// Added to an entity when its transfrom is changed
 	struct DirtyTransform
@@ -81,7 +88,7 @@ namespace fl
 
 	struct Relationship
 	{
-		std::size_t children {}; // Number of children
+		std::size_t children {0}; // Number of children
 		entt::entity firstChild {entt::null}; // First child
 		entt::entity next {entt::null}; // Next sibling
 		entt::entity prev {entt::null}; // Previous sibling

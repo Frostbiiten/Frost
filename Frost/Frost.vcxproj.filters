@@ -28,9 +28,6 @@
     <Filter Include="Source Files\Resource">
       <UniqueIdentifier>{b95ab8f2-babb-4a27-abd5-dc514590fbf4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Resource">
-      <UniqueIdentifier>{e6906520-b884-4b6e-892a-5f2e99f4852d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Debug">
       <UniqueIdentifier>{afa83ae5-6577-4d25-a0b4-0c122c01a7fc}</UniqueIdentifier>
     </Filter>
@@ -48,6 +45,15 @@
     </Filter>
     <Filter Include="Source Files\imgui">
       <UniqueIdentifier>{179882bc-faa9-4b82-be00-a634d9faa6c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Editor">
+      <UniqueIdentifier>{439c8e51-6a1b-41d3-8202-91bdcffd4781}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Editor">
+      <UniqueIdentifier>{afce816d-f4b7-4ada-bc9a-e3689112efd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Resource">
+      <UniqueIdentifier>{e6906520-b884-4b6e-892a-5f2e99f4852d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -95,6 +101,15 @@
     </ClCompile>
     <ClCompile Include="lib\imgui\imgui_widgets.cpp">
       <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="source\SceneHierarchy.cpp">
+      <Filter>Source Files\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MenuBar.cpp">
+      <Filter>Source Files\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Inspector.cpp">
+      <Filter>Source Files\Editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +172,15 @@
     </ClInclude>
     <ClInclude Include="lib\imgui\imstb_textedit.h">
       <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="source\SceneHierarchy.h">
+      <Filter>Header Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MenuBar.h">
+      <Filter>Header Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Inspector.h">
+      <Filter>Header Files\Editor</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

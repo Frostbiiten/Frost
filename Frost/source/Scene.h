@@ -34,6 +34,7 @@ namespace fl
 		void FixedUpdate();
 		void Draw(sf::RenderTarget& target);
 
+		entt::registry& GetRegistry();
 		void DumpRegistry();
 
 	private:

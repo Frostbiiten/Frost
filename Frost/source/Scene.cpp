@@ -145,11 +145,17 @@ namespace fl
 	int total = 1000;
 	void Scene::Awake()
 	{
+		entt::entity parentTest = registry.create();
+		auto& parentRelation = registry.emplace<Relationship>(parentTest);
+
 		///* SAMPLE
 		for (int x = 0; x < total; ++x)
 		{
 			entt::entity e = registry.create();
 			auto& t = registry.emplace<Transform>(e);
+			registry.emplace<SpriteRenderer>(e, "common/test.png");
+
+			SetParent(registry, e, parentTest);
 
 			t = Transform
 			(
@@ -158,9 +164,6 @@ namespace fl
 				0, //x * (360.f / total), // rotation
 				0.f, sf::Vector2f(0.1f, 0.1f) // scale
 			);
-
-			auto& r = registry.emplace<SpriteRenderer>(e);
-			r = SpriteRenderer("common/test.png");
 		}
 		Update(160000);
 		//*/
@@ -236,6 +239,11 @@ namespace fl
 		s.setOrigin(sf::Vector2f(50, 50));
 		s.setPosition(400.f, 0.f);
 		target.draw(s);
+	}
+
+	entt::registry& Scene::GetRegistry()
+	{
+		return registry;
 	}
 
 	// TODO: ...

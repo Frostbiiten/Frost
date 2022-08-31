@@ -185,11 +185,14 @@ namespace fl
 
 		void ImGuiDebug()
 		{
-			ImGui::Begin("Debug", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-			ImGui::SetWindowPos(ImVec2(windowPtr->getSize().x - 160, 15));
-			ImGui::Text(fmt::format("FPS: {}", fps).c_str());
+			ImGui::Begin("Debug", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+			ImGui::SetWindowSize(ImVec2(150, 180));
+			ImGui::SetWindowPos(ImVec2(windowPtr->getSize().x - 395, 30));
 
+			ImGui::BeginChild("FPS", ImVec2(0, 0), false, ImGuiWindowFlags_AlwaysAutoResize);
+			ImGui::Text(fmt::format("FPS: {}", fps).c_str());
 			ImGui::PlotLines("", fpsBuffer.data(), fpsBuffer.size(), 0, 0, 60, 3.4028235E38F, ImVec2(130, 100));
+			ImGui::EndChild();
 
 			ImGui::End();
 		}
@@ -240,7 +243,7 @@ namespace fl
 			// Init ImGui
 			ImGui::SFML::Init(*windowPtr, false);
 			ImGuiIO& ImGuiIO = ImGui::GetIO();
-			ImGuiIO.Fonts->AddFontFromFileTTF("common/fonts/Inter/Inter-Medium.ttf", 20.f);
+			ImGuiIO.Fonts->AddFontFromFileTTF("common/fonts/Inter/Inter-Medium.ttf", 15.f);
 			ImGui::SFML::UpdateFontTexture();
 			SkinImGui();
 
