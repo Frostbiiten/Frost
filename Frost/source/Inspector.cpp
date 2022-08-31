@@ -126,32 +126,31 @@ namespace fl
 
 						if (spriteRenderer.texture)
 						{
-							if (ImGui::CollapsingHeader("Texture", ImGuiTreeNodeFlags_Framed))
+							ImGui::Text("Texture");
+
+							bool textureSelect = ImGui::ImageButton(*spriteRenderer.texture, sf::Vector2f(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x));
+
+							if (ImGui::IsItemHovered())
 							{
-								bool textureSelect = ImGui::ImageButton(*spriteRenderer.texture, sf::Vector2f(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x));
+								ImGui::BeginTooltip();
+								ImGui::Text("Click to select texture");
+								ImGui::Text("Right click to unlink texture");
+								ImGui::EndTooltip();
 
-								if (ImGui::IsItemHovered())
+								if (ImGui::IsMouseDown(ImGuiMouseButton_Left) || textureSelect)
 								{
-									ImGui::BeginTooltip();
-									ImGui::Text("Click to select texture");
-									ImGui::Text("Right click to unlink texture");
-									ImGui::EndTooltip();
-
-									if (ImGui::IsMouseDown(ImGuiMouseButton_Left) || textureSelect)
-									{
-										Debug::log()->error("Not implemented yet!!!");
-									}
-									else if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
-									{
-										spriteRenderer.texture = NULL;
-									}
+									Debug::log()->error("Not implemented yet!!!");
+								}
+								else if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
+								{
+									spriteRenderer.texture = NULL;
 								}
 							}
 						}
 						else
 						{
 							ImGui::TextDisabled("No texture selected");
-							bool textureSelect = ImGui::ImageButton(*ResourceMan::getTexture("common/null.png"), sf::Vector2f(ImGui::GetContentRegionAvail().x - 20, ImGui::GetContentRegionAvail().x - 20));
+							bool textureSelect = ImGui::ImageButton(*ResourceMan::getTexture("common/null.png"), sf::Vector2f(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x));
 						}
 
 						ImGui::Separator();

@@ -20,8 +20,8 @@ namespace fl
 		sf::Clock appClock, deltaTimer, ImGuiClock;
 
 		// Fps data
-		int fps;
-		sf::Uint64 deltaTime, fpsUpdateTimer = 0, fpsFrameCount = 0, fpsSampleCount = 1000000, fpsBufferInterval = 40000, fpsBufferTimer = 0;
+		float fps, minFps = std::numeric_limits<float>::max(), maxFps = 0, avgFps;
+		sf::Uint64 deltaTime, fpsUpdateTimer = 0, fpsFrameCount = 0, fpsSampleCount = 1000000, fpsBufferInterval = 40000, fpsBufferTimer = 0, lastAvgUpdate;
 		std::array<float, 50> fpsBuffer;
 
 		//Process window events
@@ -186,12 +186,21 @@ namespace fl
 
 		void ImGuiDebug()
 		{
-			ImGui::Begin("Debug", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
-			ImGui::SetWindowSize(ImVec2(150, 190));
+			ImGui::Begin("Debug", NULL, ImGuiWindowFlags_NoScrollbar);
 
-			ImGui::Text(fmt::format("FPS: {}", fps).c_str());
-			ImGui::TextDisabled("Frametime");
-			ImGui::PlotLines("", fpsBuffer.data(), fpsBuffer.size(), 0, 0, 30, 3.4028235E38F, ImVec2(ImGui::GetContentRegionAvail().x, 100));
+			if (ImGui::BeginTable("FPS", 2, ImGuiTableFlags_Resizable))
+			{
+				ImGui::TableNextColumn();
+				ImGui::Text(fmt::format("FPS: {}", (int)fps).c_str());
+				ImGui::TextColored(ImVec4(0.93, 0.1, 0.3, 1), fmt::format("MIN: {}", (int)minFps).c_str());
+				ImGui::TextColored(ImVec4(1, 0.85, 0.3, 1), fmt::format("AVG: {}", (int)avgFps).c_str());
+				ImGui::TextColored(ImVec4(0.1, 0.93, 0.3, 1), fmt::format("MAX: {}", (int)maxFps).c_str());
+
+				ImGui::TableNextColumn();
+				ImGui::TextDisabled("Frametime");
+				ImGui::PlotLines("", fpsBuffer.data(), fpsBuffer.size(), 0, 0, 30, 3.4028235E38F, ImVec2(ImGui::GetContentRegionAvail().x, 100));
+				ImGui::EndTable();
+			}
 
 			ImGui::End();
 		}
@@ -204,6 +213,14 @@ namespace fl
 			if (fpsUpdateTimer > fpsSampleCount)
 			{
 				fps = (double)fpsFrameCount / (double)fpsUpdateTimer * fpsSampleCount;
+				if (fps > maxFps) maxFps = fps;
+				if (fps < minFps) minFps = fps;
+
+				sf::Uint64 currentTime = appClock.getElapsedTime().asMicroseconds();
+				float proportion = (double)lastAvgUpdate / (double)currentTime;
+				avgFps = (avgFps * proportion) + (fps * (1 - proportion));
+				lastAvgUpdate = currentTime;
+
 				fpsFrameCount = 0;
 				fpsUpdateTimer = 0;
 			}
