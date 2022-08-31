@@ -34,7 +34,9 @@ namespace fl
 	{
 		constexpr std::string_view
 			TRANSFORM_COMPONENT_NAME = "transform",
-			SPRITERENDERER_COMPONENT_NAME = "sprite_renderer"
+			SPRITERENDERER_COMPONENT_NAME = "sprite_renderer",
+			RELATIONSHIP_COMPONENT_NAME = "relationship",
+			PARENT_COMPONENT_NAME = "parent"
 		;
 
 		namespace
@@ -42,7 +44,9 @@ namespace fl
 			std::set<std::string_view> typeSet
 			{
 				TRANSFORM_COMPONENT_NAME,
-				SPRITERENDERER_COMPONENT_NAME
+				SPRITERENDERER_COMPONENT_NAME,
+				RELATIONSHIP_COMPONENT_NAME,
+				PARENT_COMPONENT_NAME
 			};
 		}
 
@@ -51,6 +55,8 @@ namespace fl
 		{
 			snapshot::reflectComponent<Transform, TRANSFORM_COMPONENT_NAME>();
 			snapshot::reflectComponent<SpriteRenderer, SPRITERENDERER_COMPONENT_NAME>();
+			snapshot::reflectComponent<Relationship, RELATIONSHIP_COMPONENT_NAME>();
+			snapshot::reflectComponent<Parent, PARENT_COMPONENT_NAME>();
 		}
 
 		inline snapshot::ShouldSerializePred Types()

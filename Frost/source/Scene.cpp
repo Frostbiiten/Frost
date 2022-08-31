@@ -142,13 +142,13 @@ namespace fl
 		}
 	}
 
-	int total = 1000;
+	int total = 10;
 	void Scene::Awake()
 	{
 		entt::entity parentTest = registry.create();
 		auto& parentRelation = registry.emplace<Relationship>(parentTest);
 
-		///* SAMPLE
+		/* SAMPLE
 		for (int x = 0; x < total; ++x)
 		{
 			entt::entity e = registry.create();

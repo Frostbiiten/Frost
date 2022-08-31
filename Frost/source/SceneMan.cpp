@@ -50,7 +50,7 @@ namespace fl
 			// Scene management
 			SceneMan::ClearScene();
 
-			//TEST(SceneMan::LoadScene("test_scene_save", false););
+			TEST(SceneMan::LoadScene("test_scene_save", false););
 
 			SceneMan::Awake();
 			SceneMan::Start();
