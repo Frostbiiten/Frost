@@ -13,6 +13,8 @@ namespace fl
 			// Open tree view
 			ImGuiTreeNodeFlags treeFlags = ((selectedEntity != entt::null) && entity == selectedEntity) * ImGuiTreeNodeFlags_Selected;
 			treeFlags |= ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_OpenOnArrow;
+			Relationship* relationship = sceneRegistry.try_get<Relationship>(entity);
+			if (!relationship->children) treeFlags |= ImGuiTreeNodeFlags_Leaf;
 
 			bool treeOpen = ImGui::TreeNodeEx(fmt::format("Entity {}", (std::size_t)entity).c_str(), treeFlags);
 
@@ -41,7 +43,6 @@ namespace fl
 
 			if (treeOpen)
 			{
-				Relationship* relationship = sceneRegistry.try_get<Relationship>(entity);
 				if (relationship)
 				{
 					entt::entity currentChild = relationship->children ? relationship->firstChild : entt::null;
@@ -63,9 +64,7 @@ namespace fl
 
 		void SceneHierarchy::Draw()
 		{
-			ImGui::Begin("Hierarchy", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-			ImGui::SetWindowSize(ImVec2(225, 400));
-			ImGui::SetWindowPos(ImVec2(10, 30));
+			ImGui::Begin("Hierarchy", NULL);
 
 			if (ImGui::IsWindowFocused()) focusedInstance = this;
 

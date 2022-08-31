@@ -5,6 +5,9 @@
 #include <queue>
 #include <variant>
 
+#include <SpriteRenderer.h>
+#include <imgui-SFML.h>
+
 namespace fl
 {
 	namespace Editor
@@ -40,54 +43,122 @@ namespace fl
 
 		void Inspector::Draw()
 		{
-			ImGui::Begin("Inspector", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-			ImGui::SetWindowSize(ImVec2(225, AppMan::windowPtr->getSize().y - 40));
-			ImGui::SetWindowPos(ImVec2(AppMan::windowPtr->getSize().x - 235, 30));
+			ImGui::Begin("Inspector", NULL);
 
 			if (focusedInstance && focusedInstance->selectedEntity != entt::null)
 			{
+				// Title
 				entt::entity focusedEntity = focusedInstance->selectedEntity;
 				ImGui::Text(fmt::format("Entity {}", (std::size_t)focusedEntity).c_str());
+				ImGui::Separator();
 
-				ImGui::SameLine();
-				if (sceneRegistry.any_of<Parent>(focusedEntity))
+				// Parent
+
+				if (ImGui::CollapsingHeader("Parent"))
 				{
-					Parent& parentComponent = sceneRegistry.get<Parent>(focusedEntity);
-
-					if (parentComponent.entity != entt::null)
+					if (sceneRegistry.any_of<Parent>(focusedEntity))
 					{
-						if (ImGui::Selectable(fmt::format("Parent: {}", (std::size_t)parentComponent.entity).c_str()))
-						{
-							focusedInstance->selectedEntity = parentComponent.entity;
-						}
+						Parent& parentComponent = sceneRegistry.get<Parent>(focusedEntity);
 
-						if (ImGui::IsItemHovered())
+						if (parentComponent.entity != entt::null)
 						{
-							ImGui::BeginTooltip();
-							ImGui::Text("Click to select parent");
-							ImGui::EndTooltip();
+							bool parentSelect = ImGui::Button(fmt::format("Parent Entity: {}", (std::size_t)parentComponent.entity).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 25));
+
+							if (ImGui::IsItemHovered())
+							{
+								ImGui::BeginTooltip();
+								ImGui::Text("Click to select parent");
+								ImGui::Text("Right click to unlink parent");
+								ImGui::EndTooltip();
+
+								if (ImGui::IsMouseDown(ImGuiMouseButton_Left) || parentSelect)
+								{
+									focusedInstance->selectedEntity = parentComponent.entity;
+								}
+								else if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
+								{
+									SetParent(sceneRegistry, focusedEntity, entt::null);
+								}
+							}
+						}
+						else
+						{
+							ImGui::SameLine();
+							ImGui::TextDisabled("NULL Parent");
 						}
 					}
 					else
 					{
-						ImGui::TextDisabled("NULL Parent");
+						ImGui::TextDisabled("No Parent Component");
 					}
-				}
-				else
-				{
-					ImGui::TextDisabled("No Parent Component");
-				}
-				ImGui::Separator();
 
+					ImGui::Separator();
+				}
+
+				// Transform
 				if (sceneRegistry.any_of<Transform>(focusedEntity))
 				{
-					Transform& transform = sceneRegistry.get<Transform>(focusedEntity);
+					bool visible = true;
+					if (ImGui::CollapsingHeader("Transform", &visible))
+					{
+						Transform& transform = sceneRegistry.get<Transform>(focusedEntity);
 
-					InputVec2(transform.position, "Position");
-					InputVec2(transform.pivot, "Pivot");
-					InputVec2(transform.scale, "Scale");
-					InputFloat(transform.rotation, "Rotation");
-					InputFloat(transform.depth, "Depth");
+						InputVec2(transform.position, "Position");
+						InputVec2(transform.pivot, "Pivot");
+						InputVec2(transform.scale, "Scale");
+						InputFloat(transform.rotation, "Rotation");
+						InputFloat(transform.depth, "Depth");
+
+						ImGui::Separator();
+					}
+
+					// Delete
+					if (!visible) sceneRegistry.remove<Transform>(focusedEntity);
+				}
+
+				// SpriteRenderer
+				if (sceneRegistry.any_of<SpriteRenderer>(focusedEntity))
+				{
+					bool visible = true;
+					if (ImGui::CollapsingHeader("SpriteRenderer", &visible))
+					{
+						SpriteRenderer& spriteRenderer = sceneRegistry.get<SpriteRenderer>(focusedEntity);
+
+						if (spriteRenderer.texture)
+						{
+							if (ImGui::CollapsingHeader("Texture", ImGuiTreeNodeFlags_Framed))
+							{
+								bool textureSelect = ImGui::ImageButton(*spriteRenderer.texture, sf::Vector2f(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x));
+
+								if (ImGui::IsItemHovered())
+								{
+									ImGui::BeginTooltip();
+									ImGui::Text("Click to select texture");
+									ImGui::Text("Right click to unlink texture");
+									ImGui::EndTooltip();
+
+									if (ImGui::IsMouseDown(ImGuiMouseButton_Left) || textureSelect)
+									{
+										Debug::log()->error("Not implemented yet!!!");
+									}
+									else if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
+									{
+										spriteRenderer.texture = NULL;
+									}
+								}
+							}
+						}
+						else
+						{
+							ImGui::TextDisabled("No texture selected");
+							bool textureSelect = ImGui::ImageButton(*ResourceMan::getTexture("common/null.png"), sf::Vector2f(ImGui::GetContentRegionAvail().x - 20, ImGui::GetContentRegionAvail().x - 20));
+						}
+
+						ImGui::Separator();
+					}
+
+					// Delete
+					if (!visible) sceneRegistry.remove<SpriteRenderer>(focusedEntity);
 				}
 			}
 			else

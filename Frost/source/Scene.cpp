@@ -221,18 +221,23 @@ namespace fl
 		// Update dirtied transforms
 		auto renderers = registry.view<Transform, SpriteRenderer>();
 
+		std::size_t x = 0;
 		for (auto entity : renderers)
 		{
 			auto& spriteRenderer = renderers.get<SpriteRenderer>(entity);
 			auto& transform = renderers.get<Transform>(entity);
-			sprite.setTexture(*spriteRenderer.texture);
-			sprite.setOrigin(transform.pivot);
-			sprite.setScale(transform.scale);
-			sprite.setRotation(transform.rotation);
-			sprite.setPosition(transform.position);
-			sprite.setColor(sf::Color(100 + transform.depth, 100 + transform.depth, 100 + transform.depth));
+			if (spriteRenderer.texture)
+			{
+				sprite.setTexture(*spriteRenderer.texture);
+				sprite.setOrigin(transform.pivot);
+				sprite.setScale(transform.scale);
+				sprite.setRotation(transform.rotation);
+				sprite.setPosition(transform.position);
+				sprite.setColor(sf::Color(100 + transform.depth, 100 + transform.depth, 100 + transform.depth));
+				target.draw(sprite);
+			}
 
-			target.draw(sprite);
+			++x;
 		}
 
 		sf::CircleShape s(50, 100);

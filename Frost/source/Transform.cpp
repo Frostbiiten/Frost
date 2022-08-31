@@ -78,29 +78,25 @@ namespace fl
 
 	void SetParent(entt::registry& registry, entt::entity entity, entt::entity parent)
 	{
-		// Unparent
-		if (parent == entt::null)
+		Parent& parentComponent = registry.get_or_emplace<Parent>(entity);
+		Relationship& relationship = registry.get_or_emplace<Relationship>(entity);
+
+		// Unlink from old parent and siblings
+		if (parentComponent.entity != entt::null)
 		{
-            registry.remove<Parent>(entity);
+			Relationship& oldParentRelation = registry.get<Relationship>(parentComponent.entity);
+
+			// Fix parent relationships
+			if (oldParentRelation.firstChild == entity) oldParentRelation.firstChild = relationship.next;
+			--oldParentRelation.children;
+
+			// Seal gap in relationship
+			if (relationship.prev != entt::null) registry.get<Relationship>(relationship.prev).next = relationship.next;
+			if (relationship.next != entt::null) registry.get<Relationship>(relationship.next).prev = relationship.prev;
 		}
-        {
-            Parent& parentComponent = registry.get_or_emplace<Parent>(entity);
-            Relationship& relationship = registry.get_or_emplace<Relationship>(entity);
 
-            // Unlink from old parent and siblings
-            if (parentComponent.entity != entt::null)
-            {
-                Relationship& oldParentRelation = registry.get<Relationship>(parentComponent.entity);
-
-                // Fix parent relationships
-                if (oldParentRelation.firstChild == entity) oldParentRelation.firstChild = relationship.next;
-                --oldParentRelation.children;
-
-				// Seal gap in relationship
-				if (relationship.prev != entt::null) registry.get<Relationship>(relationship.prev).next = relationship.next;
-				if (relationship.next != entt::null) registry.get<Relationship>(relationship.next).prev = relationship.prev;
-            }
-
+		if (parent != entt::null)
+		{
 			// Link to new parent and siblings
 			Relationship& newParentRelation = registry.get_or_emplace<Relationship>(parent);
 
@@ -120,7 +116,11 @@ namespace fl
 
 			// Set new parent
 			parentComponent.entity = parent;
-        }
+		}
+		else
+		{
+			registry.remove<Parent>(entity);
+		}
 	}
 
     void to_json(nlohmann::json& j, const DirtyTransform& t) { j = nlohmann::json(); }

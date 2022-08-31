@@ -65,7 +65,7 @@ namespace fl
 
 					UpdateDrag();
 
-					// Close button
+					/* Close button
 					ImGui::SameLine(ImGui::GetWindowWidth() - 30);
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.9, 0.0, 0.3, 1));
 					ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1, 0.6, 0.6, 1));
@@ -74,6 +74,7 @@ namespace fl
 					if (ImGui::Button("", ImVec2(25, 25))) AppMan::windowPtr->close();
 					ImGui::PopStyleColor(3);
 					ImGui::PopStyleVar();
+					//*/
 
 					ImGui::EndMainMenuBar();
 				}
