@@ -195,6 +195,7 @@ namespace fl
 				ImGui::TextColored(ImVec4(0.93, 0.1, 0.3, 1), fmt::format("MIN: {}", (int)minFps).c_str());
 				ImGui::TextColored(ImVec4(1, 0.85, 0.3, 1), fmt::format("AVG: {}", (int)avgFps).c_str());
 				ImGui::TextColored(ImVec4(0.1, 0.93, 0.3, 1), fmt::format("MAX: {}", (int)maxFps).c_str());
+				ImGui::TextDisabled(fmt::format("{} ms", (1000.f / fps)).c_str());
 
 				ImGui::TableNextColumn();
 				ImGui::TextDisabled("Frametime");
@@ -261,9 +262,8 @@ namespace fl
 			ImGuiIO& ImGuiIO = ImGui::GetIO();
 			ImGuiIO.Fonts->AddFontFromFileTTF("common/fonts/Inter/Inter-Medium.ttf", 18.f);
 			ImGui::SFML::UpdateFontTexture();
-			SkinImGui();
-
 			ImGuiIO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+			SkinImGui();
 
 			// Create view buffer and sprite
 			sf::RenderTexture buf;

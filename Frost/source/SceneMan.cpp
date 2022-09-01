@@ -19,6 +19,7 @@ using entt::operator""_hs;
 // Editor
 #include <Compression.h>
 #include <Inspector.h>
+#include <AssetBrowser.h>
 
 namespace fl
 {
@@ -39,6 +40,7 @@ namespace fl
 		// Editor
 		Editor::SceneHierarchy hierarchy{currentScene};
 		Editor::Inspector inspector{currentScene};
+		Editor::AssetBrowser browser {"common"};
 
 		// Forward declaration
 		void SaveScene(std::string_view sceneName);
@@ -166,6 +168,7 @@ namespace fl
 
 			hierarchy.Draw();
 			inspector.Draw();
+			browser.Draw();
 			Editor::MenuBar::DrawBar();
 		}
 

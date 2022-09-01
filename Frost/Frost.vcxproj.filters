@@ -111,6 +111,12 @@
     <ClCompile Include="source\Inspector.cpp">
       <Filter>Source Files\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="source\AssetBrowser.cpp">
+      <Filter>Source Files\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\imgui_stdlib.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\AppMan.h">
@@ -181,6 +187,12 @@
     </ClInclude>
     <ClInclude Include="source\Inspector.h">
       <Filter>Header Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="source\AssetBrowser.h">
+      <Filter>Header Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imgui_stdlib.h">
+      <Filter>Header Files\imgui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

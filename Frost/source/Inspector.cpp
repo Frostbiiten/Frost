@@ -124,36 +124,45 @@ namespace fl
 					{
 						SpriteRenderer& spriteRenderer = sceneRegistry.get<SpriteRenderer>(focusedEntity);
 
-						if (spriteRenderer.texture)
+						if (ImGui::BeginTable("Separator", 2, ImGuiTableFlags_Resizable))
 						{
+							ImGui::TableNextColumn();
 							ImGui::Text("Texture");
 
-							bool textureSelect = ImGui::ImageButton(*spriteRenderer.texture, sf::Vector2f(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x));
-
-							if (ImGui::IsItemHovered())
+							if (spriteRenderer.texture)
 							{
-								ImGui::BeginTooltip();
-								ImGui::Text("Click to select texture");
-								ImGui::Text("Right click to unlink texture");
-								ImGui::EndTooltip();
+								ImGui::TableNextColumn();
+								bool textureSelect = ImGui::ImageButton(*spriteRenderer.texture, sf::Vector2f(ImGui::GetContentRegionAvail().x - 20, ImGui::GetContentRegionAvail().x - 20));
 
-								if (ImGui::IsMouseDown(ImGuiMouseButton_Left) || textureSelect)
+								if (ImGui::IsItemHovered())
 								{
-									Debug::log()->error("Not implemented yet!!!");
-								}
-								else if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
-								{
-									spriteRenderer.texture = NULL;
+									ImGui::BeginTooltip();
+									ImGui::Text("Click to select texture");
+									ImGui::Text("Right click to unlink texture");
+									ImGui::EndTooltip();
+
+									if (ImGui::IsMouseDown(ImGuiMouseButton_Left) || textureSelect)
+									{
+										Debug::log()->error("Not implemented yet!!!");
+									}
+									else if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
+									{
+										spriteRenderer.texture = NULL;
+									}
 								}
 							}
-						}
-						else
-						{
-							ImGui::TextDisabled("No texture selected");
-							bool textureSelect = ImGui::ImageButton(*ResourceMan::getTexture("common/null.png"), sf::Vector2f(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x));
-						}
+							else
+							{
+								ImGui::BeginDisabled();
+								ImGui::TextWrapped("No texture selected");
+								ImGui::EndDisabled();
+								ImGui::TableNextColumn();
+								bool textureSelect = ImGui::ImageButton(*ResourceMan::getTexture("common/null.png"), sf::Vector2f(ImGui::GetContentRegionAvail().x - 20, ImGui::GetContentRegionAvail().x - 20));
+							}
 
-						ImGui::Separator();
+							ImGui::EndTable();
+							ImGui::Separator();
+						}
 					}
 
 					// Delete

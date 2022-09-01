@@ -162,10 +162,12 @@
     <ClCompile Include="lib\imgui\imgui-SFML.cpp" />
     <ClCompile Include="lib\imgui\imgui.cpp" />
     <ClCompile Include="lib\imgui\imgui_draw.cpp" />
+    <ClCompile Include="lib\imgui\imgui_stdlib.cpp" />
     <ClCompile Include="lib\imgui\imgui_tables.cpp" />
     <ClCompile Include="lib\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="source\AppMan.cpp" />
+    <ClCompile Include="source\AssetBrowser.cpp" />
     <ClCompile Include="source\AssetMan.cpp" />
     <ClCompile Include="source\Compression.cpp" />
     <ClCompile Include="source\Debug.cpp" />
@@ -185,10 +187,12 @@
     <ClInclude Include="lib\imgui\imgui-SFML_export.h" />
     <ClInclude Include="lib\imgui\imgui.h" />
     <ClInclude Include="lib\imgui\imgui_internal.h" />
+    <ClInclude Include="lib\imgui\imgui_stdlib.h" />
     <ClInclude Include="lib\imgui\imstb_rectpack.h" />
     <ClInclude Include="lib\imgui\imstb_textedit.h" />
     <ClInclude Include="lib\imgui\imstb_truetype.h" />
     <ClInclude Include="source\AppMan.h" />
+    <ClInclude Include="source\AssetBrowser.h" />
     <ClInclude Include="source\AssetMan.h" />
     <ClInclude Include="source\Compression.h" />
     <ClInclude Include="source\Debug.h" />
