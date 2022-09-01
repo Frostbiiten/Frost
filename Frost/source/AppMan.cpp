@@ -253,7 +253,7 @@ namespace fl
 			appClock.restart();
 
 			// Initiating window and set viewsize
-			windowPtr = new sf::RenderWindow(sf::VideoMode(1060, 600), applicationName, sf::Style::Default);
+			windowPtr = new sf::RenderWindow(sf::VideoMode(1590, 900), applicationName, sf::Style::Default);
 			sf::View view(sf::Vector2f(), pixelSize);
 			windowPtr->setView(view);
 

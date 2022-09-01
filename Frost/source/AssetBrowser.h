@@ -15,12 +15,13 @@ namespace fl
 		#endif
 		#endif
 
-		enum MyItemColumnID
+		enum DirEntryID
 		{
-			MyItemColumnID_Name,
-			MyItemColumnID_Size,
+			DirEntryID_Name,
+			DirEntryID_Size,
 		};
 
+		// Perhaps nest in AssetBrowser class?
 		struct DirEntry
 		{
 			std::filesystem::directory_entry entry;
@@ -28,10 +29,18 @@ namespace fl
 			DirEntry(std::filesystem::directory_entry entry, int id) : entry(entry), id(id) {}
 		};
 
+		const std::vector<std::pair<std::string, std::vector<std::filesystem::path>>> filterPresets =
+		{
+			{"All", {""}},
+			{"Folder", {""}},
+			{"Text", {".txt", ".doc", ".cpp", ".h"}},
+			{"Images", {".png", ".jpg", ".jpeg", ".bmp"}},
+		};
+
 		class AssetBrowser
 		{
 			std::filesystem::path currentPath;
-			std::vector<std::filesystem::path> filter;
+			int currentFilter;
 
 			std::vector<std::pair<const char*, std::filesystem::path>> pathButtons =
 			{
@@ -39,30 +48,31 @@ namespace fl
 				std::make_pair("Scenes", "scenes")
 			};
 
-			std::vector<std::filesystem::directory_entry> directoryEntries;
 			std::vector<DirEntry> directoryEntriesSorted;
 			std::string currentDirectoryBuffer;
 
 			std::vector<std::filesystem::path> undoBuffer;
 			std::vector<std::filesystem::path> redoBuffer;
 
-			bool listDisplay;
-			bool directoryButtonMode; // If directory field is in button mode
+			bool listDisplay, directoryButtonMode, fileSelectMode;
 
 			const ImGuiTableSortSpecs* currentSortSpecs;
+			std::filesystem::directory_entry selectedEntry;
 
 		public:
 
-			AssetBrowser(std::filesystem::path path, bool listDisplay = true) : currentPath(path), listDisplay(listDisplay), directoryButtonMode(true) { UpdateEntries(currentPath); undoBuffer.reserve(16); redoBuffer.reserve(16); };
+			AssetBrowser(std::filesystem::path path, bool listDisplay = true) :
+				currentPath(path), listDisplay(listDisplay), directoryButtonMode(true), fileSelectMode(true), currentFilter(0)
+				{ UpdateEntries(currentPath); undoBuffer.reserve(16); redoBuffer.reserve(16); };
 
 			void Shortcuts();
 			void UpButton();
 			void BackButton();
 			void ForwardButton();
 			void DirectoryField();
+			void EntryList();
 
 			void UpdateEntries(std::filesystem::path newPath, bool undoredo = false);
-			void SetFilter(std::vector<std::filesystem::path> filter);
 			void Draw();
 		};
 	}

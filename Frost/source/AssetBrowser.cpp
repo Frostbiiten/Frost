@@ -24,9 +24,13 @@ namespace fl
 		{
 			std::filesystem::path oldPath = currentPath;
 			currentPath = newPath;
-			directoryEntries.clear();
+			directoryEntriesSorted.clear();
+			selectedEntry = std::filesystem::directory_entry{};
 
-			if (filter.size())
+			// Needs to be replaced with proper checking
+			if (currentPath == "") currentPath = AssetMan::getBaseDirectory();
+
+			if (currentFilter)
 			{
 				for (const auto& dirEntry : std::filesystem::directory_iterator(currentPath))
 				{
@@ -34,11 +38,10 @@ namespace fl
 					{
 						auto entryExtension = dirEntry.path().extension();
 
-						for (auto& extension : filter)
+						for (std::size_t x = 0; x < filterPresets[currentFilter].second.size(); ++x)
 						{
-							if (entryExtension == extension)
+							if (entryExtension.string() == filterPresets[currentFilter].second[x])
 							{
-								directoryEntries.push_back(dirEntry);
 								directoryEntriesSorted.push_back(DirEntry(dirEntry, directoryEntriesSorted.size()));
 								break;
 							}
@@ -46,25 +49,15 @@ namespace fl
 					}
 					else if (dirEntry.is_directory())
 					{
-						directoryEntries.push_back(dirEntry);
 						directoryEntriesSorted.push_back(DirEntry(dirEntry, directoryEntriesSorted.size()));
 					}
 				}
 			}
 			else
 			{
-				try
+				for (const auto& dirEntry : std::filesystem::directory_iterator(currentPath))
 				{
-					if (currentPath == "") currentPath = AssetMan::getBaseDirectory();
-					for (const auto& dirEntry : std::filesystem::directory_iterator(currentPath))
-					{
-						directoryEntries.push_back(dirEntry);
-						directoryEntriesSorted.push_back(DirEntry(dirEntry, directoryEntriesSorted.size()));
-					}
-				}
-				catch (std::filesystem::filesystem_error e)
-				{
-					Debug::log()->info("{}, {}, {}, {}, {}", e.code().value(), e.code().message(), e.what(), e.path1().string(), e.path2().string());
+					directoryEntriesSorted.push_back(DirEntry(dirEntry, directoryEntriesSorted.size()));
 				}
 			}
 
@@ -88,11 +81,6 @@ namespace fl
 				// Clear redo buffer
 				redoBuffer.clear();
 			}
-		}
-		void AssetBrowser::SetFilter(std::vector<std::filesystem::path> filter)
-		{
-			this->filter = filter;
-			UpdateEntries(currentPath);
 		}
 
 		void AssetBrowser::Shortcuts()
@@ -224,26 +212,8 @@ namespace fl
 				}
 			}
 		}
-
-		void AssetBrowser::Draw()
+		void AssetBrowser::EntryList()
 		{
-			ImGui::Begin("Asset Browser", NULL);
-
-			ImGui::BeginChild("Shortcuts", ImVec2(0, 35), true, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_HorizontalScrollbar);
-
-			ImGui::SameLine();
-			UpButton();
-			ImGui::SameLine();
-			BackButton();
-			ImGui::SameLine();
-			ForwardButton();
-			Shortcuts();
-
-			ImGui::EndChild();
-
-			DirectoryField();
-
-			// Main Pane
 			if (listDisplay)
 			{
 				ImGuiTableFlags flags =
@@ -251,11 +221,11 @@ namespace fl
 				| ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
 				| ImGuiTableFlags_ScrollY;
 
-				if (ImGui::BeginTable("DirectoryList", 3, flags))
+				if (ImGui::BeginTable("DirectoryList", 3, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - (30 * fileSelectMode))))
 				{
-					ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_DefaultSort, 0.0f, MyItemColumnID_Name);
-					ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_DefaultSort, 0.0f, MyItemColumnID_Size);
-					ImGui::TableSetupColumn("????", ImGuiTableColumnFlags_DefaultSort, 0.0f, MyItemColumnID_Name);
+					ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_DefaultSort, 0.0f, DirEntryID_Name);
+					ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_DefaultSort, 0.0f, DirEntryID_Size);
+					ImGui::TableSetupColumn("????", ImGuiTableColumnFlags_DefaultSort, 0.0f, DirEntryID_Name);
 					ImGui::TableSetupScrollFreeze(0, 1);
 					ImGui::TableHeadersRow();
 
@@ -269,16 +239,10 @@ namespace fl
 
 						// SIZE
 						ImGui::TableSetColumnIndex(1);
-						if (directoryEntriesSorted[x].entry.is_regular_file())
-						{
-							ImGui::Text(formatSize(directoryEntriesSorted[x].entry.file_size()).c_str());
-						}
-						else
-						{
-							ImGui::TextDisabled("-");
-						}
+						if (directoryEntriesSorted[x].entry.is_regular_file()) ImGui::Text(formatSize(directoryEntriesSorted[x].entry.file_size()).c_str());
+						else ImGui::TextDisabled("-");
 
-						// ???
+						// ??? TODO: replace with type
 						ImGui::TableSetColumnIndex(2);
 						ImGui::Text("IDK");
 
@@ -290,18 +254,18 @@ namespace fl
 						{
 							ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, 1);
 
-							if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+							if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && fileSelectMode)
 							{
-								// TODO: Set selected
+								selectedEntry = directoryEntriesSorted[x].entry;
 							}
 
 							if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 							{
-								if (directoryEntries[x].is_directory())
+								if (directoryEntriesSorted[x].entry.is_directory())
 								{
-									UpdateEntries(directoryEntries[x]);
+									UpdateEntries(directoryEntriesSorted[x].entry);
 								}
-								else if (directoryEntries[x].is_regular_file())
+								else if (directoryEntriesSorted[x].entry.is_regular_file())
 								{
 									Debug::log()->error("Not implemented!");
 								}
@@ -326,12 +290,12 @@ namespace fl
 										int delta = 0;
 										switch (sort_spec->ColumnUserID)
 										{
-											case MyItemColumnID_Name:
+											case DirEntryID_Name:
 											{
 												delta = a.entry.path().string().compare(b.entry.path().string());
 												break;
 											}
-											case MyItemColumnID_Size:
+											case DirEntryID_Size:
 											{
 												unsigned long aSize = a.entry.is_regular_file() ? a.entry.file_size() : 0;
 												unsigned long bSize = b.entry.is_regular_file() ? b.entry.file_size() : 0;
@@ -341,10 +305,10 @@ namespace fl
 											default: IM_ASSERT(0); break;
 										}
 
-										if (delta != 0) return ((delta > 0) == (sort_spec->SortDirection == ImGuiSortDirection_Ascending));
+										if (delta != 0) return ((delta > 0) != (sort_spec->SortDirection == ImGuiSortDirection_Ascending));
 										else
 										{
-											return ((a.id > b.id) == ImGuiSortDirection_Ascending);
+											return ((a.id > b.id) != (sort_spec->SortDirection == ImGuiSortDirection_Ascending));
 										}
 									}
 								});
@@ -361,29 +325,78 @@ namespace fl
 			else
 			{
 				// TODO: add icons, replace buttons with selectable + double click to open
-
 				float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
 				auto& style = ImGui::GetStyle();
 				ImVec2 buttonSize = ImVec2(100, 100);
-				for (std::size_t x = 0; x < directoryEntries.size(); x++)
+				for (std::size_t x = 0; x < directoryEntriesSorted.size(); x++)
 				{
 					ImGui::PushID(x);
-					bool clicked = ImGui::Button(directoryEntries[x].path().filename().string().c_str(), buttonSize);
+					bool clicked = ImGui::Button(directoryEntriesSorted[x].entry.path().filename().string().c_str(), buttonSize);
 					float last_button_x2 = ImGui::GetItemRectMax().x;
 					float next_button_x2 = last_button_x2 + style.ItemSpacing.x + buttonSize.x; // Expected position if next button was on same line
-					if (x + 1 < directoryEntries.size() && next_button_x2 < window_visible_x2) ImGui::SameLine();
+					if (x + 1 < directoryEntriesSorted.size() && next_button_x2 < window_visible_x2) ImGui::SameLine();
 					ImGui::PopID();
 
 					if (clicked)
 					{
-						UpdateEntries(directoryEntries[x]);
+						UpdateEntries(directoryEntriesSorted[x].entry);
 					}
 				}
 			}
+		}
 
-			// TODO: Path field
-			std::string yea;
-			ImGui::InputText("Test", &yea);
+		void AssetBrowser::Draw()
+		{
+			ImGui::Begin("Asset Browser", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+			ImGui::BeginChild("Shortcuts", ImVec2(0, 35), true, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_HorizontalScrollbar);
+			ImGui::SameLine();
+			UpButton();
+			ImGui::SameLine();
+			BackButton();
+			ImGui::SameLine();
+			ForwardButton();
+			Shortcuts();
+			ImGui::EndChild(); // ---------- top bar ------------
+			DirectoryField(); // 2nd top bar
+
+			// TODO: ADD SELECTION HIGHLIGHT
+			EntryList();
+
+			if (fileSelectMode)
+			{
+				std::string fileSelectTextBuf = selectedEntry.path().filename().string();
+				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 150);
+				if (ImGui::InputText("##", &fileSelectTextBuf, ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					if (selectedEntry.path().filename().string() != fileSelectTextBuf)
+					{
+						std::filesystem::directory_entry newSelection(currentPath / fileSelectTextBuf);
+						if (std::filesystem::exists(newSelection))
+						{
+							selectedEntry = newSelection;
+						}
+					}
+				}
+
+				// Filter
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+				ImGui::PushID(0);
+				if (ImGui::BeginCombo("##", filterPresets[currentFilter].first.c_str(), ImGuiComboFlags_HeightSmall))
+				{
+					for (std::size_t x = 0; x < filterPresets.size(); ++x)
+					{
+						if (ImGui::Selectable(filterPresets[x].first.c_str()))
+						{
+							currentFilter = x;
+							UpdateEntries(currentPath);
+						}
+					}
+					ImGui::EndCombo();
+				}
+				ImGui::PopID();
+			}
 
 			ImGui::End();
 		}

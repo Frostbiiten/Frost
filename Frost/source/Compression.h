@@ -5,7 +5,6 @@
 
 namespace fl
 {
-	//TODO: add reusable compression context (not sure if this improves performance)
 	namespace Compression
 	{
 		void Init();
