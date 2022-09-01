@@ -171,6 +171,7 @@
     <ClCompile Include="source\AssetMan.cpp" />
     <ClCompile Include="source\Compression.cpp" />
     <ClCompile Include="source\Debug.cpp" />
+    <ClCompile Include="source\EditorView.cpp" />
     <ClCompile Include="source\Inspector.cpp" />
     <ClCompile Include="source\MenuBar.cpp" />
     <ClCompile Include="source\SceneHierarchy.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="source\AssetMan.h" />
     <ClInclude Include="source\Compression.h" />
     <ClInclude Include="source\Debug.h" />
+    <ClInclude Include="source\EditorView.h" />
     <ClInclude Include="source\Inspector.h" />
     <ClInclude Include="source\Instrumentor.h" />
     <ClInclude Include="source\MenuBar.h" />

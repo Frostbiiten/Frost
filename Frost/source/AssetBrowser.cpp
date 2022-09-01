@@ -3,6 +3,7 @@
 #include <Debug.h>
 #include <imgui_stdlib.h>
 #include <AssetMan.h>
+#include <Instrumentor.h>
 
 namespace fl
 {
@@ -13,7 +14,24 @@ namespace fl
 		constexpr unsigned long MEGABYTE = 1024 * 1024;
 		constexpr unsigned long GIGABYTE = 1024 * 1024 * 1024;
 
-		std::string formatSize(unsigned long bytes)
+		inline std::string GetType(const std::filesystem::directory_entry& entry)
+		{
+			if (entry.is_directory()) return "Folder";
+			if (entry.path().extension().string() == "") return "Unknown";
+			for (auto& type : entryTypes)
+			{
+				for (auto& filter : type.second)
+				{
+					if (entry.path().extension() == filter)
+					{
+						return type.first;
+					}
+				}
+			}
+			return "Unknown";
+		}
+
+		inline std::string formatSize(unsigned long bytes)
 		{
 			if (bytes < KILOBYTE) return fmt::format("{} B", bytes);
 			else if (bytes < MEGABYTE) return fmt::format("{:.{}f} kB", (float)bytes / KILOBYTE, 2);
@@ -82,7 +100,10 @@ namespace fl
 				redoBuffer.clear();
 			}
 		}
-
+		BrowseState AssetBrowser::GetState()
+		{
+			return currentState;
+		}
 		void AssetBrowser::Shortcuts()
 		{
 			for (std::size_t x = 0; x < pathButtons.size(); ++x)
@@ -225,7 +246,7 @@ namespace fl
 				{
 					ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_DefaultSort, 0.0f, DirEntryID_Name);
 					ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_DefaultSort, 0.0f, DirEntryID_Size);
-					ImGui::TableSetupColumn("????", ImGuiTableColumnFlags_DefaultSort, 0.0f, DirEntryID_Name);
+					ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_DefaultSort, 0.0f, DirEntryID_Type);
 					ImGui::TableSetupScrollFreeze(0, 1);
 					ImGui::TableHeadersRow();
 
@@ -242,13 +263,13 @@ namespace fl
 						if (directoryEntriesSorted[x].entry.is_regular_file()) ImGui::Text(formatSize(directoryEntriesSorted[x].entry.file_size()).c_str());
 						else ImGui::TextDisabled("-");
 
-						// ??? TODO: replace with type
+						// Type
 						ImGui::TableSetColumnIndex(2);
-						ImGui::Text("IDK");
+						ImGui::Text(GetType(directoryEntriesSorted[x].entry).c_str());
 
 						// Allow row to be selected
 						ImGui::SameLine();
-						ImGui::Selectable(std::to_string(x).c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowDoubleClick);
+						ImGui::Selectable("", selectedEntry == directoryEntriesSorted[x].entry, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowDoubleClick);
 
 						if (ImGui::IsItemHovered())
 						{
@@ -267,7 +288,9 @@ namespace fl
 								}
 								else if (directoryEntriesSorted[x].entry.is_regular_file())
 								{
-									Debug::log()->error("Not implemented!");
+									currentState = BrowseState::Selected;
+									this->callback.Invoke(directoryEntriesSorted[x].entry);
+									callback = AssetBrowserCallback();
 								}
 							}
 						}
@@ -300,6 +323,11 @@ namespace fl
 												unsigned long aSize = a.entry.is_regular_file() ? a.entry.file_size() : 0;
 												unsigned long bSize = b.entry.is_regular_file() ? b.entry.file_size() : 0;
 												delta = aSize - bSize;
+												break;
+											}
+											case DirEntryID_Type:
+											{
+												delta = GetType(a.entry).compare(GetType(b.entry));
 												break;
 											}
 											default: IM_ASSERT(0); break;
@@ -345,8 +373,17 @@ namespace fl
 			}
 		}
 
+		void AssetBrowser::Launch(AssetBrowserCallback callback, std::filesystem::path path)
+		{
+			this->currentPath = path;
+			this->callback = callback;
+			currentState = BrowseState::Browsing;
+		}
 		void AssetBrowser::Draw()
 		{
+			if (currentState == BrowseState::Inactive || currentState == BrowseState::Selected) return;
+
+			PROFILE_SCOPE("Asset Browser");
 			ImGui::Begin("Asset Browser", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
 			ImGui::BeginChild("Shortcuts", ImVec2(0, 35), true, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_HorizontalScrollbar);
@@ -359,8 +396,6 @@ namespace fl
 			Shortcuts();
 			ImGui::EndChild(); // ---------- top bar ------------
 			DirectoryField(); // 2nd top bar
-
-			// TODO: ADD SELECTION HIGHLIGHT
 			EntryList();
 
 			if (fileSelectMode)
@@ -399,6 +434,11 @@ namespace fl
 			}
 
 			ImGui::End();
+		}
+
+		std::filesystem::directory_entry AssetBrowser::GetSelection()
+		{
+			return selectedEntry;
 		}
 	}
 }

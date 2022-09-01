@@ -7,6 +7,7 @@
 
 #include <SpriteRenderer.h>
 #include <imgui-SFML.h>
+#include <Instrumentor.h>
 
 namespace fl
 {
@@ -41,8 +42,10 @@ namespace fl
 			}
 		}
 
+		// TODO: Implement imgui list clipper to avoid unecessary drawing
 		void Inspector::Draw()
 		{
+			PROFILE_SCOPE("Inspector");
 			ImGui::Begin("Inspector", NULL);
 
 			if (focusedInstance && focusedInstance->selectedEntity != entt::null)
@@ -143,7 +146,22 @@ namespace fl
 
 									if (ImGui::IsMouseDown(ImGuiMouseButton_Left) || textureSelect)
 									{
-										Debug::log()->error("Not implemented yet!!!");
+										browser.Launch
+										(
+											AssetBrowserCallback
+											(
+												[&](std::filesystem::directory_entry entry, std::any data)
+												{
+													entt::entity entity = std::any_cast<entt::entity>(data);
+													try
+													{
+														sceneRegistry.get<SpriteRenderer>(entity).texture = ResourceMan::getTexture(entry);
+													}
+													catch (std::exception e) {};
+												},
+												focusedEntity
+											)
+										);
 									}
 									else if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
 									{
@@ -175,6 +193,7 @@ namespace fl
 			}
 
 			ImGui::End();
+			browser.Draw();
 		}
 
 		void Inspector::ProcessEditQueue()

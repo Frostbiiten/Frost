@@ -184,7 +184,7 @@ namespace fl
 			style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(1.0, 0.0, 0.0, 0.3499999940395355);
 		}
 
-		void ImGuiDebug()
+		void DebugGui()
 		{
 			ImGui::Begin("Debug", NULL, ImGuiWindowFlags_NoScrollbar);
 
@@ -198,7 +198,7 @@ namespace fl
 				ImGui::TextDisabled(fmt::format("{} ms", (1000.f / fps)).c_str());
 
 				ImGui::TableNextColumn();
-				ImGui::TextDisabled("Frametime");
+				ImGui::TextDisabled("Framerate");
 				ImGui::PlotLines("", fpsBuffer.data(), fpsBuffer.size(), 0, 0, 30, 3.4028235E38F, ImVec2(ImGui::GetContentRegionAvail().x, 100));
 				ImGui::EndTable();
 			}
@@ -284,18 +284,29 @@ namespace fl
 			// Main loop
 			while (windowPtr->isOpen())
 			{
-				PollWindowEvents();
-				ImGui::SFML::Update(*windowPtr, ImGuiClock.restart());
-				ClearScreen();
-				UpdateBuffer();
+				PROFILE_SCOPE("FRAME");
+
+				{
+					PROFILE_SCOPE("SFML");
+					PollWindowEvents();
+					ImGui::SFML::Update(*windowPtr, ImGuiClock.restart());
+					ClearScreen();
+					UpdateBuffer();
+				}
 
 				SceneMan::Tick();
 
-				UpdateFPS();
-				ImGuiDebug();
+				{
+					PROFILE_SCOPE("FPS+DebugGui");
+					UpdateFPS();
+					DebugGui();
+				}
 
-				// Render BUFFER after the scene's code has been run
-				Render(buf, bufferSprite);
+				{
+					PROFILE_SCOPE("Buffer Render");
+					// Render BUFFER after the scene's code has been run
+					Render(buf, bufferSprite);
+				}
 			}
 
 			ImGui::SFML::Shutdown();

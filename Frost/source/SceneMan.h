@@ -3,6 +3,7 @@
 #include <SFML/System/Time.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <filesystem>
 
 namespace fl
 {
@@ -14,7 +15,9 @@ namespace fl
 		// Resets time management variables
 		void Reset(sf::RenderWindow& window, sf::RenderTarget& buffer);
 
-		void LoadScene(std::string_view sceneName, bool additive);
+		void SaveScene(std::string_view sceneName);
+		void LoadScene(std::string_view sceneName, bool additive = false);
+		void LoadScene(std::filesystem::path path, bool additive = false);
 		void ClearScene();
 
 		void Awake(); // Called before anything is loaded

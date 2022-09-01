@@ -13,6 +13,7 @@
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 #include <entt_snapshot/entt_snapshot.hpp>
+#include <Instrumentor.h>
 
 namespace fl
 {
@@ -142,10 +143,11 @@ namespace fl
 		}
 	}
 
-	int total = 1000;
+	int total = 10;
 	void Scene::Awake()
 	{
 		//* SAMPLE
+		return;
 		entt::entity parentTest = registry.create();
 		auto& parentRelation = registry.emplace<Relationship>(parentTest);
 
@@ -167,6 +169,7 @@ namespace fl
 		}
 		Update(160000);
 		//*/
+
 	}
 	void Scene::Start()
 	{
@@ -210,13 +213,19 @@ namespace fl
 	}
 	void Scene::Draw(sf::RenderTarget& target)
 	{
-		sf::Sprite sprite {};
 
-		///*
-		registry.sort<Transform>([](const auto& lhs, const auto& rhs) { return lhs.depth < rhs.depth; });
-		//registry.sort<Transform, SpriteRenderer>(); ^^ sort transforms by depth and then sort spriterenderers by transforms
-		registry.sort<SpriteRenderer, Transform>();
-		//*/
+		if (false)
+		{
+			PROFILE_SCOPE("SORT");
+			// TODO: OPTIMIZE THIS: From the looks of it, sorting a large number of entities seems to be VERY expensive
+			// Can parralelization be used?, or perhaps splitting the sprites into rendering groups i.e. background, midground, foreground?
+
+			///*
+			registry.sort<Transform>([](const auto& lhs, const auto& rhs) { return lhs.depth < rhs.depth; });
+			//registry.sort<Transform, SpriteRenderer>(); ^^ sort transforms by depth and then sort spriterenderers by transforms
+			registry.sort<SpriteRenderer, Transform>();
+			//*/
+		}
 
 		// Update dirtied transforms
 		auto renderers = registry.view<Transform, SpriteRenderer>();
@@ -224,6 +233,7 @@ namespace fl
 		std::size_t x = 0;
 		for (auto entity : renderers)
 		{
+			sf::Sprite sprite {};
 			auto& spriteRenderer = renderers.get<SpriteRenderer>(entity);
 			auto& transform = renderers.get<Transform>(entity);
 			if (spriteRenderer.texture)
@@ -233,17 +243,12 @@ namespace fl
 				sprite.setScale(transform.scale);
 				sprite.setRotation(transform.rotation);
 				sprite.setPosition(transform.position);
-				sprite.setColor(sf::Color(100 + transform.depth, 100 + transform.depth, 100 + transform.depth));
+				//sprite.setColor(sf::Color(100 + transform.depth, 100 + transform.depth, 100 + transform.depth));
 				target.draw(sprite);
 			}
 
 			++x;
 		}
-
-		sf::CircleShape s(50, 100);
-		s.setOrigin(sf::Vector2f(50, 50));
-		s.setPosition(400.f, 0.f);
-		target.draw(s);
 	}
 
 	entt::registry& Scene::GetRegistry()

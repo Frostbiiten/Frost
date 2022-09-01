@@ -2,6 +2,7 @@
 #include <imgui.h>
 #include <fmt/format.h>
 #include <Debug.h>
+#include <Instrumentor.h>
 
 namespace fl
 {
@@ -21,7 +22,7 @@ namespace fl
 			// Drag from
 			if (ImGui::BeginDragDropSource())
 			{
-				if (ImGui::SetDragDropPayload("DRAG_DROP_ENTITY", &entity, sizeof(entt::entity)));
+				ImGui::SetDragDropPayload("DRAG_DROP_ENTITY", &entity, sizeof(entt::entity));
 				ImGui::Text("Drag and drop");
 				ImGui::EndDragDropSource();
 			}
@@ -64,6 +65,7 @@ namespace fl
 
 		void SceneHierarchy::Draw()
 		{
+			PROFILE_SCOPE("Hierarchy");
 			ImGui::Begin("Hierarchy", NULL);
 
 			if (ImGui::IsWindowFocused()) focusedInstance = this;

@@ -1,6 +1,7 @@
 #pragma once
 #include <Scene.h>
 #include <entt/entt.hpp>
+#include <AssetBrowser.h>
 
 namespace fl
 {
@@ -26,8 +27,10 @@ namespace fl
 			Scene& scene;
 			entt::registry& sceneRegistry;
 
+			AssetBrowser browser;
+
 		public:
-			Inspector (Scene& scene) : scene(scene), sceneRegistry(scene.GetRegistry()) {}
+			Inspector (Scene& scene) : scene(scene), sceneRegistry(scene.GetRegistry()), browser("common") {}
 			void Draw();
 			void ProcessEditQueue();
 		};

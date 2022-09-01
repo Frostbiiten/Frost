@@ -1,6 +1,9 @@
 #include <imgui.h>
 #include <Debug.h>
 #include <AppMan.h>
+#include <Instrumentor.h>
+#include <AssetBrowser.h>
+#include <SceneMan.h>
 
 namespace fl
 {
@@ -10,6 +13,7 @@ namespace fl
         {
 			bool dragging = false;
 			sf::Vector2i windowDragOffset;
+			AssetBrowser browser {"common"};
 
 			void UpdateDrag()
 			{
@@ -36,13 +40,33 @@ namespace fl
 
 			void DrawBar()
 			{
-				// NOTE: (SHORTCUTS ARE CURRENTLY FOR DISPLAY ONLY)
+				PROFILE_SCOPE("Inspector");
 
+				// NOTE: (SHORTCUTS ARE CURRENTLY FOR DISPLAY ONLY)
 				if (ImGui::BeginMainMenuBar())
 				{
 					if (ImGui::BeginMenu("File"))
 					{
-						ImGui::MenuItem("Open Scene", "CTRL+O");
+						if (ImGui::MenuItem("Load Scene", "CTRL+O"))
+						{
+							browser.Launch
+							(
+								AssetBrowserCallback
+								(
+									[](std::filesystem::directory_entry entry, std::any data)
+									{
+										SceneMan::LoadScene(entry.path());
+									}, NULL
+								),
+								"scenes"
+							);
+						}
+
+						if (ImGui::MenuItem("Save Scene", "CTRL+S"))
+						{
+							SceneMan::SaveScene("test_scene_save_2");
+						}
+
 						ImGui::MenuItem("Import Asset", "CTRL+I");
 
 						ImGui::EndMenu();
@@ -64,19 +88,9 @@ namespace fl
 					}
 
 					UpdateDrag();
-
-					/* Close button
-					ImGui::SameLine(ImGui::GetWindowWidth() - 30);
-					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.9, 0.0, 0.3, 1));
-					ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1, 0.6, 0.6, 1));
-					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9, 0.4, 0.4, 1));
-					ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0);
-					if (ImGui::Button("", ImVec2(25, 25))) AppMan::windowPtr->close();
-					ImGui::PopStyleColor(3);
-					ImGui::PopStyleVar();
-					//*/
-
 					ImGui::EndMainMenuBar();
+
+					browser.Draw();
 				}
 			}
         }

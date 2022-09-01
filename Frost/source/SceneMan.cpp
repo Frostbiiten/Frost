@@ -20,6 +20,8 @@ using entt::operator""_hs;
 #include <Compression.h>
 #include <Inspector.h>
 #include <AssetBrowser.h>
+#include <Instrumentor.h>
+#include <EditorView.h>
 
 namespace fl
 {
@@ -40,10 +42,6 @@ namespace fl
 		// Editor
 		Editor::SceneHierarchy hierarchy{currentScene};
 		Editor::Inspector inspector{currentScene};
-		Editor::AssetBrowser browser {"common"};
-
-		// Forward declaration
-		void SaveScene(std::string_view sceneName);
 
 		void Reset(sf::RenderWindow& window, sf::RenderTarget& buffer)
 		{
@@ -52,7 +50,7 @@ namespace fl
 			// Scene management
 			SceneMan::ClearScene();
 
-			TEST(SceneMan::LoadScene("test_scene_save", false););
+			//TEST(SceneMan::LoadScene("test_scene_save", false););
 
 			SceneMan::Awake();
 			SceneMan::Start();
@@ -71,10 +69,10 @@ namespace fl
 
 		// Loads scene data from a file
 		// TODO: implement additive loading
-		void LoadScene(std::string_view sceneName, bool additive)
+		void LoadScene(std::filesystem::path path, bool additive)
 		{
 			std::stringstream sceneData;
-			if (AssetMan::readFile(std::filesystem::path(fmt::format("scenes/{0}/{0}.scene", sceneName)), sceneData))
+			if (AssetMan::readFile(path, sceneData))
 			{
 				nlohmann::json sceneJson = nlohmann::json::parse(sceneData);
 
@@ -91,8 +89,13 @@ namespace fl
 			}
 			else
 			{
-				Debug::log()->error("Could not load scene \'{}\'!", sceneName);
+				Debug::log()->error("Could not load scene from \'{}\'!", path.string());
 			}
+		}
+
+		void LoadScene(std::string_view sceneName, bool additive)
+		{
+			LoadScene(std::filesystem::path(fmt::format("scenes/{0}/{0}.scene", sceneName)));
 		}
 
 		// Loads scene data from a file
@@ -156,19 +159,26 @@ namespace fl
 
 		void Update()
 		{
+			PROFILE_SCOPE("UPDATE");
 			deltaTime = deltaTimeClock.restart();
 			currentScene.Update(deltaTime.asMicroseconds());
+			Editor::View::Update(deltaTime.asMicroseconds());
 			inspector.ProcessEditQueue();
 		}
 
 		void Draw()
 		{
-			currentScene.Draw(*windowPtr); // native res drawing
-			//currentScene.Draw(*bufferPtr); // pixel drawing
+			{
+				PROFILE_SCOPE("DRAW SCENE");
+				currentScene.Draw(*windowPtr); // native res drawing
 
+				//currentScene.Draw(*bufferPtr); // pixel drawing
+				// NOTE: from profiler results, this seems to be faster
+			}
+
+			PROFILE_SCOPE("Editor");
 			hierarchy.Draw();
 			inspector.Draw();
-			browser.Draw();
 			Editor::MenuBar::DrawBar();
 		}
 
